@@ -19,6 +19,8 @@ package v1
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"slices"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,6 +34,8 @@ import (
 // log is for logging in this package.
 var podlog = logf.Log.WithName("pod-resource")
 
+var digestList = []string{"@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef", "@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"}
+
 // SetupPodWebhookWithManager registers the webhook for Pod in the manager.
 func SetupPodWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).For(&corev1.Pod{}).
@@ -42,7 +46,7 @@ func SetupPodWebhookWithManager(mgr ctrl.Manager) error {
 
 // TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-// +kubebuilder:webhook:path=/mutate--v1-pod,mutating=true,failurePolicy=fail,sideEffects=None,groups="",resources=pods,verbs=create;update,versions=v1,name=mpod-v1.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/mutate--v1-pod,mutating=true,failurePolicy=ignore,sideEffects=None,groups="",resources=pods,verbs=create;update,versions=v1,name=mpod-v1.kb.io,admissionReviewVersions=v1
 
 // PodCustomDefaulter struct is responsible for setting default values on the custom resource of the
 // Kind Pod when those are created or updated.
@@ -64,15 +68,22 @@ func (d *PodCustomDefaulter) Default(ctx context.Context, obj runtime.Object) er
 	}
 	podlog.Info("Defaulting for Pod", "name", pod.GetName())
 
-	// TODO(user): fill in your defaulting logic.
-
+	// Loop containers and check digests for now
+	containersList := append(pod.Spec.InitContainers, pod.Spec.Containers...)
+	for _, container := range containersList {
+		digest := getDigest(container.Image)
+		if digest == "" {
+			podlog.Info("No digest found for pod", "name", pod.GetName())
+		}
+		podlog.Info("Digest found for pod", "name", pod.GetName(), "digest", digest)
+	}
 	return nil
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 // NOTE: The 'path' attribute must follow a specific pattern and should not be modified directly here.
 // Modifying the path for an invalid path can cause API server errors; failing to locate the webhook.
-// +kubebuilder:webhook:path=/validate--v1-pod,mutating=false,failurePolicy=fail,sideEffects=None,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod-v1.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/validate--v1-pod,mutating=false,failurePolicy=ignore,sideEffects=None,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod-v1.kb.io,admissionReviewVersions=v1
 
 // PodCustomValidator struct is responsible for validating the Pod resource
 // when it is created, updated, or deleted.
@@ -94,6 +105,15 @@ func (v *PodCustomValidator) ValidateCreate(ctx context.Context, obj runtime.Obj
 	podlog.Info("Validation for Pod upon creation", "name", pod.GetName())
 
 	// TODO(user): fill in your validation logic upon object creation.
+
+	containersList := append(pod.Spec.InitContainers, pod.Spec.Containers...)
+	for _, container := range containersList {
+		digest := getDigest(container.Image)
+		if digest == "" {
+			podlog.Info("No digest found for pod", "name", pod.GetName())
+		}
+		podlog.Info("Digest found for pod", "name", pod.GetName(), "digest", digest)
+	}
 
 	return nil, nil
 }
@@ -122,4 +142,22 @@ func (v *PodCustomValidator) ValidateDelete(ctx context.Context, obj runtime.Obj
 	// TODO(user): fill in your validation logic upon object deletion.
 
 	return nil, nil
+}
+
+// getDigest from container image or return empty
+func getDigest(image string) string {
+	re := regexp.MustCompile(`@sha256:[a-fA-F0-9]{64}`)
+	match := re.FindString(image)
+	if match != "" {
+		return match
+	}
+	return ""
+}
+
+// Validate digest against digests list
+func isDigestValid(digest string) bool {
+	if slices.Contains(digestList, digest) {
+		return true
+	}
+	return false
 }
