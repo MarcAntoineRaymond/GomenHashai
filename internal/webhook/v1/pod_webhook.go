@@ -19,7 +19,7 @@ package v1
 import (
 	"context"
 	"fmt"
-	"regexp"
+
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"kintegrity.io/kintegrity/internal/helpers"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -36,16 +37,6 @@ import (
 // nolint:unused
 // log is for logging in this package.
 var podlog = logf.Log.WithName("pod-resource")
-
-var DIGEST_MAPPING = map[string]string{
-	"busybox:latest":                   "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f",
-	"busybox":                          "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
-	"library/busybox":                  "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
-	"docker.io/library/busybox":        "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
-	"docker.io/library/busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
-	"busybox:stable":                   "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
-	"nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af",
-}
 
 // SetupPodWebhookWithManager registers the webhook for Pod in the manager.
 func SetupPodWebhookWithManager(mgr ctrl.Manager) error {
@@ -89,12 +80,12 @@ func addContainerImageDigest(containers []corev1.Container) []corev1.Container {
 	for i, container := range containers {
 		image := container.Image
 		// Remove digest if already present in image field
-		digest := getDigest(image)
+		digest := helpers.GetDigest(image)
 		if digest != "" {
 			image = strings.TrimSuffix(image, "@"+digest)
 		}
 		// Append digest from mapping or send error if no mapping
-		trustedDigest := getTrustedDigest(image)
+		trustedDigest := helpers.GetTrustedDigest(image)
 		if trustedDigest != "" {
 			image = image + "@" + trustedDigest
 			podlog.Info("Add digest to image", "name", container.Name, "image", container.Image, "digest", trustedDigest)
@@ -140,7 +131,7 @@ func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object
 	containersList := append(pod.Spec.InitContainers, pod.Spec.Containers...)
 	for i, container := range containersList {
 		image := container.Image
-		digest := getDigest(image)
+		digest := helpers.GetDigest(image)
 		if digest == "" {
 			podlog.Error(nil, "No digest found", "name", pod.GetName(), "image", image)
 			return nil, apierrors.NewForbidden(
@@ -155,7 +146,7 @@ func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object
 		podlog.Info("Digest found", "name", pod.GetName(), "digest", digest)
 		image = strings.TrimSuffix(image, "@"+digest)
 		// Append digest from mapping or send error if no mapping
-		trustedDigest := getTrustedDigest(image)
+		trustedDigest := helpers.GetTrustedDigest(image)
 		if trustedDigest == "" {
 			return nil, apierrors.NewForbidden(
 				schema.GroupResource{Group: pod.GroupVersionKind().Group, Resource: pod.Kind},
@@ -186,23 +177,4 @@ func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object
 func (v *PodCustomValidator) ValidateDelete(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	// Do nothing on delete
 	return nil, nil
-}
-
-// getDigest from container image or return empty
-func getDigest(image string) string {
-	re := regexp.MustCompile(`@sha256:[a-fA-F0-9]{64}`)
-	match := re.FindString(image)
-	if match != "" {
-		return match[1:]
-	}
-	return ""
-}
-
-// Return digest from mapping for this image or empty string
-func getTrustedDigest(image string) string {
-	// TODO handle tag or not tag mechanic, if image has tag and digest exist for base image without tag, use this one
-	if digest, ok := DIGEST_MAPPING[image]; ok {
-		return digest
-	}
-	return ""
 }

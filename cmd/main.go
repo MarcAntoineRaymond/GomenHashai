@@ -39,7 +39,9 @@ import (
 
 	"kintegrity.io/kintegrity/internal/controller"
 	webhookcorev1 "kintegrity.io/kintegrity/internal/webhook/v1"
+
 	// +kubebuilder:scaffold:imports
+	"kintegrity.io/kintegrity/internal/helpers"
 )
 
 var (
@@ -176,6 +178,9 @@ func main() {
 			config.GetCertificate = metricsCertWatcher.GetCertificate
 		})
 	}
+
+	//Kintegrity Load digest mapping
+	helpers.LoadDigestMapping()
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,

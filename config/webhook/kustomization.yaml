@@ -18,3 +18,4 @@ patches:
               operator: NotIn
               values:
                 - kintegrity-system
+                - kube-system
