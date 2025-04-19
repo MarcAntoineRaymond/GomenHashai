@@ -19,19 +19,36 @@ package helpers
 import (
 	"os"
 	"regexp"
+	"strconv"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
-const defaultDigestMappingPath = "/etc/kintegrity/digests_mapping.yaml"
+const DEFAULT_DIGEST_MAPPING_PATH = "/etc/kintegrity/digests_mapping.yaml"
 
 var DIGEST_MAPPING = map[string]string{}
+
+// Digest mapping without tag will be used for images using tag not present in digest mappings
+var CAN_FORCE_DIGEST = true
+
+func InitConfig() error {
+	forceMapping := os.Getenv("DIGEST_MAPPING_FORCE")
+	if forceMapping != "" {
+		boolValue, err := strconv.ParseBool(forceMapping)
+		if err != nil {
+			return err
+		}
+		CAN_FORCE_DIGEST = boolValue
+	}
+	return nil
+}
 
 // Load Digest Mapping from file, filepath can be set from env DIGEST_MAPPING_PATH
 func LoadDigestMapping() error {
 	filepath := os.Getenv("DIGEST_MAPPING_PATH")
 	if filepath == "" {
-		filepath = defaultDigestMappingPath
+		filepath = DEFAULT_DIGEST_MAPPING_PATH
 	}
 	data, err := os.ReadFile(filepath)
 	if err != nil {
@@ -59,6 +76,13 @@ func GetTrustedDigest(image string) string {
 	// TODO handle tag or not tag mechanic, if image has tag and digest exist for base image without tag, use this one
 	if digest, ok := DIGEST_MAPPING[image]; ok {
 		return digest
+	} else {
+		if CAN_FORCE_DIGEST && strings.Contains(image, ":") {
+			imageWithoutTag := strings.Split(image, ":")[0]
+			if digest, ok := DIGEST_MAPPING[imageWithoutTag]; ok {
+				return digest
+			}
+		}
 	}
 	return ""
 }

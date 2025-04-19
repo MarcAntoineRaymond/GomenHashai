@@ -179,12 +179,21 @@ func main() {
 		})
 	}
 
-	//Kintegrity Load digest mapping
-	err := helpers.LoadDigestMapping()
+	//Kintegrity init
+
+	err := helpers.InitConfig()
 	if err != nil {
-		setupLog.Error(err, "cannot load digests mapping file")
+		setupLog.Error(err, "cannot init config")
 		os.Exit(1)
 	}
+	setupLog.Info("Config loaded", "CAN_FORCE_DIGEST", helpers.CAN_FORCE_DIGEST)
+
+	err = helpers.LoadDigestMapping()
+	if err != nil {
+		setupLog.Error(err, "cannot load digests mapping file", "file", helpers.DEFAULT_DIGEST_MAPPING_PATH)
+		os.Exit(1)
+	}
+	setupLog.Info("Mappings loaded")
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
