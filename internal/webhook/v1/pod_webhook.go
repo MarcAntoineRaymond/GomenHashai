@@ -96,7 +96,6 @@ func addContainerImageDigest(containers []corev1.Container) []corev1.Container {
 			podlog.Info("No valid digest for image", "name", container.Name, "image", container.Image)
 		}
 	}
-	podlog.Info("Digest", "mapping", helpers.DIGEST_MAPPING)
 	return containers
 }
 
