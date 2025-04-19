@@ -25,7 +25,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"kintegrity.io/kintegrity/test/utils"
+	"github.com/MarcAntoineRaymond/kintegrity/test/utils"
 )
 
 var (

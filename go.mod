@@ -1,4 +1,4 @@
-module kintegrity.io/kintegrity
+module github.com/MarcAntoineRaymond/kintegrity
 
 go 1.23.0
 

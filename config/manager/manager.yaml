@@ -92,7 +92,13 @@ spec:
           requests:
             cpu: 10m
             memory: 64Mi
-        volumeMounts: []
-      volumes: []
+        volumeMounts:
+          - name: digests-mapping
+            mountPath: "/etc/kintegrity/"
+            readOnly: true
+      volumes:
+        - name: digests-mapping
+          secret:
+            secretName: digests-mapping
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

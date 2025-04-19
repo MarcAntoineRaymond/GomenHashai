@@ -22,12 +22,12 @@ import (
 
 	"strings"
 
+	"github.com/MarcAntoineRaymond/kintegrity/internal/helpers"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"kintegrity.io/kintegrity/internal/helpers"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -88,13 +88,15 @@ func addContainerImageDigest(containers []corev1.Container) []corev1.Container {
 		trustedDigest := helpers.GetTrustedDigest(image)
 		if trustedDigest != "" {
 			image = image + "@" + trustedDigest
+			// Only modify image in incoming pod if there is a trusted digest
+			container.Image = image
+			containers[i] = container
 			podlog.Info("Add digest to image", "name", container.Name, "image", container.Image, "digest", trustedDigest)
 		} else {
 			podlog.Info("No valid digest for image", "name", container.Name, "image", container.Image)
 		}
-		container.Image = image
-		containers[i] = container
 	}
+	podlog.Info("Digest", "mapping", helpers.DIGEST_MAPPING)
 	return containers
 }
 
@@ -133,7 +135,7 @@ func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object
 		image := container.Image
 		digest := helpers.GetDigest(image)
 		if digest == "" {
-			podlog.Error(nil, "No digest found", "name", pod.GetName(), "image", image)
+			podlog.Info("No digest found", "name", pod.GetName(), "image", image)
 			return nil, apierrors.NewForbidden(
 				schema.GroupResource{Group: pod.GroupVersionKind().Group, Resource: pod.Kind},
 				pod.Name,

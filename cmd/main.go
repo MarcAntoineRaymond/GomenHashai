@@ -37,11 +37,11 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"kintegrity.io/kintegrity/internal/controller"
-	webhookcorev1 "kintegrity.io/kintegrity/internal/webhook/v1"
+	"github.com/MarcAntoineRaymond/kintegrity/internal/controller"
+	webhookcorev1 "github.com/MarcAntoineRaymond/kintegrity/internal/webhook/v1"
 
 	// +kubebuilder:scaffold:imports
-	"kintegrity.io/kintegrity/internal/helpers"
+	"github.com/MarcAntoineRaymond/kintegrity/internal/helpers"
 )
 
 var (
@@ -180,7 +180,11 @@ func main() {
 	}
 
 	//Kintegrity Load digest mapping
-	helpers.LoadDigestMapping()
+	err := helpers.LoadDigestMapping()
+	if err != nil {
+		setupLog.Error(err, "cannot load digests mapping file")
+		os.Exit(1)
+	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
