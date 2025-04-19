@@ -89,11 +89,13 @@ func addContainerImageDigest(containers []corev1.Container) []corev1.Container {
 		if trustedDigest != "" {
 			image = image + "@" + trustedDigest
 			// Only modify image in incoming pod if there is a trusted digest
-			container.Image = image
-			containers[i] = container
+			if !helpers.DIGEST_MUTATION_DRYRUN {
+				container.Image = image
+				containers[i] = container
+			}
 			podlog.Info("Add digest to image", "name", container.Name, "image", container.Image, "digest", trustedDigest)
 		} else {
-			podlog.Info("No valid digest for image", "name", container.Name, "image", container.Image)
+			podlog.Info("No trusted digest for image", "name", container.Name, "image", container.Image)
 		}
 	}
 	return containers
@@ -129,49 +131,71 @@ func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object
 	}
 	podlog.Info("Validating digests", "name", pod.GetName())
 
+	warnings := admission.Warnings{}
+
 	containersList := append(pod.Spec.InitContainers, pod.Spec.Containers...)
 	for i, container := range containersList {
 		image := container.Image
 		digest := helpers.GetDigest(image)
 		if digest == "" {
-			podlog.Info("No digest found", "name", pod.GetName(), "image", image)
-			return nil, apierrors.NewForbidden(
+			podlog.Info("Deny pod - no digest found", "name", pod.GetName(), "image", image)
+			err := apierrors.NewForbidden(
 				schema.GroupResource{Group: pod.GroupVersionKind().Group, Resource: pod.Kind},
 				pod.Name,
 				field.Forbidden(
 					field.NewPath("spec").Child("containers").Index(i).Child("image"),
-					"image does not contain a digest",
+					"image is not using a digest",
 				),
 			)
+			if !helpers.DIGEST_VALIDATION_WARNING {
+				return nil, err
+			} else {
+				warnings = append(warnings, err.Error())
+			}
 		}
 		podlog.Info("Digest found", "name", pod.GetName(), "digest", digest)
 		image = strings.TrimSuffix(image, "@"+digest)
-		// Append digest from mapping or send error if no mapping
+		// Get trusted dige
 		trustedDigest := helpers.GetTrustedDigest(image)
+		// Check if image has a mapping with a trusted digest
 		if trustedDigest == "" {
-			return nil, apierrors.NewForbidden(
+			podlog.Info("Deny pod - image has no trusted digest", "name", pod.GetName(), "image", image, "digest", digest)
+			err := apierrors.NewForbidden(
 				schema.GroupResource{Group: pod.GroupVersionKind().Group, Resource: pod.Kind},
 				pod.Name,
 				field.Forbidden(
 					field.NewPath("spec").Child("containers").Index(i).Child("image"),
-					"image does not have any trusted digest",
+					"image does not have a trusted digest",
 				),
 			)
+			if !helpers.DIGEST_VALIDATION_WARNING {
+				return nil, err
+			} else {
+				warnings = append(warnings, err.Error())
+			}
 		}
+		// Check if the image is using the trusted digest
 		if trustedDigest != digest {
-			return nil, apierrors.NewForbidden(
+			podlog.Info("Deny pod - digest is not trusted", "name", pod.GetName(), "image", image, "digest", digest)
+			err := apierrors.NewForbidden(
 				schema.GroupResource{Group: pod.GroupVersionKind().Group, Resource: pod.Kind},
 				pod.Name,
 				field.Forbidden(
 					field.NewPath("spec").Child("containers").Index(i).Child("image"),
-					"image contains an untrusted digest",
+					"image use an untrusted digest",
 				),
 			)
+			if !helpers.DIGEST_VALIDATION_WARNING {
+				return nil, err
+			} else {
+				warnings = append(warnings, err.Error())
+			}
+		} else {
+			podlog.Info("Digest is trusted", "name", pod.GetName(), "image", image, "digest", digest)
 		}
-		podlog.Info("Digest is trusted", "name", pod.GetName(), "image", image, "digest", digest)
 	}
-	podlog.Info("Completed digests validation", "name", pod.GetName())
-	return nil, nil
+	podlog.Info("Allow Pod - Completed digests validation", "name", pod.GetName())
+	return warnings, nil
 }
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type Pod.

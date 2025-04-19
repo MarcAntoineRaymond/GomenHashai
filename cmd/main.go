@@ -181,12 +181,12 @@ func main() {
 
 	//Kintegrity init
 
-	err := helpers.InitConfig()
+	configVars, err := helpers.InitConfig()
 	if err != nil {
 		setupLog.Error(err, "cannot init config")
 		os.Exit(1)
 	}
-	setupLog.Info("Config loaded", "CAN_FORCE_DIGEST", helpers.CAN_FORCE_DIGEST)
+	setupLog.Info("Config loaded", configVars)
 
 	err = helpers.LoadDigestMapping()
 	if err != nil {

@@ -30,18 +30,41 @@ const DEFAULT_DIGEST_MAPPING_PATH = "/etc/kintegrity/digests_mapping.yaml"
 var DIGEST_MAPPING = map[string]string{}
 
 // Digest mapping without tag will be used for images using tag not present in digest mappings
-var CAN_FORCE_DIGEST = true
+var DIGEST_MAPPING_FORCE = true
 
-func InitConfig() error {
+// Return warnings instead of denying pods failing digest validation
+var DIGEST_VALIDATION_WARNING = false
+
+// Do not add digest to pods, but logs the operation instead
+var DIGEST_MUTATION_DRYRUN = false
+
+// Init configuration from env variable and send vars list with values ready to be printed
+func InitConfig() (any, error) {
 	forceMapping := os.Getenv("DIGEST_MAPPING_FORCE")
 	if forceMapping != "" {
 		boolValue, err := strconv.ParseBool(forceMapping)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		CAN_FORCE_DIGEST = boolValue
+		DIGEST_MAPPING_FORCE = boolValue
 	}
-	return nil
+	validationWarning := os.Getenv("DIGEST_VALIDATION_WARNING")
+	if validationWarning != "" {
+		boolValue, err := strconv.ParseBool(validationWarning)
+		if err != nil {
+			return nil, err
+		}
+		DIGEST_VALIDATION_WARNING = boolValue
+	}
+	mutationDryrun := os.Getenv("DIGEST_MUTATION_DRYRUN")
+	if mutationDryrun != "" {
+		boolValue, err := strconv.ParseBool(mutationDryrun)
+		if err != nil {
+			return nil, err
+		}
+		DIGEST_MUTATION_DRYRUN = boolValue
+	}
+	return []any{"DIGEST_MAPPING_FORCE", DIGEST_MAPPING_FORCE, "DIGEST_VALIDATION_WARNING", DIGEST_VALIDATION_WARNING, "DIGEST_MUTATION_DRYRUN", DIGEST_MUTATION_DRYRUN}, nil
 }
 
 // Load Digest Mapping from file, filepath can be set from env DIGEST_MAPPING_PATH
@@ -77,7 +100,7 @@ func GetTrustedDigest(image string) string {
 	if digest, ok := DIGEST_MAPPING[image]; ok {
 		return digest
 	} else {
-		if CAN_FORCE_DIGEST && strings.Contains(image, ":") {
+		if DIGEST_MAPPING_FORCE && strings.Contains(image, ":") {
 			imageWithoutTag := strings.Split(image, ":")[0]
 			if digest, ok := DIGEST_MAPPING[imageWithoutTag]; ok {
 				return digest
