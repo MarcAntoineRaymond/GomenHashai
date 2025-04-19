@@ -96,7 +96,7 @@ func addContainerImageDigest(containers []corev1.Container) []corev1.Container {
 		// Append digest from mapping or send error if no mapping
 		trustedDigest := getTrustedDigest(image)
 		if trustedDigest != "" {
-			image = image + trustedDigest
+			image = image + "@" + trustedDigest
 			podlog.Info("Add digest to image", "name", container.Name, "image", container.Image, "digest", trustedDigest)
 		} else {
 			podlog.Info("No valid digest for image", "name", container.Name, "image", container.Image)
