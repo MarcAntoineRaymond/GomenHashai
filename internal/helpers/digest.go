@@ -38,8 +38,6 @@ var CONFIG = map[string]bool{
 	"DIGEST_MUTATION_DRYRUN": false,
 	// Update existing pods
 	"DIGEST_UPDATE_EXISTING_PODS": true,
-	// Validate existing pods
-	"DIGEST_VALIDATE_EXISTING_PODS": true,
 	// Delete existing pods if validation fails
 	"DIGEST_DELETE_EXISTING_PODS": true,
 }

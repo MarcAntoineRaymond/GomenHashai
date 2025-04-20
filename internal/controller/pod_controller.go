@@ -18,60 +18,83 @@ package controller
 
 import (
 	"context"
-	"os"
+	"fmt"
 	"time"
 
 	"github.com/MarcAntoineRaymond/kintegrity/internal/helpers"
-	kintegrityv1 "github.com/MarcAntoineRaymond/kintegrity/internal/webhook/v1"
+	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=core,resources=pods/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=create;get;list;watch;update;patch;delete
 
-func HandleExistingPods(mgr manager.Manager) {
+type PodInitializer struct {
+	Client client.Client
+	Logger logr.Logger
+}
+
+func (r *PodInitializer) Start(ctx context.Context) error {
 	time.Sleep(5 * time.Second)
+	r.Logger.Info("Start existing pods checks")
 
-	logger := mgr.GetLogger()
-	logger.Info("Start existing pods checks")
-
-	var pods corev1.PodList
-	if err := mgr.GetClient().List(context.TODO(), &pods); err != nil {
-		logger.Error(err, "unable to list pods at start up")
-		os.Exit(1)
+	var podList corev1.PodList
+	if err := r.Client.List(ctx, &podList); err != nil {
+		return err
 	}
+	pods := podList.Items
+	retries := 0
+	maxRetries := 5
 
-	for _, pod := range pods.Items {
+	// Loop until list is empty as error can occur we may need to retry deleting/updating pods on unexpected failure
+	for len(pods) > 0 && retries < maxRetries {
 
-		logger.Info("Process pod", "name", pod.Name)
+		var remaining []corev1.Pod
+		for _, pod := range pods {
+			r.Logger.Info("Process pod", "name", pod.Name)
 
-		// TODO process namespace exemption better (matchSelector and objectSelector config has to be similar, need config from YAML)
-		if pod.Namespace == os.Getenv("NAMESPACE") {
-			logger.Info("Skip pod because namespace is exempted", "name", pod.Name)
-			continue
-		}
+			updateOpts := &client.UpdateOptions{
+				FieldManager: "kintegrity",
+			}
+			if !helpers.CONFIG["DIGEST_UPDATE_EXISTING_PODS"] {
+				updateOpts.DryRun = []string{"All"}
+			}
 
-		if helpers.CONFIG["DIGEST_UPDATE_EXISTING_PODS"] {
-			pod.Spec.InitContainers = kintegrityv1.AddContainerImageDigest(pod.Spec.InitContainers)
-			pod.Spec.Containers = kintegrityv1.AddContainerImageDigest(pod.Spec.Containers)
-			logger.Info("Updated pod with digests", "name", pod.Name)
-		}
-
-		if helpers.CONFIG["DIGEST_VALIDATE_EXISTING_PODS"] {
-
-			_, err := kintegrityv1.ValidatePod(&pod)
-			if err != nil {
-				if helpers.CONFIG["DIGEST_DELETE_EXISTING_PODS"] {
-					if err := mgr.GetClient().Delete(context.TODO(), &pod); err != nil {
-						logger.Error(err, "unable to delete pod", "name", pod.Name)
+			if err := r.Client.Update(ctx, &pod, updateOpts); err != nil {
+				// If err is API forbidden
+				if apierrors.IsInvalid(err) || apierrors.IsForbidden(err) {
+					if helpers.CONFIG["DIGEST_DELETE_EXISTING_PODS"] {
+						if err := r.Client.Delete(ctx, &pod); err != nil {
+							r.Logger.Error(err, "unable to delete pod", "name", pod.Name)
+							remaining = append(remaining, pod)
+							continue
+						}
+						r.Logger.Info("Deleted pod", "name", pod.Name)
 					}
-					logger.Info("Deleted pod", "name", pod.Name)
+				} else {
+					r.Logger.Error(err, "unexpected error occured when updating pod", "name", pod.Name)
+					remaining = append(remaining, pod)
+					continue
 				}
 			}
 
-			logger.Info("Validated pod with digests", "name", pod.Name)
+			r.Logger.Info("Finished processing pod", "name", pod.Name)
 		}
+
+		pods = remaining
+		retries++
+		time.Sleep(5 * time.Second)
 	}
+
+	if len(pods) > 0 {
+		podNames := []string{}
+		for _, pod := range pods {
+			podNames = append(podNames, pod.Name)
+		}
+		return fmt.Errorf("some pods were not processed: %v", podNames)
+	}
+
+	r.Logger.Info("Finished processing existing pods")
+	return nil
 }
