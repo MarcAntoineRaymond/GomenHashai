@@ -186,7 +186,7 @@ func main() {
 		setupLog.Error(err, "cannot init config")
 		os.Exit(1)
 	}
-	setupLog.Info("Config loaded", configVars)
+	setupLog.Info("Config loaded", configVars...)
 
 	err = helpers.LoadDigestMapping()
 	if err != nil {

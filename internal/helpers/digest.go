@@ -39,7 +39,7 @@ var DIGEST_VALIDATION_WARNING = false
 var DIGEST_MUTATION_DRYRUN = false
 
 // Init configuration from env variable and send vars list with values ready to be printed
-func InitConfig() (any, error) {
+func InitConfig() ([]any, error) {
 	forceMapping := os.Getenv("DIGEST_MAPPING_FORCE")
 	if forceMapping != "" {
 		boolValue, err := strconv.ParseBool(forceMapping)
