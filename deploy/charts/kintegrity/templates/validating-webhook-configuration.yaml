@@ -1,0 +1,58 @@
+{{- if .Values.webhook.validating.enabled }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ include "kintegrity.fullname" . }}-validating-webhook-configuration
+  labels:
+    {{- include "kintegrity.labels" . | nindent 4 }}
+    {{- with .Values.webhook.validating.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if index .Values.certificates "cert-manager.enabled" }}
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kintegrity.webhookSecretName" . }}
+    {{- end }}
+    {{- with .Values.webhook.validating.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: '{{ include "kintegrity.fullname" . }}-webhook-service'
+      namespace: '{{ .Release.Namespace }}'
+      path: /validate--v1-pod
+  failurePolicy: {{ .Values.webhook.validating.failurePolicy }}
+  matchPolicy: {{ .Values.webhook.validating.matchPolicy }}
+  name: vpod-v1.kb.io
+  namespaceSelector:
+    matchExpressions:
+    - key: kubernetes.io/metadata.name
+      operator: NotIn
+      values:
+      - {{ .Release.Namespace }}
+    {{- range $key, $value := .Values.webhook.validating.exemptNamespacesLabels }}
+    - key: {{ $key }}
+      operator: NotIn
+      values:
+      {{- range $value }}
+      - {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- with .Values.webhook.validating.objectSelector }}
+  objectSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - pods
+  sideEffects: {{ .Values.webhook.validating.sideEffects }}
+{{- end }}

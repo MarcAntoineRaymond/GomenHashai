@@ -1,0 +1,6 @@
+apiVersion: v2
+name: kintegrity
+description: Kintegrity guarantee images integrity in your k8s cluster
+type: application
+version: 0.1.0
+appVersion: "dev"

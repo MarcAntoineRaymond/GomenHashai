@@ -1,0 +1,10 @@
+{{- if index .Values.certificates "cert-manager.enabled" }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "kintegrity.fullname" . }}-selfsigned-issuer
+  labels:
+  {{- include "kintegrity.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+{{- end }}

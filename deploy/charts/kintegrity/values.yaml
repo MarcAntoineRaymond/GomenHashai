@@ -1,0 +1,177 @@
+# Kintegrity replicas count
+replicas: 1
+
+# Override Chart name in template
+nameOverride:
+
+# Override ReleaseName-ChartName in template
+fullnameOverride:
+
+# Cluster domain used by 
+kubernetesClusterDomain: cluster.local
+
+image:
+  repository: 127.0.0.1:5000/kintegrity
+  # Imgae tag to use default to AppVersion
+  tag:
+
+# Mapping containing "image": "trusted digest"
+digestsMapping:
+  # Create the secret
+  create: true
+  # Name of the secret, if create is false secret must exist
+  secretName:
+  # YAML image mapping
+  mapping:
+    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
+    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+    "docker.io/library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+    "docker.io/library/busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+    "busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+    "nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af"
+    "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
+
+# Args passed to the manager app
+args:
+  - --metrics-bind-address=:8443
+  - --leader-elect
+  - --health-probe-bind-address=:8081
+  - --webhook-cert-path=/etc/kintegrity/certificates/webhook-certs
+  - --metrics-cert-path=/etc/kintegrity/certificates/metrics-certs
+
+annotations: {}
+
+podAnnotations:
+  kubectl.kubernetes.io/default-container: kintegrity
+
+extraLabels: {}
+
+extraPodLabels: {}
+
+# Kintegrity container security context
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  privileged: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 4000
+  runAsGroup: 3000
+  runAsNonRoot: true
+  runAsUser: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# Kintegrity resources configuration, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+resources:
+  limits:
+    cpu: "1"
+    memory: 256Mi
+  requests:
+    cpu: 10m
+    memory: 64Mi
+
+# Configure Deployment liveness probe
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  port: 8081
+
+# Configure Deployment readiness probe
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  port: 8081
+
+env: []
+
+envFrom: []
+
+sidecars: []
+
+initContainers: []
+
+extraVolumes: []
+
+extraVolumeMounts: []
+
+# Service account configuration
+serviceAccount:
+  # Create the service account, if false the service account must be provided
+  create: true
+  # Name of the service account, if create is false it must exists
+  name:
+  # Annotations to the service account if create is true
+  annotations: {}
+  # Extra Labels to the service account if create is true
+  extraLabels: {}
+  # Automount service account token in service account
+  automountServiceAccountToken: true
+
+# RBAC role and binding to the service account
+rbac:
+  # Create the RBAC
+  create: true
+
+certificates:
+  # Cert manager integration configuration
+  cert-manager:
+    # Enable cert-manager integration, enable if you want to use cert-manager self-signed certificates
+    enabled: false
+  webhook:
+    # Name of the secret containing webhook certificates
+    secretName:
+  metrics:
+    # Name of the secret containing metrics certificates
+    secretName:
+
+metrics:
+  # Metrics service configuration
+  service:
+    annotations: {}
+    extraLabels: {}
+    port: 8443
+    targetPort: 8443
+    type: ClusterIP
+
+webhook:
+  # Mutating Webhook configuration
+  mutating:
+    # Enable mutation webhook
+    enabled: true
+    # Add labels: value to match namespace to exempt from mutation
+    exemptNamespacesLabels: {}
+    annotations: {}
+    extraLabels: {}
+    failurePolicy: Fail
+    matchPolicy: Exact
+    reinvocationPolicy: Never
+    objectSelector: {}
+    sideEffects: None
+
+  # Validating Webhook configuration
+  validating:
+    # Enable validation webhook
+    enabled: true
+    # Add labels: value to match namespace to exempt from validation
+    exemptNamespacesLabels: {}
+    annotations: {}
+    extraLabels: {}
+    failurePolicy: Fail
+    matchPolicy: Exact
+    objectSelector: {}
+    sideEffects: None
+
+  # Webhook service configuration
+  service:
+    annotations: {}
+    extraLabels: {}
+    port: 443
+    targetPort: 9443
+    type: ClusterIP

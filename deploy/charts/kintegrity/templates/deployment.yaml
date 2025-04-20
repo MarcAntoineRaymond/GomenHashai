@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kintegrity.fullname" . }}
+  labels:
+    {{- include "kintegrity.labels" . | nindent 4 }}
+    {{- with .Values.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kintegrity
+    {{- include "kintegrity.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kintegrity
+        {{- include "kintegrity.selectorLabels" . | nindent 8 }}
+        {{- with .Values.extraPodLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.initContainers }}
+      initContainers:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      containers:
+      - args:
+          {{- toYaml .Values.args | nindent 10 }}
+        command:
+        - /manager
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+        name: kintegrity
+        env:
+          {{- toYaml .Values.env | nindent 10 }}
+        envFrom:
+          {{- toYaml .Values.envFrom | nindent 10 }}
+        ports:
+        - containerPort: {{ .Values.readinessProbe.port }}
+          name: probe-port
+        {{- if ne .Values.livenessProbe.port .Values.readinessProbe.port }}
+        - containerPort: {{ .Values.livenessProbe.port }}
+          name: liveness-probe-port
+        {{- end }}
+        - containerPort: {{ .Values.webhook.service.targetPort }}
+          name: webhook-server
+          protocol: TCP
+        - containerPort: {{ .Values.metrics.service.targetPort }}
+          name: metrics-server
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            {{- if ne .Values.livenessProbe.port .Values.readinessProbe.port }}
+            name: liveness-probe-port
+            {{- else }}
+            port: probe-port
+            {{- end }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: probe-port
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
+        volumeMounts:
+        - mountPath: /etc/kintegrity/
+          name: digests-mapping
+          readOnly: true
+        - mountPath: /etc/kintegrity/certificates/webhook-certs
+          name: webhook-certs
+          readOnly: true
+        - mountPath: /etc/kintegrity/certificates/metrics-certs
+          name: metrics-certs
+          readOnly: true
+        {{- with .Values.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.sidecars }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "kintegrity.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - name: digests-mapping
+        secret:
+          secretName: {{ include "kintegrity.digestsSecretName" . }}
+      - name: webhook-certs
+        secret:
+          secretName: {{ include "kintegrity.webhookSecretName" . }}
+      - name: metrics-certs
+        secret:
+          secretName: {{ include "kintegrity.metricsSecretName" . }}
+      {{- with .Values.extraVolumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}

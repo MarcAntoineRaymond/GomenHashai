@@ -1,0 +1,17 @@
+{{- if index .Values.certificates "cert-manager.enabled" }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "kintegrity.webhookSecretName" . }}
+  labels:
+  {{- include "kintegrity.labels" . | nindent 4 }}
+spec:
+  dnsNames:
+  - '{{ include "kintegrity.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc'
+  - '{{ include "kintegrity.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc.{{
+    .Values.kubernetesClusterDomain }}'
+  issuerRef:
+    kind: Issuer
+    name: '{{ include "kintegrity.fullname" . }}-selfsigned-issuer'
+  secretName: {{ include "kintegrity.webhookSecretName" . }}
+{{- end }}

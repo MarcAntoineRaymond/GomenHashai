@@ -1,0 +1,12 @@
+{{- if .Values.digestsMapping.create }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "kintegrity.digestsSecretName" . }}
+  labels:
+    {{- include "kintegrity.labels" . | nindent 4 }}
+stringData:
+  digests_mapping.yaml: |
+    {{- .Values.digestsMapping.mapping | toYaml | nindent 4 }}
+type: Opaque
+{{- end }}
