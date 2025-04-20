@@ -69,14 +69,14 @@ func (d *PodCustomDefaulter) Default(ctx context.Context, obj runtime.Object) er
 
 	podlog.Info("Mutating digests", "name", pod.GetName())
 
-	pod.Spec.InitContainers = addContainerImageDigest(pod.Spec.InitContainers)
-	pod.Spec.Containers = addContainerImageDigest(pod.Spec.Containers)
+	pod.Spec.InitContainers = AddContainerImageDigest(pod.Spec.InitContainers)
+	pod.Spec.Containers = AddContainerImageDigest(pod.Spec.Containers)
 
 	return nil
 }
 
 // Loop container list and append digest to images, return errors for every container images not matching mapping list
-func addContainerImageDigest(containers []corev1.Container) []corev1.Container {
+func AddContainerImageDigest(containers []corev1.Container) []corev1.Container {
 	for i, container := range containers {
 		image := container.Image
 		// Remove digest if already present in image field
@@ -89,7 +89,7 @@ func addContainerImageDigest(containers []corev1.Container) []corev1.Container {
 		if trustedDigest != "" {
 			image = image + "@" + trustedDigest
 			// Only modify image in incoming pod if there is a trusted digest
-			if !helpers.DIGEST_MUTATION_DRYRUN {
+			if !helpers.CONFIG["DIGEST_MUTATION_DRYRUN"] {
 				container.Image = image
 				containers[i] = container
 			}
@@ -116,15 +116,15 @@ var _ webhook.CustomValidator = &PodCustomValidator{}
 
 // ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type Pod.
 func (v *PodCustomValidator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	return v.ValidatePod(ctx, obj)
+	return ValidatePod(obj)
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type Pod.
 func (v *PodCustomValidator) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	return v.ValidatePod(ctx, newObj)
+	return ValidatePod(newObj)
 }
 
-func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 	pod, ok := obj.(*corev1.Pod)
 	if !ok {
 		return nil, fmt.Errorf("expected a Pod object for the obj but got %T", obj)
@@ -147,7 +147,7 @@ func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object
 					"image is not using a digest",
 				),
 			)
-			if !helpers.DIGEST_VALIDATION_WARNING {
+			if !helpers.CONFIG["DIGEST_VALIDATION_WARNING"] {
 				return nil, err
 			} else {
 				warnings = append(warnings, err.Error())
@@ -168,7 +168,7 @@ func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object
 					"image does not have a trusted digest",
 				),
 			)
-			if !helpers.DIGEST_VALIDATION_WARNING {
+			if !helpers.CONFIG["DIGEST_VALIDATION_WARNING"] {
 				return nil, err
 			} else {
 				warnings = append(warnings, err.Error())
@@ -185,7 +185,7 @@ func (v *PodCustomValidator) ValidatePod(ctx context.Context, obj runtime.Object
 					"image use an untrusted digest",
 				),
 			)
-			if !helpers.DIGEST_VALIDATION_WARNING {
+			if !helpers.CONFIG["DIGEST_VALIDATION_WARNING"] {
 				return nil, err
 			} else {
 				warnings = append(warnings, err.Error())

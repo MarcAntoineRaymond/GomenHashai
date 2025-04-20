@@ -89,7 +89,7 @@ readinessProbe:
   periodSeconds: 10
   port: 8081
 
-env: []
+extraEnv: []
 
 envFrom: []
 

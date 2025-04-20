@@ -29,42 +29,36 @@ const DEFAULT_DIGEST_MAPPING_PATH = "/etc/kintegrity/digests_mapping.yaml"
 
 var DIGEST_MAPPING = map[string]string{}
 
-// Digest mapping without tag will be used for images using tag not present in digest mappings
-var DIGEST_MAPPING_FORCE = true
-
-// Return warnings instead of denying pods failing digest validation
-var DIGEST_VALIDATION_WARNING = false
-
-// Do not add digest to pods, but logs the operation instead
-var DIGEST_MUTATION_DRYRUN = false
+var CONFIG = map[string]bool{
+	// Digest mapping without tag will be used for images using tag not present in digest mappings
+	"DIGEST_MAPPING_FORCE": true,
+	// Return warnings instead of denying pods failing digest validation
+	"DIGEST_VALIDATION_WARNING": false,
+	// Do not add digest to pods, but logs the operation instead
+	"DIGEST_MUTATION_DRYRUN": false,
+	// Update existing pods
+	"DIGEST_UPDATE_EXISTING_PODS": true,
+	// Validate existing pods
+	"DIGEST_VALIDATE_EXISTING_PODS": true,
+	// Delete existing pods if validation fails
+	"DIGEST_DELETE_EXISTING_PODS": true,
+}
 
 // Init configuration from env variable and send vars list with values ready to be printed
 func InitConfig() ([]any, error) {
-	forceMapping := os.Getenv("DIGEST_MAPPING_FORCE")
-	if forceMapping != "" {
-		boolValue, err := strconv.ParseBool(forceMapping)
-		if err != nil {
-			return nil, err
+	var out []any
+	for key := range CONFIG {
+		envValue := os.Getenv(key)
+		if envValue != "" {
+			boolValue, err := strconv.ParseBool(envValue)
+			if err != nil {
+				return nil, err
+			}
+			CONFIG[key] = boolValue
 		}
-		DIGEST_MAPPING_FORCE = boolValue
+		out = append(out, key, CONFIG[key])
 	}
-	validationWarning := os.Getenv("DIGEST_VALIDATION_WARNING")
-	if validationWarning != "" {
-		boolValue, err := strconv.ParseBool(validationWarning)
-		if err != nil {
-			return nil, err
-		}
-		DIGEST_VALIDATION_WARNING = boolValue
-	}
-	mutationDryrun := os.Getenv("DIGEST_MUTATION_DRYRUN")
-	if mutationDryrun != "" {
-		boolValue, err := strconv.ParseBool(mutationDryrun)
-		if err != nil {
-			return nil, err
-		}
-		DIGEST_MUTATION_DRYRUN = boolValue
-	}
-	return []any{"DIGEST_MAPPING_FORCE", DIGEST_MAPPING_FORCE, "DIGEST_VALIDATION_WARNING", DIGEST_VALIDATION_WARNING, "DIGEST_MUTATION_DRYRUN", DIGEST_MUTATION_DRYRUN}, nil
+	return out, nil
 }
 
 // Load Digest Mapping from file, filepath can be set from env DIGEST_MAPPING_PATH
@@ -100,7 +94,7 @@ func GetTrustedDigest(image string) string {
 	if digest, ok := DIGEST_MAPPING[image]; ok {
 		return digest
 	} else {
-		if DIGEST_MAPPING_FORCE && strings.Contains(image, ":") {
+		if CONFIG["DIGEST_MAPPING_FORCE"] && strings.Contains(image, ":") {
 			imageWithoutTag := strings.Split(image, ":")[0]
 			if digest, ok := DIGEST_MAPPING[imageWithoutTag]; ok {
 				return digest

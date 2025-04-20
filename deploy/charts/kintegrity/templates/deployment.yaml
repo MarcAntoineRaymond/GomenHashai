@@ -42,9 +42,17 @@ spec:
         image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
         name: kintegrity
         env:
-          {{- toYaml .Values.env | nindent 10 }}
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          {{- with .Values.extraEnv }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- with .Values.envFrom }}
         envFrom:
-          {{- toYaml .Values.envFrom | nindent 10 }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         ports:
         - containerPort: {{ .Values.readinessProbe.port }}
           name: probe-port
