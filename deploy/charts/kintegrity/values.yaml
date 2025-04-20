@@ -147,6 +147,8 @@ webhook:
     enabled: true
     # Add labels: value to match namespace to exempt from mutation
     exemptNamespacesLabels: {}
+    # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
+    caBundle:
     annotations: {}
     extraLabels: {}
     failurePolicy: Fail
@@ -161,6 +163,8 @@ webhook:
     enabled: true
     # Add labels: value to match namespace to exempt from validation
     exemptNamespacesLabels: {}
+    # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
+    caBundle:
     annotations: {}
     extraLabels: {}
     failurePolicy: Fail

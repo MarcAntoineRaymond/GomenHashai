@@ -9,7 +9,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{- if index .Values.certificates "cert-manager.enabled" }}
+    {{- if index .Values "certificates" "cert-manager" "enabled" }}
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kintegrity.webhookSecretName" . }}
     {{- end }}
     {{- with .Values.webhook.mutating.annotations }}
@@ -19,6 +19,9 @@ webhooks:
 - admissionReviewVersions:
   - v1
   clientConfig:
+    {{- with .Values.webhook.mutating.caBundle }}
+    caBundle: {{ . }}
+    {{- end }}
     service:
       name: '{{ include "kintegrity.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
