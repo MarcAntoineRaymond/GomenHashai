@@ -9,7 +9,7 @@ GomenHashai guarantee images integrity in your k8s cluster by adding digests fro
 ## 📚 Table of Contents
 
 - [✨ What It Does](#-what-it-does)
-- [🔧 Configurations](#️-configurations)
+- [🔧 Configurations](#-configurations)
 - [🚀 Deployment](#-deployment)
 - [⚙️ Helm Chart Values](#️-helm-chart-values)
 - [📄 License](#-license)
