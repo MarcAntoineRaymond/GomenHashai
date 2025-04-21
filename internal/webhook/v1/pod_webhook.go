@@ -79,6 +79,10 @@ func (d *PodCustomDefaulter) Default(ctx context.Context, obj runtime.Object) er
 func AddContainerImageDigest(containers []corev1.Container, podName string) []corev1.Container {
 	for i, container := range containers {
 		image := container.Image
+		if helpers.IsImageExempt(image) {
+			podlog.Info("[🐾IntegrityPatrol] skip exempted image ⛩️", "pod", podName, "container", container.Name, "image", container.Image)
+			continue
+		}
 		// Remove digest if already present in image field
 		digest := helpers.GetDigest(image)
 		if digest != "" {
@@ -151,6 +155,11 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 	containersList := append(pod.Spec.InitContainers, pod.Spec.Containers...)
 	for i, container := range containersList {
 		image := container.Image
+		if helpers.IsImageExempt(image) {
+			podlog.Info("[🐾IntegrityPatrol] skip exempted image ⛩️", "pod", pod.GetName(), "container", container.Name, "image", container.Image)
+			continue
+		}
+
 		digest := helpers.GetDigest(image)
 		if digest == "" {
 			podlog.Info("[🍣GomenHashai!] a container tried to sneak in without using digest ❌", "pod", pod.GetName(), "container", container.Name, "image", image)

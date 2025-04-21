@@ -53,10 +53,30 @@ func GetTrustedDigest(image string) string {
 	return ""
 }
 
+// Return image without registry part if present at the beginning of image
 func GetImageWithoutRegistry(image string) string {
 	if strings.Contains(strings.Split(image, "/")[0], ".") {
 		imageWithoutRegistry := strings.Join(strings.Split(image, "/")[1:], "/")
 		return imageWithoutRegistry
 	}
 	return image
+}
+
+// Return if the image match an entry in the exempt list which can contain regex
+func IsImageExempt(image string) bool {
+	if len(CONFIG.Exemptions) > 0 {
+		for _, exemption := range CONFIG.Exemptions {
+			if image == exemption {
+				return true
+			}
+			re, err := regexp.Compile(exemption)
+			if err == nil {
+				match := re.FindString(image)
+				if match != "" {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }

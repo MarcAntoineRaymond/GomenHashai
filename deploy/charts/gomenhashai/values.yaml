@@ -7,13 +7,14 @@ nameOverride:
 # Override ReleaseName-ChartName in template
 fullnameOverride:
 
-# Cluster domain used by 
+# Cluster domain (used by cert-manager to generate certificate)
 kubernetesClusterDomain: cluster.local
 
 image:
   repository: 127.0.0.1:5000/gomenhashai
   # Imgae tag to use default to AppVersion
   tag:
+  pullPolicy: IfNotPresent
 
 # Mapping containing "image": "trusted digest"
 digestsMapping:
@@ -38,7 +39,7 @@ config:
 # digestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml"
 # # -- List of images to skip, can contain regex
 #	exemptions: []
-# # -- An image without tag in the mapping will be considered defaul. Images with tag that do not match specific trusted digest will use this digest instead (image it is the same base image)
+# # -- If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping
 #	imageDefaultDigest: true
 # # -- Can be warn or fail (default)
 #	validationMode: "fail"
@@ -178,9 +179,9 @@ webhook:
     enabled: true
     # Add labels: value to match namespace to exempt from mutation
     exemptNamespacesLabels:
-      kubernetes.io/metadata.name:
-        - "kube-system"
-        - "cert-manager"
+    #  kubernetes.io/metadata.name:
+    #    - "kube-system"
+    #    - "cert-manager"
     # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
     caBundle:
     annotations: {}
@@ -197,9 +198,9 @@ webhook:
     enabled: true
     # Add labels: value to match namespace to exempt from validation
     exemptNamespacesLabels:
-      kubernetes.io/metadata.name:
-        - "kube-system"
-        - "cert-manager"
+    #  kubernetes.io/metadata.name:
+    #    - "kube-system"
+    #    - "cert-manager"
     # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
     caBundle:
     annotations: {}

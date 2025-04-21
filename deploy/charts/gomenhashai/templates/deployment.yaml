@@ -40,6 +40,7 @@ spec:
         command:
         - /manager
         image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: gomenhashai
         env:
           - name: NAMESPACE
