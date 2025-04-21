@@ -3,4 +3,4 @@ name: gomenhashai
 description: GomenHashai guarantee images integrity in your k8s cluster by adding digests from a trusted set to your pods. It will also apologize for denying and gently terminating pods that does not use trusted digest. 🍣GomenHashai!
 type: application
 version: 0.1.0
-appVersion: "dev25"
+appVersion: "0.1.0"

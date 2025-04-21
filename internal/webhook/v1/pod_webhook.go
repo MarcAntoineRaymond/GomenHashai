@@ -67,7 +67,7 @@ func (d *PodCustomDefaulter) Default(ctx context.Context, obj runtime.Object) er
 		return fmt.Errorf("a wild exception appeared! GomenHashai is confused...😵 webhook expected a Pod object for the obj but got %T", obj)
 	}
 
-	podlog.Info("[🐾IntegrityPatrol] start mutating images digest 🥷", "pod", pod.GetName())
+	podlog.Info("[🐾IntegrityPatrol] start mutation 🥷", "pod", pod.GetName())
 
 	pod.Spec.InitContainers = AddContainerImageDigest(pod.Spec.InitContainers, pod.GetName())
 	pod.Spec.Containers = AddContainerImageDigest(pod.Spec.Containers, pod.GetName())
@@ -148,7 +148,7 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 	if !ok {
 		return nil, fmt.Errorf("a wild exception appeared! GomenHashai is confused...😵 webhook expected a Pod object for the obj but got %T", obj)
 	}
-	podlog.Info("[🐾IntegrityPatrol] start in~spec~tion 🔍", "name", pod.GetName())
+	podlog.Info("[🐾IntegrityPatrol] start in~spec~tion 🔍", "pod", pod.GetName())
 
 	warnings := admission.Warnings{}
 
@@ -221,7 +221,7 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 				return nil, fmt.Errorf("🍣GomenHashai validationMode config is unkown: %v this should not append Please whisper sweet YAML to me and try again. original error: %v", helpers.CONFIG.ValidationMode, err)
 			}
 		} else {
-			podlog.Info("[🐾IntegrityPatrol] container-san digest is trusted 🙇", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
+			podlog.Info("[🐾IntegrityPatrol] container-san image digest is trusted 🙇", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
 		}
 	}
 	podlog.Info("[🍣GomenHashai] integrity verified. You may pass, pod-chan 💮 Okaeri~", "pod", pod.GetName())

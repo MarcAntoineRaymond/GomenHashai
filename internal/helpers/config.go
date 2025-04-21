@@ -35,7 +35,7 @@ type Config struct {
 	// An image without tag in the mapping will be considered default. Images with tag that do not match specific trusted digest will use this digest instead (image it is the same base image)
 	ImageDefaultDigest bool `yaml:"imageDefaultDigest"`
 	// Can be warn or fail (default)
-	ValidationMode string `yaml:"validationMode" validate:"oneof warn fail"`
+	ValidationMode string `yaml:"validationMode" validate:"oneof=warn fail"`
 	// Enable to not modify pods but instead logs (pods will fail validation unless you disable it or set it in warn)
 	MutationDryRun bool `yaml:"mutationDryRun"`
 	// Enable modifying the registry part of images with the value of MutationRegistry
