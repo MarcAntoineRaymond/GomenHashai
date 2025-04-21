@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "kintegrity.fullname" . }}-metrics-service
+  name: {{ include "gomenhashai.fullname" . }}-metrics-service
   labels:
-    {{- include "kintegrity.labels" . | nindent 4 }}
+    {{- include "gomenhashai.labels" . | nindent 4 }}
     {{- with .Values.metrics.service.extraLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -14,8 +14,8 @@ metadata:
 spec:
   type: {{ .Values.metrics.service.type }}
   selector:
-    app.kubernetes.io/name: kintegrity
-    {{- include "kintegrity.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: gomenhashai
+    {{- include "gomenhashai.selectorLabels" . | nindent 4 }}
   ports:
     - name: https
       port: {{ .Values.metrics.service.port }}

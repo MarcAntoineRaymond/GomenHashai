@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "kintegrity.fullname" . }}-webhook-service
+  name: {{ include "gomenhashai.fullname" . }}-webhook-service
   labels:
-    {{- include "kintegrity.labels" . | nindent 4 }}
+    {{- include "gomenhashai.labels" . | nindent 4 }}
     {{- with .Values.webhook.service.extraLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -14,8 +14,8 @@ metadata:
 spec:
   type: {{ .Values.webhook.service.type }}
   selector:
-    app.kubernetes.io/name: kintegrity
-    {{- include "kintegrity.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: gomenhashai
+    {{- include "gomenhashai.selectorLabels" . | nindent 4 }}
   ports:
     - port: {{ .Values.webhook.service.port }}
       protocol: TCP

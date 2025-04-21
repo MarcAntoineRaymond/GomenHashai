@@ -25,7 +25,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const DEFAULT_DIGEST_MAPPING_PATH = "/etc/kintegrity/digests_mapping.yaml"
+const DEFAULT_DIGEST_MAPPING_PATH = "/etc/gomenhashai/digests_mapping.yaml"
 
 var DIGEST_MAPPING = map[string]string{}
 

@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "kintegrity.digestsSecretName" . }}
+  name: {{ include "gomenhashai.digestsSecretName" . }}
   labels:
-    {{- include "kintegrity.labels" . | nindent 4 }}
+    {{- include "gomenhashai.labels" . | nindent 4 }}
 stringData:
   digests_mapping.yaml: |
     {{- .Values.digestsMapping.mapping | toYaml | nindent 4 }}

@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "kintegrity.name" -}}
+{{- define "gomenhashai.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "kintegrity.fullname" -}}
+{{- define "gomenhashai.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "kintegrity.chart" -}}
+{{- define "gomenhashai.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "kintegrity.labels" -}}
-helm.sh/chart: {{ include "kintegrity.chart" . }}
-{{ include "kintegrity.selectorLabels" . }}
+{{- define "gomenhashai.labels" -}}
+helm.sh/chart: {{ include "gomenhashai.chart" . }}
+{{ include "gomenhashai.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "kintegrity.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kintegrity.name" . }}
+{{- define "gomenhashai.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "gomenhashai.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "kintegrity.serviceAccountName" -}}
+{{- define "gomenhashai.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "kintegrity.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "gomenhashai.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
@@ -64,20 +64,20 @@ Create the name of the service account to use
 {{/*
 Create the name of the secret digests mapping to use
 */}}
-{{- define "kintegrity.digestsSecretName" -}}
-{{- default (printf "%s-%s" (include "kintegrity.fullname" .) "digests-mapping") .Values.digestsMapping.secretName }}
+{{- define "gomenhashai.digestsSecretName" -}}
+{{- default (printf "%s-%s" (include "gomenhashai.fullname" .) "digests-mapping") .Values.digestsMapping.secretName }}
 {{- end }}
 
 {{/*
 Create the name of the webhook cert secret to use
 */}}
-{{- define "kintegrity.webhookSecretName" -}}
-{{- default (printf "%s-%s" (include "kintegrity.fullname" .) "webhook-cert") .Values.certificates.webhook.secretName }}
+{{- define "gomenhashai.webhookSecretName" -}}
+{{- default (printf "%s-%s" (include "gomenhashai.fullname" .) "webhook-cert") .Values.certificates.webhook.secretName }}
 {{- end }}
 
 {{/*
 Create the name of the metrics cert secret to use
 */}}
-{{- define "kintegrity.metricsSecretName" -}}
-{{- default (printf "%s-%s" (include "kintegrity.fullname" .) "metrics-cert") .Values.certificates.metrics.secretName }}
+{{- define "gomenhashai.metricsSecretName" -}}
+{{- default (printf "%s-%s" (include "gomenhashai.fullname" .) "metrics-cert") .Values.certificates.metrics.secretName }}
 {{- end }}

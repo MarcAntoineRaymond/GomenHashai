@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MarcAntoineRaymond/kintegrity/internal/helpers"
+	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -37,7 +37,7 @@ type PodInitializer struct {
 
 func (r *PodInitializer) Start(ctx context.Context) error {
 	time.Sleep(5 * time.Second)
-	r.Logger.Info("Start existing pods checks")
+	r.Logger.Info("[🐾IntegrityPatrol] investigate existing pods 🔍")
 
 	var podList corev1.PodList
 	if err := r.Client.List(ctx, &podList); err != nil {
@@ -46,6 +46,7 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 	pods := podList.Items
 	retries := 0
 	maxRetries := 5
+	r.Logger.Info("[🐾IntegrityPatrol] has rounded up all existing pods and is ready to bite 🐶")
 
 	// Loop until list is empty as error can occur we may need to retry deleting/updating pods on unexpected failure
 	for len(pods) > 0 && retries < maxRetries {
@@ -55,7 +56,7 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 			r.Logger.Info("Process pod", "name", pod.Name)
 
 			updateOpts := &client.UpdateOptions{
-				FieldManager: "kintegrity",
+				FieldManager: "gomenhashai",
 			}
 			if !helpers.CONFIG["DIGEST_UPDATE_EXISTING_PODS"] {
 				updateOpts.DryRun = []string{"All"}
@@ -64,22 +65,24 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 			if err := r.Client.Update(ctx, &pod, updateOpts); err != nil {
 				// If err is API forbidden
 				if apierrors.IsInvalid(err) || apierrors.IsForbidden(err) {
+					r.Logger.Info("[🍣GomenHashai!] this pod is forbidden and will be gently offboarded ☁️✂️ Sayonara, pod-san.", "name", pod.Name)
 					if helpers.CONFIG["DIGEST_DELETE_EXISTING_PODS"] {
 						if err := r.Client.Delete(ctx, &pod); err != nil {
-							r.Logger.Error(err, "unable to delete pod", "name", pod.Name)
+							r.Logger.Error(err, "[🐾IntegrityPatrol] is embarrassed, an error occured when deleting pod 😶", "name", pod.Name)
 							remaining = append(remaining, pod)
 							continue
 						}
-						r.Logger.Info("Deleted pod", "name", pod.Name)
 					}
 				} else {
-					r.Logger.Error(err, "unexpected error occured when updating pod", "name", pod.Name)
+					r.Logger.Error(err, "[🐾IntegrityPatrol] unexpected error occured when updating pod, even samurai stumble sometimes ⛩️", "name", pod.Name)
 					remaining = append(remaining, pod)
 					continue
 				}
+			} else {
+				r.Logger.Info("[🍣GomenHashai] nods respectfully. Pod integrity confirmed.", "name", pod.Name)
 			}
 
-			r.Logger.Info("Finished processing pod", "name", pod.Name)
+			r.Logger.Info("[🐾IntegrityPatrol] finished processing pod", "name", pod.Name)
 		}
 
 		pods = remaining
@@ -92,9 +95,9 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 		for _, pod := range pods {
 			podNames = append(podNames, pod.Name)
 		}
-		return fmt.Errorf("some pods were not processed: %v", podNames)
+		return fmt.Errorf("[🐾IntegrityPatrol] failed to process some pods: %v", podNames)
 	}
 
-	r.Logger.Info("Finished processing existing pods")
+	r.Logger.Info("[🐾IntegrityPatrol] existing pods investigation complete 🍜")
 	return nil
 }

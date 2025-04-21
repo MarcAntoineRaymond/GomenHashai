@@ -1,4 +1,4 @@
-module github.com/MarcAntoineRaymond/kintegrity
+module github.com/MarcAntoineRaymond/gomenhashai
 
 go 1.23.0
 

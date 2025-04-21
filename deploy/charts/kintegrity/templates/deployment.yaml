@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kintegrity.fullname" . }}
+  name: {{ include "gomenhashai.fullname" . }}
   labels:
-    {{- include "kintegrity.labels" . | nindent 4 }}
+    {{- include "gomenhashai.labels" . | nindent 4 }}
     {{- with .Values.extraLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -15,13 +15,13 @@ spec:
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: kintegrity
-    {{- include "kintegrity.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: gomenhashai
+    {{- include "gomenhashai.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: kintegrity
-        {{- include "kintegrity.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: gomenhashai
+        {{- include "gomenhashai.selectorLabels" . | nindent 8 }}
         {{- with .Values.extraPodLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -40,7 +40,7 @@ spec:
         command:
         - /manager
         image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
-        name: kintegrity
+        name: gomenhashai
         env:
           - name: NAMESPACE
             valueFrom:
@@ -87,13 +87,13 @@ spec:
         securityContext:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
         volumeMounts:
-        - mountPath: /etc/kintegrity/
+        - mountPath: /etc/gomenhashai/
           name: digests-mapping
           readOnly: true
-        - mountPath: /etc/kintegrity/certificates/webhook-certs
+        - mountPath: /etc/gomenhashai/certificates/webhook-certs
           name: webhook-certs
           readOnly: true
-        - mountPath: /etc/kintegrity/certificates/metrics-certs
+        - mountPath: /etc/gomenhashai/certificates/metrics-certs
           name: metrics-certs
           readOnly: true
         {{- with .Values.extraVolumeMounts }}
@@ -104,18 +104,18 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      serviceAccountName: {{ include "kintegrity.serviceAccountName" . }}
+      serviceAccountName: {{ include "gomenhashai.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
       volumes:
       - name: digests-mapping
         secret:
-          secretName: {{ include "kintegrity.digestsSecretName" . }}
+          secretName: {{ include "gomenhashai.digestsSecretName" . }}
       - name: webhook-certs
         secret:
-          secretName: {{ include "kintegrity.webhookSecretName" . }}
+          secretName: {{ include "gomenhashai.webhookSecretName" . }}
       - name: metrics-certs
         secret:
-          secretName: {{ include "kintegrity.metricsSecretName" . }}
+          secretName: {{ include "gomenhashai.metricsSecretName" . }}
       {{- with .Values.extraVolumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}

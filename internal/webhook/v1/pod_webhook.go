@@ -22,7 +22,7 @@ import (
 
 	"strings"
 
-	"github.com/MarcAntoineRaymond/kintegrity/internal/helpers"
+	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -64,19 +64,19 @@ func (d *PodCustomDefaulter) Default(ctx context.Context, obj runtime.Object) er
 	pod, ok := obj.(*corev1.Pod)
 
 	if !ok {
-		return fmt.Errorf("expected an Pod object but got %T", obj)
+		return fmt.Errorf("a wild exception appeared! GomenHashai is confused...😵 webhook expected a Pod object for the obj but got %T", obj)
 	}
 
-	podlog.Info("Mutating digests", "name", pod.GetName())
+	podlog.Info("[🐾IntegrityPatrol] start mutating images digest 🥷", "pod", pod.GetName())
 
-	pod.Spec.InitContainers = AddContainerImageDigest(pod.Spec.InitContainers)
-	pod.Spec.Containers = AddContainerImageDigest(pod.Spec.Containers)
+	pod.Spec.InitContainers = AddContainerImageDigest(pod.Spec.InitContainers, pod.GetName())
+	pod.Spec.Containers = AddContainerImageDigest(pod.Spec.Containers, pod.GetName())
 
 	return nil
 }
 
-// Loop container list and append digest to images, return errors for every container images not matching mapping list
-func AddContainerImageDigest(containers []corev1.Container) []corev1.Container {
+// Loop container list and append digest to images, podName is used for logging
+func AddContainerImageDigest(containers []corev1.Container, podName string) []corev1.Container {
 	for i, container := range containers {
 		image := container.Image
 		// Remove digest if already present in image field
@@ -93,9 +93,9 @@ func AddContainerImageDigest(containers []corev1.Container) []corev1.Container {
 				container.Image = image
 				containers[i] = container
 			}
-			podlog.Info("Add digest to image", "name", container.Name, "image", container.Image, "digest", trustedDigest)
+			podlog.Info("[🐾IntegrityPatrol] digest was added to image 🐶", "pod", podName, "container", container.Name, "image", container.Image, "digest", trustedDigest)
 		} else {
-			podlog.Info("No trusted digest for image", "name", container.Name, "image", container.Image)
+			podlog.Info("[🐾IntegrityPatrol] did not found any trusted digest for this image 🛡️", "pod", podName, "container", container.Name, "image", container.Image)
 		}
 	}
 	return containers
@@ -127,9 +127,9 @@ func (v *PodCustomValidator) ValidateUpdate(ctx context.Context, oldObj, newObj 
 func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 	pod, ok := obj.(*corev1.Pod)
 	if !ok {
-		return nil, fmt.Errorf("expected a Pod object for the obj but got %T", obj)
+		return nil, fmt.Errorf("a wild exception appeared! GomenHashai is confused...😵 webhook expected a Pod object for the obj but got %T", obj)
 	}
-	podlog.Info("Validating digests", "name", pod.GetName())
+	podlog.Info("[🐾IntegrityPatrol] start in~spec~tion 🔍", "name", pod.GetName())
 
 	warnings := admission.Warnings{}
 
@@ -138,7 +138,7 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 		image := container.Image
 		digest := helpers.GetDigest(image)
 		if digest == "" {
-			podlog.Info("Deny pod - no digest found", "name", pod.GetName(), "image", image)
+			podlog.Info("[🍣GomenHashai!] a container tried to sneak in without using digest ❌", "pod", pod.GetName(), "container", container.Name, "image", image)
 			err := apierrors.NewForbidden(
 				schema.GroupResource{Group: pod.GroupVersionKind().Group, Resource: pod.Kind},
 				pod.Name,
@@ -153,13 +153,13 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 				warnings = append(warnings, err.Error())
 			}
 		}
-		podlog.Info("Digest found", "name", pod.GetName(), "digest", digest)
+		podlog.Info("[🐾IntegrityPatrol] has found a digest ✨", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
 		image = strings.TrimSuffix(image, "@"+digest)
 		// Get trusted dige
 		trustedDigest := helpers.GetTrustedDigest(image)
 		// Check if image has a mapping with a trusted digest
 		if trustedDigest == "" {
-			podlog.Info("Deny pod - image has no trusted digest", "name", pod.GetName(), "image", image, "digest", digest)
+			podlog.Info("[🍣GomenHashai!] doesn't know any trusted digest for this image ❌", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
 			err := apierrors.NewForbidden(
 				schema.GroupResource{Group: pod.GroupVersionKind().Group, Resource: pod.Kind},
 				pod.Name,
@@ -176,7 +176,7 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 		}
 		// Check if the image is using the trusted digest
 		if trustedDigest != digest {
-			podlog.Info("Deny pod - digest is not trusted", "name", pod.GetName(), "image", image, "digest", digest)
+			podlog.Info("[🍣GomenHashai!] digest is not trusted. Exile recommended ❌", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
 			err := apierrors.NewForbidden(
 				schema.GroupResource{Group: pod.GroupVersionKind().Group, Resource: pod.Kind},
 				pod.Name,
@@ -191,10 +191,11 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 				warnings = append(warnings, err.Error())
 			}
 		} else {
-			podlog.Info("Digest is trusted", "name", pod.GetName(), "image", image, "digest", digest)
+			podlog.Info("[🐾IntegrityPatrol] container-san digest is trusted 🙇", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
 		}
 	}
-	podlog.Info("Allow Pod - Completed digests validation", "name", pod.GetName())
+	podlog.Info("[🍣GomenHashai] integrity verified. You may pass, pod-chan 💮 Okaeri~", "pod", pod.GetName())
+	podlog.Info("[🐾IntegrityPatrol] in~spec~tion complete ✅", "pod", pod.GetName())
 	return warnings, nil
 }
 

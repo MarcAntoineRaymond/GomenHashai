@@ -2,11 +2,11 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: github.com/MarcAntoineRaymond/kintegrity
+domain: github.com/MarcAntoineRaymond/gomenhashai
 layout:
 - go.kubebuilder.io/v4
-projectName: kintegrity
-repo: github.com/MarcAntoineRaymond/kintegrity
+projectName: gomenhashai
+repo: github.com/MarcAntoineRaymond/gomenhashai
 resources:
 - controller: true
   core: true

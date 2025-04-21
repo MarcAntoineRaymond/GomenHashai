@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   labels:
     control-plane: controller-manager
-    app.kubernetes.io/name: kintegrity
+    app.kubernetes.io/name: gomenhashai
     app.kubernetes.io/managed-by: kustomize
   name: system
 ---
@@ -14,13 +14,13 @@ metadata:
   namespace: system
   labels:
     control-plane: controller-manager
-    app.kubernetes.io/name: kintegrity
+    app.kubernetes.io/name: gomenhashai
     app.kubernetes.io/managed-by: kustomize
 spec:
   selector:
     matchLabels:
       control-plane: controller-manager
-      app.kubernetes.io/name: kintegrity
+      app.kubernetes.io/name: gomenhashai
   replicas: 1
   template:
     metadata:
@@ -28,7 +28,7 @@ spec:
         kubectl.kubernetes.io/default-container: manager
       labels:
         control-plane: controller-manager
-        app.kubernetes.io/name: kintegrity
+        app.kubernetes.io/name: gomenhashai
     spec:
       securityContext:
         runAsNonRoot: true
@@ -77,7 +77,7 @@ spec:
             memory: 64Mi
         volumeMounts:
           - name: digests-mapping
-            mountPath: "/etc/kintegrity/"
+            mountPath: "/etc/gomenhashai/"
             readOnly: true
       volumes:
         - name: digests-mapping

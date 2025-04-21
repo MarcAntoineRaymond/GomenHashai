@@ -37,11 +37,11 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/MarcAntoineRaymond/kintegrity/internal/controller"
-	webhookcorev1 "github.com/MarcAntoineRaymond/kintegrity/internal/webhook/v1"
+	"github.com/MarcAntoineRaymond/gomenhashai/internal/controller"
+	webhookcorev1 "github.com/MarcAntoineRaymond/gomenhashai/internal/webhook/v1"
 
 	// +kubebuilder:scaffold:imports
-	"github.com/MarcAntoineRaymond/kintegrity/internal/helpers"
+	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
 )
 
 var (
@@ -179,7 +179,7 @@ func main() {
 		})
 	}
 
-	//Kintegrity init
+	//gomenhashai init
 
 	configVars, err := helpers.InitConfig()
 	if err != nil {
@@ -201,7 +201,7 @@ func main() {
 		WebhookServer:                 webhookServer,
 		HealthProbeBindAddress:        probeAddr,
 		LeaderElection:                enableLeaderElection,
-		LeaderElectionID:              "88e6f9d2.kintegrity.io",
+		LeaderElectionID:              "88e6f9d2.gomenhashai.io",
 		LeaderElectionReleaseOnCancel: true,
 	})
 	if err != nil {
@@ -248,13 +248,13 @@ func main() {
 			Client: mgr.GetClient(),
 			Logger: mgr.GetLogger(),
 		}); err != nil {
-		setupLog.Error(err, "error processing existing pods")
+		setupLog.Error(err, "GomenHashai spilled the soy sauce on the logs 🍶📉")
 		os.Exit(1)
 	}
 
-	setupLog.Info("starting manager")
+	setupLog.Info("GomenHashai is warming up is nose")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "problem running manager")
+		setupLog.Error(err, "GomenHashai tripped over its own paws... internal error 🐶💥")
 		os.Exit(1)
 	}
 }

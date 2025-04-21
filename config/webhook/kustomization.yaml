@@ -17,5 +17,5 @@ patches:
             - key: kubernetes.io/metadata.name
               operator: NotIn
               values:
-                - kintegrity-system
+                - gomenhashai-system
                 - kube-system

@@ -121,10 +121,10 @@ PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 docker-buildx: ## Build and push docker image for the manager for cross-platform support
 	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
 	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
-	- $(CONTAINER_TOOL) buildx create --name kintegrity-builder
-	$(CONTAINER_TOOL) buildx use kintegrity-builder
+	- $(CONTAINER_TOOL) buildx create --name gomenhashai-builder
+	$(CONTAINER_TOOL) buildx use gomenhashai-builder
 	- $(CONTAINER_TOOL) buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
-	- $(CONTAINER_TOOL) buildx rm kintegrity-builder
+	- $(CONTAINER_TOOL) buildx rm gomenhashai-builder
 	rm Dockerfile.cross
 
 .PHONY: build-installer
@@ -216,7 +216,7 @@ $(HELMIFY): $(LOCALBIN)
 	test -s $(LOCALBIN)/helmify || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
     
 helm: manifests kustomize helmify
-	$(KUSTOMIZE) build config/default | $(HELMIFY) kintegrity && mkdir -p deploy/charts && rm -rf deploy/charts/* && mv kintegrity deploy/charts
+	$(KUSTOMIZE) build config/default | $(HELMIFY) gomenhashai && mkdir -p deploy/charts && rm -rf deploy/charts/* && mv gomenhashai deploy/charts
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

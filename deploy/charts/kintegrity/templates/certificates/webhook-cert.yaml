@@ -2,16 +2,16 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ include "kintegrity.webhookSecretName" . }}
+  name: {{ include "gomenhashai.webhookSecretName" . }}
   labels:
-  {{- include "kintegrity.labels" . | nindent 4 }}
+  {{- include "gomenhashai.labels" . | nindent 4 }}
 spec:
   dnsNames:
-  - '{{ include "kintegrity.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc'
-  - '{{ include "kintegrity.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc.{{
+  - '{{ include "gomenhashai.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc'
+  - '{{ include "gomenhashai.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc.{{
     .Values.kubernetesClusterDomain }}'
   issuerRef:
     kind: Issuer
-    name: '{{ include "kintegrity.fullname" . }}-selfsigned-issuer'
-  secretName: {{ include "kintegrity.webhookSecretName" . }}
+    name: '{{ include "gomenhashai.fullname" . }}-selfsigned-issuer'
+  secretName: {{ include "gomenhashai.webhookSecretName" . }}
 {{- end }}

@@ -2,15 +2,15 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: {{ include "kintegrity.fullname" . }}-mutating-webhook-configuration
+  name: {{ include "gomenhashai.fullname" . }}-mutating-webhook-configuration
   labels:
-    {{- include "kintegrity.labels" . | nindent 4 }}
+    {{- include "gomenhashai.labels" . | nindent 4 }}
     {{- with .Values.webhook.mutating.extraLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
     {{- if index .Values "certificates" "cert-manager" "enabled" }}
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kintegrity.webhookSecretName" . }}
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "gomenhashai.webhookSecretName" . }}
     {{- end }}
     {{- with .Values.webhook.mutating.annotations }}
     {{- toYaml . | nindent 4 }}
@@ -23,7 +23,7 @@ webhooks:
     caBundle: {{ . }}
     {{- end }}
     service:
-      name: '{{ include "kintegrity.fullname" . }}-webhook-service'
+      name: '{{ include "gomenhashai.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
       path: /mutate--v1-pod
   failurePolicy: {{ .Values.webhook.mutating.failurePolicy }}

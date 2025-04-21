@@ -2,9 +2,9 @@
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: {{ include "kintegrity.fullname" . }}-selfsigned-issuer
+  name: {{ include "gomenhashai.fullname" . }}-selfsigned-issuer
   labels:
-  {{- include "kintegrity.labels" . | nindent 4 }}
+  {{- include "gomenhashai.labels" . | nindent 4 }}
 spec:
   selfSigned: {}
 {{- end }}

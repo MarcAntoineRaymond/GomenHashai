@@ -2,15 +2,15 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ include "kintegrity.metricsSecretName" . }}
+  name: {{ include "gomenhashai.metricsSecretName" . }}
   labels:
-  {{- include "kintegrity.labels" . | nindent 4 }}
+  {{- include "gomenhashai.labels" . | nindent 4 }}
 spec:
   dnsNames:
-  - '{{ include "kintegrity.fullname" . }}-metrics-service.{{ .Release.Namespace }}.svc'
-  - '{{ include "kintegrity.fullname" . }}-metrics-service.{{ .Release.Namespace }}.svc.{{ .Values.kubernetesClusterDomain }}'
+  - '{{ include "gomenhashai.fullname" . }}-metrics-service.{{ .Release.Namespace }}.svc'
+  - '{{ include "gomenhashai.fullname" . }}-metrics-service.{{ .Release.Namespace }}.svc.{{ .Values.kubernetesClusterDomain }}'
   issuerRef:
     kind: Issuer
-    name: '{{ include "kintegrity.fullname" . }}-selfsigned-issuer'
-  secretName: {{ include "kintegrity.metricsSecretName" . }}
+    name: '{{ include "gomenhashai.fullname" . }}-selfsigned-issuer'
+  secretName: {{ include "gomenhashai.metricsSecretName" . }}
 {{- end }}

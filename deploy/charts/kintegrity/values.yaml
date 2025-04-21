@@ -1,4 +1,4 @@
-# Kintegrity replicas count
+# gomenhashai replicas count
 replicas: 1
 
 # Override Chart name in template
@@ -11,7 +11,7 @@ fullnameOverride:
 kubernetesClusterDomain: cluster.local
 
 image:
-  repository: 127.0.0.1:5000/kintegrity
+  repository: 127.0.0.1:5000/gomenhashai
   # Imgae tag to use default to AppVersion
   tag:
 
@@ -37,19 +37,19 @@ args:
   - --metrics-bind-address=:8443
   - --leader-elect
   - --health-probe-bind-address=:8081
-  - --webhook-cert-path=/etc/kintegrity/certificates/webhook-certs
-  - --metrics-cert-path=/etc/kintegrity/certificates/metrics-certs
+  - --webhook-cert-path=/etc/gomenhashai/certificates/webhook-certs
+  - --metrics-cert-path=/etc/gomenhashai/certificates/metrics-certs
 
 annotations: {}
 
 podAnnotations:
-  kubectl.kubernetes.io/default-container: kintegrity
+  kubectl.kubernetes.io/default-container: gomenhashai
 
 extraLabels: {}
 
 extraPodLabels: {}
 
-# Kintegrity container security context
+# gomenhashai container security context
 containerSecurityContext:
   allowPrivilegeEscalation: false
   capabilities:
@@ -68,7 +68,7 @@ podSecurityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# Kintegrity resources configuration, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+# gomenhashai resources configuration, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
 resources:
   limits:
     cpu: "1"
@@ -146,7 +146,10 @@ webhook:
     # Enable mutation webhook
     enabled: true
     # Add labels: value to match namespace to exempt from mutation
-    exemptNamespacesLabels: {}
+    exemptNamespacesLabels:
+      kubernetes.io/metadata.name:
+        - "kube-system"
+        - "cert-manager"
     # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
     caBundle:
     annotations: {}
@@ -162,7 +165,10 @@ webhook:
     # Enable validation webhook
     enabled: true
     # Add labels: value to match namespace to exempt from validation
-    exemptNamespacesLabels: {}
+    exemptNamespacesLabels:
+      kubernetes.io/metadata.name:
+        - "kube-system"
+        - "cert-manager"
     # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
     caBundle:
     annotations: {}
