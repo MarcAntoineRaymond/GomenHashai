@@ -1,6 +1,6 @@
 # 🍣 GomenHashai 🐾
 
-![GomenHashai Logo](logo/GomenHashai.png)
+![GomenHashai Logo](logo/logo.png)
 
 GomenHashai guarantee images integrity in your k8s cluster by adding digests from a trusted set to your pods. It will also apologize for denying and gently terminating pods that does not use trusted digest. 🍣GomenHashai!
 
@@ -9,8 +9,8 @@ GomenHashai guarantee images integrity in your k8s cluster by adding digests fro
 ## 📚 Table of Contents
 
 - [✨ What It Does](#-what-it-does)
-- [🔧 Configurations](#️-Configurations)
-- [🚀 Deployment](#-Deployment)
+- [🔧 Configurations](#️-configurations)
+- [🚀 Deployment](#-deployment)
 - [⚙️ Helm Chart Values](#️-helm-chart-values)
 - [📄 License](#-license)
 
@@ -105,17 +105,17 @@ mutationRegistry: ""
 # -- Configuration of the process that handles existing pods on init
 existingPods:
 # -- Enable the init function that will process existing pods at startup
-	enabled: true
+    enabled: true
 # -- Timeout used to wait before starting this job in seconds
-	startTimeout: 5
+    startTimeout: 5
 # -- Timeout used to wait before retrying to process pods that failed in seconds
-	retryTimeout: 5
+    retryTimeout: 5
 # -- How many times we should retry processing pods that failed
-	retries: 5
+    retries: 5
 # -- Replace already existing pods with output from webhook, if disbaled webhook will be used with dry run to not modify pods
-	updateEnabled: true
+    updateEnabled: true
 # -- Allow deleting existing pods that are forbidden by webhook
-	deleteEnabled: true
+    deleteEnabled: true
 ```
 
 The configuration file path can be overwritten by the environment variable `GOMENHASHAI_CONFIG_PATH`.
@@ -245,7 +245,7 @@ You can customize certificate handling, namespace filters, and webhook behavior.
 
 ---
 
-## License
+## 📄 License
 
 Copyright 2025 Marc-Antoine RAYMOND.
 
