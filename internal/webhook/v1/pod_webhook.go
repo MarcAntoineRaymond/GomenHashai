@@ -89,7 +89,7 @@ func AddContainerImageDigest(containers []corev1.Container, podName string) []co
 		if trustedDigest != "" {
 			image = image + "@" + trustedDigest
 			// Only modify image in incoming pod if there is a trusted digest
-			if !helpers.CONFIG["DIGEST_MUTATION_DRYRUN"] {
+			if !helpers.CONFIG.MutationDryRun {
 				container.Image = image
 				containers[i] = container
 			}
@@ -147,10 +147,12 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 					"image is not using a digest",
 				),
 			)
-			if !helpers.CONFIG["DIGEST_VALIDATION_WARNING"] {
+			if helpers.CONFIG.ValidationMode == "fail" {
 				return nil, err
-			} else {
+			} else if helpers.CONFIG.ValidationMode == "warn" {
 				warnings = append(warnings, err.Error())
+			} else {
+				return nil, fmt.Errorf("🍣GomenHashai validationMode config is unkown: %v this should not append Please whisper sweet YAML to me and try again. original error: %v", helpers.CONFIG.ValidationMode, err)
 			}
 		}
 		podlog.Info("[🐾IntegrityPatrol] has found a digest ✨", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
@@ -168,10 +170,12 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 					"image does not have a trusted digest",
 				),
 			)
-			if !helpers.CONFIG["DIGEST_VALIDATION_WARNING"] {
+			if helpers.CONFIG.ValidationMode == "fail" {
 				return nil, err
-			} else {
+			} else if helpers.CONFIG.ValidationMode == "warn" {
 				warnings = append(warnings, err.Error())
+			} else {
+				return nil, fmt.Errorf("🍣GomenHashai validationMode config is unkown: %v this should not append Please whisper sweet YAML to me and try again. original error: %v", helpers.CONFIG.ValidationMode, err)
 			}
 		}
 		// Check if the image is using the trusted digest
@@ -185,10 +189,12 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 					"image use an untrusted digest",
 				),
 			)
-			if !helpers.CONFIG["DIGEST_VALIDATION_WARNING"] {
+			if helpers.CONFIG.ValidationMode == "fail" {
 				return nil, err
-			} else {
+			} else if helpers.CONFIG.ValidationMode == "warn" {
 				warnings = append(warnings, err.Error())
+			} else {
+				return nil, fmt.Errorf("🍣GomenHashai validationMode config is unkown: %v this should not append Please whisper sweet YAML to me and try again. original error: %v", helpers.CONFIG.ValidationMode, err)
 			}
 		} else {
 			podlog.Info("[🐾IntegrityPatrol] container-san digest is trusted 🙇", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)

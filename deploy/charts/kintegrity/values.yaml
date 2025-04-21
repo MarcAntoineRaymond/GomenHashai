@@ -23,14 +23,41 @@ digestsMapping:
   secretName:
   # YAML image mapping
   mapping:
-    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
-    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "docker.io/library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "docker.io/library/busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af"
-    "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
+#    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
+#    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+#    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+#    "docker.io/library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+#    "docker.io/library/busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+#    "busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+#    "nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af"
+#    "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
+
+# YAML configuration
+config:
+# # -- Path to the digests mapping file
+# digestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml"
+# # -- List of images to skip, can contain regex
+#	exemptions: []
+# # -- An image without tag in the mapping will be considered defaul. Images with tag that do not match specific trusted digest will use this digest instead (image it is the same base image)
+#	imageDefaultDigest: true
+# # -- Can be warn or fail (default)
+#	validationMode: "fail"
+# # -- Enable to not modify pods but instead logs (pods will fail validation unless you disable it or set it in warn)
+#	mutationDryRun: false
+# # -- Configuration of the process that handles existing pods on init
+#	existingPods:
+# # -- Enable the init function that will process existing pods at startup
+#		enabled: true
+# # -- Timeout used to wait before starting this job in seconds
+#		startTimeout: 5
+# # -- Timeout used to wait before retrying to process pods that failed in seconds
+#		retryTimeout: 5
+# # -- How many times we should retry processing pods that failed
+#		retries: 5
+# # -- Replace already existing pods with output from webhook, if disbaled webhook will be used with dry run to not modify pods
+#		updateEnabled: true
+# # -- Allow deleting existing pods that are forbidden by webhook
+#		deleteEnabled: true
 
 # Args passed to the manager app
 args:

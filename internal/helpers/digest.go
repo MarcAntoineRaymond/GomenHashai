@@ -17,64 +17,11 @@ limitations under the License.
 package helpers
 
 import (
-	"os"
 	"regexp"
-	"strconv"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 )
 
 const DEFAULT_DIGEST_MAPPING_PATH = "/etc/gomenhashai/digests_mapping.yaml"
-
-var DIGEST_MAPPING = map[string]string{}
-
-var CONFIG = map[string]bool{
-	// Digest mapping without tag will be used for images using tag not present in digest mappings
-	"DIGEST_MAPPING_FORCE": true,
-	// Return warnings instead of denying pods failing digest validation
-	"DIGEST_VALIDATION_WARNING": false,
-	// Do not add digest to pods, but logs the operation instead
-	"DIGEST_MUTATION_DRYRUN": false,
-	// Update existing pods
-	"DIGEST_UPDATE_EXISTING_PODS": true,
-	// Delete existing pods if validation fails
-	"DIGEST_DELETE_EXISTING_PODS": true,
-}
-
-// Init configuration from env variable and send vars list with values ready to be printed
-func InitConfig() ([]any, error) {
-	var out []any
-	for key := range CONFIG {
-		envValue := os.Getenv(key)
-		if envValue != "" {
-			boolValue, err := strconv.ParseBool(envValue)
-			if err != nil {
-				return nil, err
-			}
-			CONFIG[key] = boolValue
-		}
-		out = append(out, key, CONFIG[key])
-	}
-	return out, nil
-}
-
-// Load Digest Mapping from file, filepath can be set from env DIGEST_MAPPING_PATH
-func LoadDigestMapping() error {
-	filepath := os.Getenv("DIGEST_MAPPING_PATH")
-	if filepath == "" {
-		filepath = DEFAULT_DIGEST_MAPPING_PATH
-	}
-	data, err := os.ReadFile(filepath)
-	if err != nil {
-		return err
-	}
-
-	if err := yaml.Unmarshal(data, &DIGEST_MAPPING); err != nil {
-		return err
-	}
-	return nil
-}
 
 // getDigest from container image or return empty
 func GetDigest(image string) string {
@@ -88,11 +35,10 @@ func GetDigest(image string) string {
 
 // Return digest from mapping for this image or empty string
 func GetTrustedDigest(image string) string {
-	// TODO handle tag or not tag mechanic, if image has tag and digest exist for base image without tag, use this one
 	if digest, ok := DIGEST_MAPPING[image]; ok {
 		return digest
 	} else {
-		if CONFIG["DIGEST_MAPPING_FORCE"] && strings.Contains(image, ":") {
+		if CONFIG.ImageDefaultDigest && strings.Contains(image, ":") {
 			imageWithoutTag := strings.Split(image, ":")[0]
 			if digest, ok := DIGEST_MAPPING[imageWithoutTag]; ok {
 				return digest

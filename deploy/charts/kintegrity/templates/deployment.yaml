@@ -87,7 +87,11 @@ spec:
         securityContext:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
         volumeMounts:
-        - mountPath: /etc/gomenhashai/
+        {{- if .Values.config }}
+        - name: config
+          mountPath: /etc/gomenhashai/configs/
+        {{- end }}
+        - mountPath: /etc/gomenhashai/digests/
           name: digests-mapping
           readOnly: true
         - mountPath: /etc/gomenhashai/certificates/webhook-certs
@@ -107,6 +111,11 @@ spec:
       serviceAccountName: {{ include "gomenhashai.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
       volumes:
+      {{- if .Values.config }}
+      - name: config
+        configMap:
+          name: {{ include "gomenhashai.fullname" . }}-config
+      {{- end }}
       - name: digests-mapping
         secret:
           secretName: {{ include "gomenhashai.digestsSecretName" . }}

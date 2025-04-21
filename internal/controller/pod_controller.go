@@ -36,7 +36,10 @@ type PodInitializer struct {
 }
 
 func (r *PodInitializer) Start(ctx context.Context) error {
-	time.Sleep(5 * time.Second)
+	startTimeout := helpers.CONFIG.ExistingPods.StartTimeout
+	retryTimeout := helpers.CONFIG.ExistingPods.RetryTimeout
+	maxRetries := helpers.CONFIG.ExistingPods.Retries
+	time.Sleep(time.Duration(startTimeout) * time.Second)
 	r.Logger.Info("[🐾IntegrityPatrol] investigate existing pods 🔍")
 
 	var podList corev1.PodList
@@ -45,7 +48,6 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 	}
 	pods := podList.Items
 	retries := 0
-	maxRetries := 5
 	r.Logger.Info("[🐾IntegrityPatrol] has rounded up all existing pods and is ready to bite 🐶")
 
 	// Loop until list is empty as error can occur we may need to retry deleting/updating pods on unexpected failure
@@ -58,7 +60,7 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 			updateOpts := &client.UpdateOptions{
 				FieldManager: "gomenhashai",
 			}
-			if !helpers.CONFIG["DIGEST_UPDATE_EXISTING_PODS"] {
+			if !helpers.CONFIG.ExistingPods.UpdateEnabled {
 				updateOpts.DryRun = []string{"All"}
 			}
 
@@ -66,7 +68,7 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 				// If err is API forbidden
 				if apierrors.IsInvalid(err) || apierrors.IsForbidden(err) {
 					r.Logger.Info("[🍣GomenHashai!] this pod is forbidden and will be gently offboarded ☁️✂️ Sayonara, pod-san.", "name", pod.Name)
-					if helpers.CONFIG["DIGEST_DELETE_EXISTING_PODS"] {
+					if helpers.CONFIG.ExistingPods.DeleteEnabled {
 						if err := r.Client.Delete(ctx, &pod); err != nil {
 							r.Logger.Error(err, "[🐾IntegrityPatrol] is embarrassed, an error occured when deleting pod 😶", "name", pod.Name)
 							remaining = append(remaining, pod)
@@ -87,7 +89,7 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 
 		pods = remaining
 		retries++
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Duration(retryTimeout) * time.Second)
 	}
 
 	if len(pods) > 0 {

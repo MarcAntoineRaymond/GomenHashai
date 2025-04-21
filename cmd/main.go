@@ -180,13 +180,13 @@ func main() {
 	}
 
 	//gomenhashai init
-
-	configVars, err := helpers.InitConfig()
+	err := helpers.InitConfig()
 	if err != nil {
-		setupLog.Error(err, "cannot init config")
+		setupLog.Error(err, "🍙GomenHashai cannot init config")
 		os.Exit(1)
 	}
-	setupLog.Info("Config loaded", configVars...)
+
+	setupLog.Info("🍙GomenHashai config loaded", "config", helpers.CONFIG)
 
 	err = helpers.LoadDigestMapping()
 	if err != nil {
@@ -243,18 +243,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := mgr.Add(
-		&controller.PodInitializer{
-			Client: mgr.GetClient(),
-			Logger: mgr.GetLogger(),
-		}); err != nil {
-		setupLog.Error(err, "GomenHashai spilled the soy sauce on the logs 🍶📉")
-		os.Exit(1)
+	if helpers.CONFIG.ExistingPods.Enabled {
+		if err := mgr.Add(
+			&controller.PodInitializer{
+				Client: mgr.GetClient(),
+				Logger: mgr.GetLogger(),
+			}); err != nil {
+			setupLog.Error(err, "🍙GomenHashai spilled the soy sauce on the logs 🍶📉")
+			os.Exit(1)
+		}
 	}
 
-	setupLog.Info("GomenHashai is warming up is nose")
+	setupLog.Info("🍙GomenHashai is warming up is nose")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "GomenHashai tripped over its own paws... internal error 🐶💥")
+		setupLog.Error(err, "🍙GomenHashai tripped over its own paws... internal error 🐶💥")
 		os.Exit(1)
 	}
 }
