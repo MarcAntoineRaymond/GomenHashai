@@ -44,6 +44,10 @@ config:
 #	validationMode: "fail"
 # # -- Enable to not modify pods but instead logs (pods will fail validation unless you disable it or set it in warn)
 #	mutationDryRun: false
+# # -- Enable modifying the registry part of images with the value of MutationRegistry
+#	mutationRegistryEnabled: false
+# # -- The registry to inject when MutationRegistryEnabled is true
+#	mutationRegistry: ""
 # # -- Configuration of the process that handles existing pods on init
 #	existingPods:
 # # -- Enable the init function that will process existing pods at startup

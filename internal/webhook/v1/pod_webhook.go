@@ -97,6 +97,21 @@ func AddContainerImageDigest(containers []corev1.Container, podName string) []co
 		} else {
 			podlog.Info("[🐾IntegrityPatrol] did not found any trusted digest for this image 🛡️", "pod", podName, "container", container.Name, "image", container.Image)
 		}
+
+		// Do registry mutation
+		if helpers.CONFIG.MutationRegistryEnabled {
+			imageProcessRegistry := helpers.GetImageWithoutRegistry(image)
+			// If MutationRegistry is empty we already removed the registry
+			if helpers.CONFIG.MutationRegistry != "" {
+				imageProcessRegistry = helpers.CONFIG.MutationRegistry + "/" + imageProcessRegistry
+			}
+
+			// We do nothing if the image was not modified
+			if imageProcessRegistry != image {
+				container.Image = imageProcessRegistry
+				containers[i] = container
+			}
+		}
 	}
 	return containers
 }

@@ -38,12 +38,25 @@ func GetTrustedDigest(image string) string {
 	if digest, ok := DIGEST_MAPPING[image]; ok {
 		return digest
 	} else {
+		// Check for base image without tag in mapping this will be default
 		if CONFIG.ImageDefaultDigest && strings.Contains(image, ":") {
 			imageWithoutTag := strings.Split(image, ":")[0]
 			if digest, ok := DIGEST_MAPPING[imageWithoutTag]; ok {
 				return digest
 			}
 		}
+		// Try to find digest without registry part if it exist
+		if imageWithoutRegistry := GetImageWithoutRegistry(image); imageWithoutRegistry != image {
+			return GetTrustedDigest(imageWithoutRegistry)
+		}
 	}
 	return ""
+}
+
+func GetImageWithoutRegistry(image string) string {
+	if strings.Contains(strings.Split(image, "/")[0], ".") {
+		imageWithoutRegistry := strings.Join(strings.Split(image, "/")[1:], "/")
+		return imageWithoutRegistry
+	}
+	return image
 }

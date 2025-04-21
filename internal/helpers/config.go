@@ -19,6 +19,7 @@ package helpers
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
@@ -37,6 +38,10 @@ type Config struct {
 	ValidationMode string `yaml:"validationMode" validate:"oneof warn fail"`
 	// Enable to not modify pods but instead logs (pods will fail validation unless you disable it or set it in warn)
 	MutationDryRun bool `yaml:"mutationDryRun"`
+	// Enable modifying the registry part of images with the value of MutationRegistry
+	MutationRegistryEnabled bool `yaml:"mutationRegistryEnabled"`
+	// The registry to inject when MutationRegistryEnabled is true
+	MutationRegistry string `yaml:"mutationRegistry"`
 	// Configuration of the process that handles existing pods on init
 	ExistingPods ExistingPodsConfig `yaml:"existingPods"`
 }
@@ -62,11 +67,12 @@ var CONFIG = defaultConfig()
 
 func defaultConfig() Config {
 	return Config{
-		DigestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml",
-		Exemptions:         []string{},
-		ImageDefaultDigest: true,
-		ValidationMode:     "fail",
-		MutationDryRun:     false,
+		DigestsMappingFile:      "/etc/gomenhashai/digests/digests_mapping.yaml",
+		Exemptions:              []string{},
+		ImageDefaultDigest:      true,
+		ValidationMode:          "fail",
+		MutationDryRun:          false,
+		MutationRegistryEnabled: false,
 		ExistingPods: ExistingPodsConfig{
 			Enabled:       true,
 			StartTimeout:  5,
@@ -99,6 +105,9 @@ func InitConfig() error {
 	if err := envconfig.Process("gomenhashai", &cfg); err != nil {
 		return fmt.Errorf("failed to process env vars: %w", err)
 	}
+
+	// Sanatize
+	cfg.MutationRegistry = strings.TrimSuffix(cfg.MutationRegistry, "/")
 
 	// Validate config
 	validate := validator.New()
