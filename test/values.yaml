@@ -16,8 +16,19 @@ digestsMapping:
     "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
 
 config:
+  exemptions:
+    - ".*redis:.*"
+  mutationRegistryEnabled: true
+  mutationRegistry: ""
+  existingPods:
+    enabled: false
+    retryTimeout: 0
 
-extraEnv: []
+extraEnv:
+  - name: GOMENHASHAI_EXISTING_PODS_RETRY_TIMEOUT
+    value: "1"
+  - name: GOMENHASHAI_VALIDATIONMODE
+    value: "warn"
 
 certificates:
   cert-manager:

@@ -1,4 +1,4 @@
-# gomenhashai replicas count
+# gomenhashai replicas count multiple replicas is supported for HA
 replicas: 1
 
 # Override Chart name in template
@@ -37,7 +37,7 @@ digestsMapping:
 config:
 # # -- Path to the digests mapping file
 # digestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml"
-# # -- List of images to skip, can contain regex
+# # -- List of images to skip, can contain regex ex: ".*redis:.*"
 #	exemptions: []
 # # -- If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping
 #	imageDefaultDigest: true

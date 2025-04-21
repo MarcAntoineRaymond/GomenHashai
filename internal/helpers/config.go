@@ -30,7 +30,7 @@ import (
 type Config struct {
 	// Path to the digests mapping file
 	DigestsMappingFile string `yaml:"digestMappingFile"`
-	// List of images to skip, can contain regex
+	// List of images to skip, can contain regex ex: ".*redis:.*"
 	Exemptions []string `yaml:"exemptions"`
 	// An image without tag in the mapping will be considered default. Images with tag that do not match specific trusted digest will use this digest instead (image it is the same base image)
 	ImageDefaultDigest bool `yaml:"imageDefaultDigest"`

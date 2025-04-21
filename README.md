@@ -2,7 +2,7 @@
 
 ![GomenHashai Logo](logo/logo.png)
 
-GomenHashai guarantee images integrity in your k8s cluster by adding digests from a trusted set to your pods. It will also apologize for denying and gently terminating pods that does not use trusted digest. 🍣GomenHashai!
+GomenHashai guarantee images integrity in your k8s cluster by adding digests from a trusted set to your pods. It will also apologize for denying and gently terminating pods that does not use a trusted digest. 🍣GomenHashai!
 
 ---
 
@@ -81,6 +81,10 @@ It is possible to exempt a list of images, or even use regex to exempt images.
 
 The Helm Chart will exempt the namespace in which you install 🍣GomenHashai, you can exempt other namespaces as well.
 
+### ⚠️ Warning
+
+Running without configuring much may break stuff in your cluster, 🍣GomenHashai 🙇. Be careful providing a complete mapping for images/digests or set exemptions for your important cluster services (CNI, control-plane, api server...).
+
 ---
 
 ## 🔧 Configurations
@@ -90,7 +94,7 @@ A YAML configuration file can be used to customize the processing behaviour in a
 ```yaml
 # -- Path to the digests mapping file
 digestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml"
-# -- List of images to skip, can contain regex
+# -- List of images to skip, can contain regex ex: ".*redis:.*"
 exemptions: []
 # -- If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping
 imageDefaultDigest: true
