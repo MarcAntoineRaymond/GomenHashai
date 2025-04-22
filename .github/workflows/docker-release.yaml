@@ -42,7 +42,7 @@ jobs:
 
       - name: Build and push Docker image
         id: push
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
@@ -56,13 +56,3 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-
-  trigger-helm:
-    needs: build-and-push-image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Helm Chart Workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: helm-release.yaml
-          token: ${{ secrets.GITHUB_TOKEN }}
