@@ -173,11 +173,12 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 					"image is not using a digest",
 				),
 			)
-			if helpers.CONFIG.ValidationMode == helpers.ValidationModeFail {
+			switch helpers.CONFIG.ValidationMode {
+			case helpers.ValidationModeFail:
 				return nil, err
-			} else if helpers.CONFIG.ValidationMode == helpers.ValidationModeWarn {
+			case helpers.ValidationModeWarn:
 				warnings = append(warnings, err.Error())
-			} else {
+			default:
 				return nil, fmt.Errorf("🍣GomenHashai validationMode config is unknown: %v this should not append Please whisper sweet YAML to me and try again. original error: %v", helpers.CONFIG.ValidationMode, err)
 			}
 		}
@@ -196,11 +197,12 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 					"image does not have a trusted digest",
 				),
 			)
-			if helpers.CONFIG.ValidationMode == helpers.ValidationModeFail {
+			switch helpers.CONFIG.ValidationMode {
+			case helpers.ValidationModeFail:
 				return nil, err
-			} else if helpers.CONFIG.ValidationMode == helpers.ValidationModeWarn {
+			case helpers.ValidationModeWarn:
 				warnings = append(warnings, err.Error())
-			} else {
+			default:
 				return nil, fmt.Errorf("🍣GomenHashai validationMode config is unknown: %v this should not append Please whisper sweet YAML to me and try again. original error: %v", helpers.CONFIG.ValidationMode, err)
 			}
 		}
@@ -215,11 +217,12 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 					"image use an untrusted digest",
 				),
 			)
-			if helpers.CONFIG.ValidationMode == helpers.ValidationModeFail {
+			switch helpers.CONFIG.ValidationMode {
+			case helpers.ValidationModeFail:
 				return nil, err
-			} else if helpers.CONFIG.ValidationMode == helpers.ValidationModeWarn {
+			case helpers.ValidationModeWarn:
 				warnings = append(warnings, err.Error())
-			} else {
+			default:
 				return nil, fmt.Errorf("🍣GomenHashai validationMode config is unknown: %v this should not append Please whisper sweet YAML to me and try again. original error: %v", helpers.CONFIG.ValidationMode, err)
 			}
 		} else {
