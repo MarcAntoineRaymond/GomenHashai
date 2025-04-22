@@ -19,6 +19,7 @@ package helpers
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -55,11 +56,14 @@ type ExistingPodsConfig struct {
 	RetryTimeout int `yaml:"retryTimeout" validate:"gte=0" envconfig:"EXISTING_PODS_RETRY_TIMEOUT"`
 	// How many times we should retry processing pods that failed
 	Retries int `yaml:"retries" validate:"gte=0" envconfig:"EXISTING_PODS_RETRIES"`
-	// Replace already existing pods with output from webhook, if disbaled webhook will be used with dry run to not modify pods
+	// Replace already existing pods with output from webhook, if disabled webhook will be used with dry run to not modify pods
 	UpdateEnabled bool `yaml:"updateEnabled" envconfig:"EXISTING_PODS_UPDATE_ENABLED"`
 	// Allow deleting existing pods that are forbidden by webhook
 	DeleteEnabled bool `yaml:"deleteEnabled" envconfig:"EXISTING_PODS_DELETE_ENABLED"`
 }
+
+const ValidationModeWarn = "warn"
+const ValidationModeFail = "fail"
 
 var CONFIG_PATH = "/etc/gomenhashai/configs/config.yaml"
 var DIGEST_MAPPING = map[string]string{}
@@ -87,13 +91,13 @@ func defaultConfig() Config {
 func InitConfig() error {
 	cfg := defaultConfig()
 
-	filepath := os.Getenv("GOMENHASHAI_CONFIG_PATH")
-	if filepath == "" {
-		filepath = CONFIG_PATH
+	configPath := os.Getenv("GOMENHASHAI_CONFIG_PATH")
+	if configPath == "" {
+		configPath = CONFIG_PATH
 	}
 
 	// Read YAML from file
-	if data, err := os.ReadFile(filepath); err == nil {
+	if data, err := os.ReadFile(filepath.Clean(configPath)); err == nil {
 		if err := yaml.Unmarshal(data, &cfg); err != nil {
 			return fmt.Errorf("failed to parse config file: %w", err)
 		}
@@ -122,9 +126,9 @@ func InitConfig() error {
 // Load Digest Mapping from file
 func LoadDigestMapping() error {
 
-	filepath := CONFIG.DigestsMappingFile
+	mappingPath := CONFIG.DigestsMappingFile
 
-	data, err := os.ReadFile(filepath)
+	data, err := os.ReadFile(filepath.Clean(mappingPath))
 	if err == nil {
 		if err := yaml.Unmarshal(data, &DIGEST_MAPPING); err != nil {
 			return err

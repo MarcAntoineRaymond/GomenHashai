@@ -116,17 +116,17 @@ var _ = Describe("Digest", func() {
 	Describe("Is the image exempted by the exemption config", func() {
 		Context("with registry", func() {
 			It("should be exempted", func() {
-				Expect(helpers.IsImageExempt(imageDigest)).To(Equal(true))
+				Expect(helpers.IsImageExempt(imageDigest)).To(BeTrue())
 			})
 		})
 		Context("with redis", func() {
 			It("should be exempted", func() {
-				Expect(helpers.IsImageExempt("lib/redis:6")).To(Equal(true))
+				Expect(helpers.IsImageExempt("lib/redis:6")).To(BeTrue())
 			})
 		})
 		Context("with curl", func() {
 			It("should  NOT be exempted", func() {
-				Expect(helpers.IsImageExempt(imageWithTrustedTag)).To(Equal(false))
+				Expect(helpers.IsImageExempt(imageWithTrustedTag)).To(BeFalse())
 			})
 		})
 	})

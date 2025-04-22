@@ -123,7 +123,7 @@ existingPods:
     retryTimeout: 5
 # -- How many times we should retry processing pods that failed
     retries: 5
-# -- Replace already existing pods with output from webhook, if disbaled webhook will be used with dry run to not modify pods
+# -- Replace already existing pods with output from webhook, if disabled webhook will be used with dry run to not modify pods
     updateEnabled: true
 # -- Allow deleting existing pods that are forbidden by webhook
     deleteEnabled: true
