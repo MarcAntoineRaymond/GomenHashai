@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 env:
   IMAGE_NAME: ghcr.io/marcantoineraymond/gomenhashai
