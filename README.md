@@ -2,7 +2,12 @@
 
 ![GomenHashai Logo](logo/logo.png)
 
-GomenHashai guarantee images integrity in your k8s cluster by adding digests from a trusted set to your pods. It will also apologize for denying and gently terminating pods that does not use a trusted digest. 🍣GomenHashai!
+Keep your Kubernetes cluster safe by ensuring all pod images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
+
+Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default protections.
+
+
+*✨ “GomenHashai” is a playful mix of “Gomen nasai” (ごめんなさい – Japanese for “I’m sorry”) and “Hash,” referencing image digests. Because it says sorry when it denies your pods 😄. 🍣*
 
 ---
 
@@ -62,6 +67,8 @@ If the image in the mapping does not have a tag it will be used as default for t
 Deploy the entire setup in one command with Helm.
 
 Includes webhook deployment, certificates (with cert-manager), and RBAC.
+
+The provided Helm chart follows Kubernetes security best practices out of the box.
 
 ### 📰 Logging
 
