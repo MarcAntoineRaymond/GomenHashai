@@ -23,9 +23,9 @@ import (
 
 const DEFAULT_DIGEST_MAPPING_PATH = "/etc/gomenhashai/digests_mapping.yaml"
 
-// getDigest from container image or return empty
+// getDigest from container image or return empty, invalid digests are ignored
 func GetDigest(image string) string {
-	re := regexp.MustCompile(`@sha256:[a-fA-F0-9]{64}`)
+	re := regexp.MustCompile(`@sha256:[a-fA-F0-9]{64}$`)
 	match := re.FindString(image)
 	if match != "" {
 		return match[1:]
