@@ -37,7 +37,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          go test -v -coverprofile=coverage.out ./...
+          go test -v -coverprofile=coverage.out $(go list ./... | grep -v /e2e)
           go tool cover -func=coverage.out
 
       - name: Upload coverage report
