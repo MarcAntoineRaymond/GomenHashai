@@ -143,27 +143,15 @@ The variable starts with `GOMENHASHAI_` and follows with the variable name in up
 
 ## 🚀 Deployment
 
-### 🛠️ Build Locally
-
-Clone the repo:
-
-```sh
-git clone https://github.com/yourusername/gomenhashai.git
-cd gomenhashai
-```
-
-Build the binary:
-
-```sh
-make docker-build docker-push IMG=<your_image>
-```
-
 ### 🚀 Deploy with Helm
 
-Package or pull the chart
+[Deploy cert-manager in your cluster](https://cert-manager.io/docs/installation/) (You can also provide your own certificates).
+
+Add the GomenHashai repo and install the Chart:
 
 ```sh
-helm install gomenhashai ./charts/gomenhashai
+helm repo add gomenhashai https://marcantoineRaymond.github.io/GomenHashai
+helm install my-release gomenhashai/gomenhashai
 ```
 
 You need to provide the digest mapping in the values:
@@ -191,6 +179,29 @@ digestsMapping:
   secretName: my-secret
 ```
 
+### 🛠️ Build Locally
+
+Clone the repo:
+
+```sh
+git clone https://github.com/yourusername/gomenhashai.git
+cd gomenhashai
+```
+
+Build the binary:
+
+```sh
+make docker-build docker-push IMG=<your_image>
+```
+
+Install the chart:
+
+```sh
+helm install gomenhashai ./deploy/charts/gomenhashai
+```
+
+---
+
 ## ⚙️ Helm Chart Values
 
 Here are common values you can override in `values.yaml`:
@@ -213,17 +224,14 @@ digestsMapping:
 #    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
 #    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
 #    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-
 # YAML configuration
 config:
-
 # Service account configuration
 serviceAccount:
   # Create the service account, if false the service account must be provided
   create: true
   # Name of the service account, if create is false it must exists
   name:
-
 webhook:
   # Mutating Webhook configuration
   mutating:
@@ -237,7 +245,6 @@ webhook:
     # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
     caBundle:
     objectSelector: {}
-
   # Validating Webhook configuration
   validating:
     # Enable validation webhook
