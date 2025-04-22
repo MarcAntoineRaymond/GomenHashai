@@ -154,8 +154,8 @@ rbac:
 certificates:
   # Cert manager integration configuration
   cert-manager:
-    # Enable cert-manager integration, enable if you want to use cert-manager self-signed certificates
-    enabled: false
+    # Enable cert-manager integration, disable if you want to provide your own certificates
+    enabled: true
   webhook:
     # Name of the secret containing webhook certificates
     secretName:

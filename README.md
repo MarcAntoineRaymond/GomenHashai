@@ -16,7 +16,6 @@ Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default 
 - [✨ What It Does](#-what-it-does)
 - [🔧 Configurations](#-configurations)
 - [🚀 Deployment](#-deployment)
-- [⚙️ Helm Chart Values](#️-helm-chart-values)
 - [📄 License](#-license)
 
 ---
@@ -143,27 +142,15 @@ The variable starts with `GOMENHASHAI_` and follows with the variable name in up
 
 ## 🚀 Deployment
 
-### 🛠️ Build Locally
-
-Clone the repo:
-
-```sh
-git clone https://github.com/yourusername/gomenhashai.git
-cd gomenhashai
-```
-
-Build the binary:
-
-```sh
-make docker-build docker-push IMG=<your_image>
-```
-
 ### 🚀 Deploy with Helm
 
-Package or pull the chart
+[Deploy cert-manager in your cluster](https://cert-manager.io/docs/installation/) (You can also provide your own certificates).
+
+Add the GomenHashai repo and install the Chart:
 
 ```sh
-helm install gomenhashai ./charts/gomenhashai
+helm repo add gomenhashai https://marcantoineRaymond.github.io/GomenHashai
+helm install my-release gomenhashai/gomenhashai --set "certificates.cert-manager.enabled=true"
 ```
 
 You need to provide the digest mapping in the values:
@@ -191,68 +178,29 @@ digestsMapping:
   secretName: my-secret
 ```
 
-## ⚙️ Helm Chart Values
+### 🛠️ Build Locally
 
-Here are common values you can override in `values.yaml`:
+Clone the repo:
 
-```yaml
-replicas: 1
-image:
-  repository: gomenhashai
-  tag:
-  pullPolicy: IfNotPresent
-
-# Mapping containing "image": "trusted digest"
-digestsMapping:
-  # Create the secret
-  create: true
-  # Name of the secret, if create is false secret must exist
-  secretName:
-  # YAML image mapping
-  mapping:
-#    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
-#    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-#    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-
-# YAML configuration
-config:
-
-# Service account configuration
-serviceAccount:
-  # Create the service account, if false the service account must be provided
-  create: true
-  # Name of the service account, if create is false it must exists
-  name:
-
-webhook:
-  # Mutating Webhook configuration
-  mutating:
-    # Enable mutation webhook
-    enabled: true
-    # Add labels: value to match namespace to exempt from mutation
-    exemptNamespacesLabels:
-    #  kubernetes.io/metadata.name:
-    #    - "kube-system"
-    #    - "cert-manager"
-    # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
-    caBundle:
-    objectSelector: {}
-
-  # Validating Webhook configuration
-  validating:
-    # Enable validation webhook
-    enabled: true
-    # Add labels: value to match namespace to exempt from validation
-    exemptNamespacesLabels:
-    #  kubernetes.io/metadata.name:
-    #    - "kube-system"
-    #    - "cert-manager"
-    # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
-    caBundle:
-    objectSelector: {}
+```sh
+git clone https://github.com/yourusername/gomenhashai.git
+cd gomenhashai
 ```
 
-You can customize certificate handling, namespace filters, and webhook behavior. See the full chart configuration in [`deploy/charts/gomenhashai/values.yaml`](./deploy/charts/gomenhashai/values.yaml).
+Build the binary:
+
+```sh
+make docker-build docker-push IMG=<your_image>
+```
+
+Install the chart:
+
+```sh
+helm install gomenhashai ./deploy/charts/gomenhashai
+```
+
+## ⚙️ Helm Chart Values
+
 
 ---
 
