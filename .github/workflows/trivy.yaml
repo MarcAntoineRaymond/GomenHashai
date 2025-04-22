@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  IMAGE_NAME: ghcr.io/marcantoineraymond/gomenhashai
+
 jobs:
   build:
     name: Build
@@ -21,12 +24,12 @@ jobs:
 
       - name: Build an image from Dockerfile
         run: |
-          docker build -t ghcr.io/marcantoineRaymond/gomenhashai:${{ github.sha }} .
+          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: 'ghcr.io/marcantoineRaymond/gomenhashai:${{ github.sha }}'
+          image-ref: '${{ env.IMAGE_NAME }}:${{ github.sha }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
 

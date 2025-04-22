@@ -11,7 +11,7 @@ fullnameOverride:
 kubernetesClusterDomain: cluster.local
 
 image:
-  repository: ghcr.io/marcantoineRaymond/gomenhashai
+  repository: ghcr.io/marcantoineraymond/gomenhashai
   # Imgae tag to use default to AppVersion
   tag:
   pullPolicy: IfNotPresent
