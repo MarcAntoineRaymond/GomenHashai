@@ -70,13 +70,13 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 					r.Logger.Info("[🍣GomenHashai!] this pod is forbidden and will be gently offboarded ☁️✂️ Sayonara, pod-san.", "name", pod.Name)
 					if helpers.CONFIG.ExistingPods.DeleteEnabled {
 						if err := r.Client.Delete(ctx, &pod); err != nil {
-							r.Logger.Error(err, "[🐾IntegrityPatrol] is embarrassed, an error occured when deleting pod 😶", "name", pod.Name)
+							r.Logger.Error(err, "[🐾IntegrityPatrol] is embarrassed, an error occurred when deleting pod 😶", "name", pod.Name)
 							remaining = append(remaining, pod)
 							continue
 						}
 					}
 				} else {
-					r.Logger.Error(err, "[🐾IntegrityPatrol] unexpected error occured when updating pod, even samurai stumble sometimes ⛩️", "name", pod.Name)
+					r.Logger.Error(err, "[🐾IntegrityPatrol] unexpected error occurred when updating pod, even samurai stumble sometimes ⛩️", "name", pod.Name)
 					remaining = append(remaining, pod)
 					continue
 				}

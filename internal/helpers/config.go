@@ -55,11 +55,14 @@ type ExistingPodsConfig struct {
 	RetryTimeout int `yaml:"retryTimeout" validate:"gte=0" envconfig:"EXISTING_PODS_RETRY_TIMEOUT"`
 	// How many times we should retry processing pods that failed
 	Retries int `yaml:"retries" validate:"gte=0" envconfig:"EXISTING_PODS_RETRIES"`
-	// Replace already existing pods with output from webhook, if disbaled webhook will be used with dry run to not modify pods
+	// Replace already existing pods with output from webhook, if disabled webhook will be used with dry run to not modify pods
 	UpdateEnabled bool `yaml:"updateEnabled" envconfig:"EXISTING_PODS_UPDATE_ENABLED"`
 	// Allow deleting existing pods that are forbidden by webhook
 	DeleteEnabled bool `yaml:"deleteEnabled" envconfig:"EXISTING_PODS_DELETE_ENABLED"`
 }
+
+const ValidationModeWarn = "warn"
+const ValidationModeFail = "fail"
 
 var CONFIG_PATH = "/etc/gomenhashai/configs/config.yaml"
 var DIGEST_MAPPING = map[string]string{}

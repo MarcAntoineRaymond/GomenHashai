@@ -179,7 +179,7 @@ func main() {
 		})
 	}
 
-	//gomenhashai init
+	// gomenhashai init
 	err := helpers.InitConfig()
 	if err != nil {
 		setupLog.Error(err, "🍙GomenHashai cannot init config")
