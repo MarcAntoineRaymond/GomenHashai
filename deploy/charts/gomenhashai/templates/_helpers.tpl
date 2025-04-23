@@ -81,3 +81,18 @@ Create the name of the metrics cert secret to use
 {{- define "gomenhashai.metricsSecretName" -}}
 {{- default (printf "%s-%s" (include "gomenhashai.fullname" .) "metrics-cert") .Values.certificates.metrics.secretName }}
 {{- end }}
+
+{{/*
+Generate self signed CA and certificate/key pair
+*/}}
+{{- if not (or (index .Values "certificates" "cert-manager" "enabled") .Values.certificates.webhook.secretName .Values.certificates.metrics.secretName) }}
+{{- define "gomenhashai.ca" -}}
+{{- genCA "gomenhashai-ca" .Values.certificates.duration }}
+{{- end }}
+{{- define "gomenhashai.webhookcert" -}}
+{{- genSignedCert (printf "%s--webhook-service.%s.svc" (include "gomenhashai.fullname" .) .Release.Namespace) nil nil .Values.certificates.duration (include "gomenhashai.ca" .) }}
+{{- end }}
+{{- define "gomenhashai.metricscert" -}}
+{{- genSignedCert (printf "%s--metrics-service.%s.svc" (include "gomenhashai.fullname" .) .Release.Namespace) nil nil .Values.certificates.duration (include "gomenhashai.ca" .) }}
+{{- end }}
+{{- end }}

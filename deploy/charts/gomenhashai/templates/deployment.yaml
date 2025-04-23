@@ -39,7 +39,7 @@ spec:
           {{- toYaml .Values.args | nindent 10 }}
         command:
         - /manager
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ with .Values.image.digest }}@{{ . }}{{ end }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: gomenhashai
         env:

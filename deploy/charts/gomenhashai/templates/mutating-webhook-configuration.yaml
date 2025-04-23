@@ -20,7 +20,7 @@ webhooks:
   - v1
   clientConfig:
     {{- with .Values.webhook.mutating.caBundle }}
-    caBundle: {{ . }}
+    caBundle: {{ . | b64enc }}
     {{- end }}
     service:
       name: '{{ include "gomenhashai.fullname" . }}-webhook-service'

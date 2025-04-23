@@ -1,11 +1,10 @@
 # 🍣 GomenHashai 🐾
 
-![GomenHashai Logo](logo/logo.png)
-
 Keep your Kubernetes cluster safe by ensuring all pod images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
 
 Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default protections.
 
+![GomenHashai Logo](logo/logo.png)
 
 *✨ “GomenHashai” is a playful mix of “Gomen nasai” (ごめんなさい – Japanese for “I’m sorry”) and “Hash,” referencing image digests. Because it says sorry when it denies your pods 😄. 🍣*
 
@@ -14,9 +13,8 @@ Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default 
 ## 📚 Table of Contents
 
 - [✨ What It Does](#-what-it-does)
-- [🔧 Configurations](#-configurations)
-- [🚀 Deployment](#-deployment)
-- [⚙️ Helm Chart Values](#️-helm-chart-values)
+- [🚀 Getting Started](#-getting-started)
+- [🐶 Releases](#-releases)
 - [📄 License](#-license)
 
 ---
@@ -25,7 +23,7 @@ Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default 
 
 ### 🌀 Mutating Admission Webhook
 
-Automatically rewrites container images in Pods to include a trusted digest (e.g., nginx:latest -> nginx:latest@sha256:...).
+Automatically rewrites container images in Pods to include a trusted digest (e.g., nginx:1.27.5 -> nginx:1.27.5@sha256:...).
 
 ### 🛡️ Validating Admission Webhook
 
@@ -57,10 +55,6 @@ stringData:
 
 ```
 
-Image name in the mapping that does not have a registry will match images from any registry.
-But if it contains a registry ex: `docker.io` the image used in the pod should match the registry as well.
-
-If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping. (This behaviour can be disabled)
 
 ### 📦 Helm Chart
 
@@ -69,14 +63,6 @@ Deploy the entire setup in one command with Helm.
 Includes webhook deployment, certificates (with cert-manager), and RBAC.
 
 The provided Helm chart follows Kubernetes security best practices out of the box.
-
-### 📰 Logging
-
-Follow exactly what resources gets denied, deleted or modified in the logs:
-
-Messages using `[🍣GomenHashai!]` and `❌` indicates a pod was denied and message `[🍣GomenHashai] integrity verified` indicates the pod will be authorized.
-
-Messages using `[🐾IntegrityPatrol]` are informative.
 
 ### 🐳 Registry Modification
 
@@ -94,7 +80,71 @@ Running without configuring much may break stuff in your cluster, 🍣GomenHasha
 
 ---
 
+## 🚀 Getting Started
+
+1. Prerequisites
+  
+    - A Kubernetes cluster (e.g., Minikube, GKE, EKS)
+    - Helm 3 installed
+    - A list of trusted image digests you want to enforce
+
+2. Prepare your trusted digest mapping
+
+    Prepare a yaml file to configure the digest mapping for the Helm Chart installation:
+
+    my-values.yaml
+    ```yaml
+    digestsMapping:
+      mapping:
+        "library/nginx": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
+        "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
+        ...
+    ```
+
+3. Add the GomenHashai Helm Repository
+
+    ```sh
+    helm repo add gomenhashai https://marcantoineRaymond.github.io/GomenHashai
+    helm repo update
+    ```
+
+4. Install GomenHashai
+
+    Deploy GomenHashai into your cluster using Helm:
+
+    ```sh
+    helm install gomenhashai gomenhashai/gomenhashai \
+      --namespace gomenhashai-system \
+      --create-namespace \
+      --values my-values.yaml
+    ```
+
+    This command installs GomenHashai in the gomenhashai-system namespace. A secret is created with the mapping you provided.
+
+5. Test the setup
+
+    Creating a pod with an untrusted image will fail:
+
+    ```sh
+    kubectl run test --image=curlimages/curl:7.66.0
+    Error from server (Forbidden): admission webhook "vpod-v1.kb.io" denied the request: Pod "test" is forbidden: spec.containers[0].image: Forbidden: image is not using a digest
+    ```
+
+    But creating one with a trusted image will succeed and the container is using the digest:
+
+    ```sh
+    kubectl run test --image=curlimages/curl:8.13.0
+    kubectl get pods test -o yaml | grep 'image:'
+      image: curlimages/curl:8.13.0@sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd
+    ```
+
+Read the [Usage section](docs/usage.md) of the documentation for informations on different use cases and an in depth look at how to properly set everything up.
+
+---
+
 ## 🔧 Configurations
+
+You can customize the trusted digest secret content, certificate handling, namespace filters, webhook behavior and much more. See the full chart configuration in [`deploy/charts/gomenhashai/values.yaml`](./deploy/charts/gomenhashai/values.yaml).
 
 A YAML configuration file can be used to customize the processing behaviour in addition to the Helm Chart configuration:
 
@@ -138,128 +188,6 @@ It is also possible to run this tool without blocking pods: `validationMode: war
 Each variable can be overwritten by an environment variable.
 
 The variable starts with `GOMENHASHAI_` and follows with the variable name in upper case: `GOMENHASHAI_VALIDATIONMODE` or `GOMENHASHAI_EXISTING_PODS_ENABLED`, ommitting the `GOMENHASHAI_` will also work but it is better to keep it.
-
----
-
-## 🚀 Deployment
-
-### 🚀 Deploy with Helm
-
-[Deploy cert-manager in your cluster](https://cert-manager.io/docs/installation/) (You can also provide your own certificates).
-
-Add the GomenHashai repo and install the Chart:
-
-```sh
-helm repo add gomenhashai https://marcantoineRaymond.github.io/GomenHashai
-helm install my-release gomenhashai/gomenhashai
-```
-
-You need to provide the digest mapping in the values:
-
-```yaml
-digestsMapping:
-  mapping:
-    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
-    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "docker.io/library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "docker.io/library/busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af"
-    "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
-```
-
-You could also provide your trusted digests mapping from an already created secret, it needs to be created in the same namespace you deploy:
-
-```yaml
-digestsMapping:
-  # Create the secret
-  create: false
-  # Name of the secret, if create is false secret must exist
-  secretName: my-secret
-```
-
-### 🛠️ Build Locally
-
-Clone the repo:
-
-```sh
-git clone https://github.com/yourusername/gomenhashai.git
-cd gomenhashai
-```
-
-Build the binary:
-
-```sh
-make docker-build docker-push IMG=<your_image>
-```
-
-Install the chart:
-
-```sh
-helm install gomenhashai ./deploy/charts/gomenhashai
-```
-
----
-
-## ⚙️ Helm Chart Values
-
-Here are common values you can override in `values.yaml`:
-
-```yaml
-replicas: 1
-image:
-  repository: gomenhashai
-  tag:
-  pullPolicy: IfNotPresent
-
-# Mapping containing "image": "trusted digest"
-digestsMapping:
-  # Create the secret
-  create: true
-  # Name of the secret, if create is false secret must exist
-  secretName:
-  # YAML image mapping
-  mapping:
-#    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
-#    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-#    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-# YAML configuration
-config:
-# Service account configuration
-serviceAccount:
-  # Create the service account, if false the service account must be provided
-  create: true
-  # Name of the service account, if create is false it must exists
-  name:
-webhook:
-  # Mutating Webhook configuration
-  mutating:
-    # Enable mutation webhook
-    enabled: true
-    # Add labels: value to match namespace to exempt from mutation
-    exemptNamespacesLabels:
-    #  kubernetes.io/metadata.name:
-    #    - "kube-system"
-    #    - "cert-manager"
-    # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
-    caBundle:
-    objectSelector: {}
-  # Validating Webhook configuration
-  validating:
-    # Enable validation webhook
-    enabled: true
-    # Add labels: value to match namespace to exempt from validation
-    exemptNamespacesLabels:
-    #  kubernetes.io/metadata.name:
-    #    - "kube-system"
-    #    - "cert-manager"
-    # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
-    caBundle:
-    objectSelector: {}
-```
-
-You can customize certificate handling, namespace filters, and webhook behavior. See the full chart configuration in [`deploy/charts/gomenhashai/values.yaml`](./deploy/charts/gomenhashai/values.yaml).
 
 ---
 
