@@ -64,6 +64,32 @@ Image name in the mapping that does not have a registry will match images from a
 
 If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping. (This behaviour can be disabled, check [Configurations](../README.md#-configurations))
 
+For instance with the following mapping:
+
+```yaml
+"library/busybox:1": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
+"docker.io/library/nginx": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
+```
+
+If you run a container using image `library/busybox:1` it will be allowed and the digest `sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f` will be added to ensure the right image is used.
+
+Now if you run a container with image `library/busybox:2` it will be denied.
+
+Since there are no registry defined, running containers with these images with any registry will have the same results:
+
+- `docker.io/library/busybox:1` allowed and digest is added
+- `docker.io/library/busybox:2` denied
+
+Now for image `docker.io/library/nginx` we specified the registry in the mapping so we get the following results:
+
+- `library/nginx` denied
+- `docker.io/library/nginx` allowed and digest is added
+- `docker.io/library/nginx:1` allowed and digest is added (as there were no tag defined in the mapping)
+- `library/nginx:1` denied
+
+Be careful with the tags and registry, very often the same image will have different digests in different registry and tags cannot be easily swapped.
+In most cases you may want to specify both tags and registry in mapping.
+
 ## Audit or Dry Run
 
 Enforcing behaviour of the mutating and validating webhook can be disabled.
@@ -88,3 +114,30 @@ mutationDryRun: true
 ```
 
 You can also completely disable both webhooks from the Helm Chart values but in this case pods will not be submitted to any check and GomenHashai will not be able to log anything.
+
+### Exemptions
+
+It is possible to exempt a list of images, or even use regex to exempt images by setting the variable `exemptions` in the Helm Chart config:
+
+```yaml
+config:
+  exemptions:
+    - ".*redis:.*"
+    - "docker.io/library/busybox:12"
+```
+
+The Helm Chart will exempt the namespace in which you install 🍣GomenHashai, you can exempt other namespaces as well:
+
+```yaml
+webhook:
+  mutating:
+    exemptNamespacesLabels:
+      kubernetes.io/metadata.name:
+        - "kube-system"
+        - "cert-manager"
+  validating:
+    exemptNamespacesLabels:
+      kubernetes.io/metadata.name:
+        - "kube-system"
+        - "cert-manager"
+```
