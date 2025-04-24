@@ -78,6 +78,7 @@ jobs:
 
       # Create a Pull Request
       - name: Create Pull Request
+        if: github.ref_type == 'tag'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
