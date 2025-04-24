@@ -76,28 +76,17 @@ jobs:
           TAG: ${{ steps.extract_tag.outputs.tag }}
           DIGEST: ${{ steps.docker_build.outputs.digest }}
 
-      - name: Commit changes to a new branch
-        if: github.ref_type == 'tag'
-        env:
-          TAG: ${{ steps.extract_tag.outputs.tag }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          BRANCH="update-chart-version-${TAG}"
-          git checkout -b "$BRANCH"
-          git add deploy/charts/gomenhashai/Chart.yaml
-          git add deploy/charts/gomenhashai/values.yaml
-          git commit -m "chore: update appVersion to ${TAG}"
-          git push origin "$BRANCH"
-
       # Create a Pull Request
       - name: Create Pull Request
-        if: github.ref_type == 'tag'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: update-chart-version-${{ steps.extract_tag.outputs.tag }}
+          commit-message: Update appVersion to ${{ steps.extract_tag.outputs.tag }}
+          delete-branch: true
           base: main
           title: "chore: update appVersion to ${{ steps.extract_tag.outputs.tag }}"
           body: |
-            This PR updates the Helm chart appVersion to match the published Docker tag `${{ steps.extract_tag.outputs.tag }}`.
+            This PR updates the Helm chart appVersion to match the published Docker tag `${{ steps.extract_tag.outputs.tag }}` and also update the digest.
+          labels: |
+            automated pr
