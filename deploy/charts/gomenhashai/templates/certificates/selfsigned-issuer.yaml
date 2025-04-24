@@ -1,4 +1,4 @@
-{{- if index .Values "certificates" "cert-manager" "enabled" }}
+{{- if and (index .Values "certificates" "cert-manager" "enabled") (index .Values "certificates" "cert-manager" "create") (not (index .Values "certificates" "cert-manager" "issuer")) }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:

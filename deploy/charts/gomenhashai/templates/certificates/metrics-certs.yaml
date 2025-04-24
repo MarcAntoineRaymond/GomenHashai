@@ -1,4 +1,4 @@
-{{- if index .Values "certificates" "cert-manager" "enabled" }}
+{{- if and (index .Values "certificates" "cert-manager" "enabled") (index .Values "certificates" "cert-manager" "create") }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -11,6 +11,10 @@ spec:
   - '{{ include "gomenhashai.fullname" . }}-metrics-service.{{ .Release.Namespace }}.svc.{{ .Values.kubernetesClusterDomain }}'
   issuerRef:
     kind: Issuer
+    {{- if index .Values "certificates" "cert-manager" "issuer" }}
+    name: {{ index .Values "certificates" "cert-manager" "issuer" }}
+    {{- else }}
     name: '{{ include "gomenhashai.fullname" . }}-selfsigned-issuer'
+    {{- end }}
   secretName: {{ include "gomenhashai.metricsSecretName" . }}
 {{- end }}

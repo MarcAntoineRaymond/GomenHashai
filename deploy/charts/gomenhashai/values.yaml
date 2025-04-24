@@ -12,8 +12,9 @@ kubernetesClusterDomain: cluster.local
 
 image:
   repository: ghcr.io/marcantoineraymond/gomenhashai
-  # Imgae tag to use default to AppVersion
+  # Image tag to use, default to appVersion
   tag:
+  digest: sha256:0cdcf6113d460e09e1839e74d064f6f3eb6f637b43132708c4c3e4fd45d9f494
   pullPolicy: IfNotPresent
 
 # Mapping containing "image": "trusted digest"
@@ -22,6 +23,8 @@ digestsMapping:
   create: true
   # Name of the secret, if create is false secret must exist
   secretName:
+  # Name of the key under which the mapping is stored in the secret
+  secretKey: digests_mapping.yaml
   # YAML image mapping
   mapping:
 #    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
@@ -33,36 +36,10 @@ digestsMapping:
 #    "nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af"
 #    "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
 
-# YAML configuration
+# YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations
 config:
-# # -- Path to the digests mapping file
-# digestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml"
-# # -- List of images to skip, can contain regex ex: ".*redis:.*"
-#	exemptions: []
-# # -- If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping
-#	imageDefaultDigest: true
-# # -- Can be warn or fail (default)
-#	validationMode: "fail"
-# # -- Enable to not modify pods but instead logs (pods will fail validation unless you disable it or set it in warn)
-#	mutationDryRun: false
-# # -- Enable modifying the registry part of images with the value of MutationRegistry
-#	mutationRegistryEnabled: false
-# # -- The registry to inject when MutationRegistryEnabled is true
-#	mutationRegistry: ""
-# # -- Configuration of the process that handles existing pods on init
-#	existingPods:
-# # -- Enable the init function that will process existing pods at startup
-#		enabled: true
-# # -- Timeout used to wait before starting this job in seconds
-#		startTimeout: 5
-# # -- Timeout used to wait before retrying to process pods that failed in seconds
-#		retryTimeout: 5
-# # -- How many times we should retry processing pods that failed
-#		retries: 5
-# # -- Replace already existing pods with output from webhook, if disabled webhook will be used with dry run to not modify pods
-#		updateEnabled: true
-# # -- Allow deleting existing pods that are forbidden by webhook
-#		deleteEnabled: true
+#  exemptions: []
+#  ...
 
 # Args passed to the manager app
 args:
@@ -151,16 +128,32 @@ rbac:
   # Create the RBAC
   create: true
 
+# Certificates management configuration
+# By default a self signed CA and required certificates are generated with Helm
+# But this is not a recommended setup
+# You should either enable cert-manager to create GomenHashai provided cert-manager certificates and issuer resources
+# Or enable cert-manager, disable create and provide your own secret with cert-manager certificates
+# You can also provide your own secrets with cert-manager disabled but you will need to to provide the CA for both webhook configurations and certificate rotation will have to be handled manually
 certificates:
-  # Cert manager integration configuration
+  # Certificates duration in days (for default self signed certificate)
+  duration: 365
+  # Cert manager configuration
   cert-manager:
-    # Enable cert-manager integration, disable if you want to provide your own certificates
-    enabled: true
+    # Use cert-manager to inject CA in webhook configuration
+    enabled: false
+    # Deploy certificates resources for cert-manager (Only if cert-manager is enabled, disable creation if you provide your own certificates from a secret)
+    create: true
+    # Certificates duration in days
+    duration: 365
+    # When to renew certificates
+    renewBefore: 360h
+    # Only set issuer if you have your own issuer otherwise one will be created (if create is true)
+    issuer:
   webhook:
-    # Name of the secret containing webhook certificates
+    # Name of the secret containing webhook certificates (generated if empty)
     secretName:
   metrics:
-    # Name of the secret containing metrics certificates
+    # Name of the secret containing metrics certificates (generated if empty)
     secretName:
 
 metrics:
@@ -182,7 +175,7 @@ webhook:
     #  kubernetes.io/metadata.name:
     #    - "kube-system"
     #    - "cert-manager"
-    # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
+    # CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager
     caBundle:
     annotations: {}
     extraLabels: {}
@@ -201,7 +194,7 @@ webhook:
     #  kubernetes.io/metadata.name:
     #    - "kube-system"
     #    - "cert-manager"
-    # CA Bundle in PEM format to pass to the webhook, necessary if not injected by cert-manager
+    # CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager
     caBundle:
     annotations: {}
     extraLabels: {}

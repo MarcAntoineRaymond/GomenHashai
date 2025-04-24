@@ -56,3 +56,45 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+      - name: Extract Docker tag from Git ref
+        if: github.ref_type == 'tag'
+        id: extract_tag
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Update Chart.yaml appVersion
+        if: github.ref_type == 'tag'
+        run: |
+          sed -i "s/^appVersion:.*/appVersion: ${TAG}/" deploy/charts/gomenhashai/Chart.yaml
+          sed -i "s|^\([[:space:]]*digest:\).*|\1 \"${DIGEST}\"|" deploy/charts/gomenhashai/values.yaml
+        env:
+          TAG: ${{ steps.extract_tag.outputs.tag }}
+          DIGEST: ${{ steps.docker_build.outputs.digest }}
+
+      - name: Commit changes to a new branch
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ steps.extract_tag.outputs.tag }}
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          BRANCH="update-chart-version-${TAG}"
+          git checkout -b "$BRANCH"
+          git add deploy/charts/gomenhashai/Chart.yaml
+          git add deploy/charts/gomenhashai/values.yaml
+          git commit -m "chore: update appVersion to ${TAG}"
+          git push origin "$BRANCH"
+
+      # Create a Pull Request
+      - name: Create Pull Request
+        if: github.ref_type == 'tag'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update-chart-version-${{ steps.extract_tag.outputs.tag }}
+          base: main
+          title: "chore: update appVersion to ${{ steps.extract_tag.outputs.tag }}"
+          body: |
+            This PR updates the Helm chart appVersion to match the published Docker tag `${{ steps.extract_tag.outputs.tag }}`.
