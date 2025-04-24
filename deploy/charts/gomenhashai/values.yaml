@@ -14,7 +14,7 @@ image:
   repository: ghcr.io/marcantoineraymond/gomenhashai
   # Image tag to use, default to appVersion
   tag:
-  digest: sha256:0cdcf6113d460e09e1839e74d064f6f3eb6f637b43132708c4c3e4fd45d9f494
+  digest: ""
   pullPolicy: IfNotPresent
 
 # Mapping containing "image": "trusted digest"
