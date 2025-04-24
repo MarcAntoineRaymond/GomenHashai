@@ -23,6 +23,8 @@ digestsMapping:
   create: true
   # Name of the secret, if create is false secret must exist
   secretName:
+  # Name of the key under which the mapping is stored in the secret
+  secretKey: digests_mapping.yaml
   # YAML image mapping
   mapping:
 #    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"

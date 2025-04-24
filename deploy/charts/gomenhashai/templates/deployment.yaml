@@ -92,8 +92,9 @@ spec:
         - name: config
           mountPath: /etc/gomenhashai/configs/
         {{- end }}
-        - mountPath: /etc/gomenhashai/digests/
+        - mountPath: /etc/gomenhashai/digests/digests_mapping.yaml
           name: digests-mapping
+          subPath: {{ .Values.digestsMapping.secretKey }}
           readOnly: true
         - mountPath: /etc/gomenhashai/certificates/webhook-certs
           name: webhook-certs

@@ -1,4 +1,6 @@
-# Certificates Management
+# 🔐 Certificates Management
+
+Certificates are required for the Validation and mutation Admission Webhooks and the metrics service.
 
 By default a self signed CA and required certificates are generated with Helm.
 But this is not a recommended setup.

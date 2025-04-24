@@ -14,7 +14,9 @@ Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default 
 
 - [✨ What It Does](#-what-it-does)
 - [🚀 Getting Started](#-getting-started)
-- [🐶 Releases](#-releases)
+- [🍣 Usage](#-usage)
+- [🔧 Configurations](#-configurations)
+- [🐶 Release](#-release)
 - [📄 License](#-license)
 
 ---
@@ -52,7 +54,7 @@ stringData:
     "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
     "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
     "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-
+    ...
 ```
 
 
@@ -142,9 +144,19 @@ Read the [Usage section](docs/usage.md) of the documentation for informations on
 
 ---
 
+## 🍣 Usage
+
+As explained in the previous sections, GomenHashai has many cool features.
+
+Read the [Usage section](docs/usage.md) of the documentation for informations on different use cases and an in depth look at how to properly set everything up.
+
+---
+
 ## 🔧 Configurations
 
 You can customize the trusted digest secret content, certificate handling, namespace filters, webhook behavior and much more. See the full chart configuration in [`deploy/charts/gomenhashai/values.yaml`](./deploy/charts/gomenhashai/values.yaml).
+
+You should also read the [certificate management section](docs/certificates_management.md) to understand how to configure certificate management to better fit your needs.
 
 A YAML configuration file can be used to customize the processing behaviour in addition to the Helm Chart configuration:
 
@@ -188,6 +200,12 @@ It is also possible to run this tool without blocking pods: `validationMode: war
 Each variable can be overwritten by an environment variable.
 
 The variable starts with `GOMENHASHAI_` and follows with the variable name in upper case: `GOMENHASHAI_VALIDATIONMODE` or `GOMENHASHAI_EXISTING_PODS_ENABLED`, ommitting the `GOMENHASHAI_` will also work but it is better to keep it.
+
+---
+
+## 🐶 Release
+
+You can find note on our release process on the [dedicated page](docs/release_process.md).
 
 ---
 
