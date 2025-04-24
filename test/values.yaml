@@ -1,8 +1,4 @@
-replicas: 1
-
-image:
-  repository: ghcr.io/marcantoineraymond/gomenhashai
-  tag:
+replicas: 2
 
 digestsMapping:
   mapping:
@@ -29,10 +25,6 @@ extraEnv:
     value: "1"
   - name: GOMENHASHAI_VALIDATIONMODE
     value: "warn"
-
-certificates:
-  cert-manager:
-    enabled: true
 
 webhook:
   mutating:
