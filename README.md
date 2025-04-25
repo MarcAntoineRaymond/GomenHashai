@@ -1,10 +1,10 @@
 # 🍣 GomenHashai 🐾
 
-Keep your Kubernetes cluster safe by ensuring all pod images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
+Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
 
 Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default protections.
 
-![GomenHashai Logo](logo/logo.png)
+![GomenHashai Logo](logo/GomenHashai_NoBg_NoText_small.png)
 
 *✨ “GomenHashai” is a playful mix of “Gomen nasai” (ごめんなさい – Japanese for “I’m sorry”) and “Hash,” referencing image digests. Because it says sorry when it denies your pods 😄. 🍣*
 
@@ -29,7 +29,7 @@ Automatically rewrites container images in Pods to include a trusted digest (e.g
 
 ### 🛡️ Validating Admission Webhook
 
-Denies Pods that contain containers without trusted digests.
+Denies Pods that uses containers without trusted digests.
 
 Ensures every container image matches a digest listed in a trusted Secret.
 
@@ -158,40 +158,41 @@ You can customize the trusted digest secret content, certificate handling, names
 
 You should also read the [certificate management section](docs/certificates_management.md) to understand how to configure certificate management to better fit your needs.
 
-A YAML configuration file can be used to customize the processing behaviour in addition to the Helm Chart configuration:
+A YAML configuration file can be used to customize the processing behaviour in addition to the other Helm Chart configurations:
 
 ```yaml
-# -- Path to the digests mapping file
-digestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml"
-# -- List of images to skip, can contain regex ex: ".*redis:.*"
-exemptions: []
-# -- If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping
-imageDefaultDigest: true
-# -- Can be warn or fail (default)
-validationMode: "fail"
-# -- Enable to not modify pods but instead logs (pods will fail validation unless you disable it or set it in warn)
-mutationDryRun: false
-# -- Enable modifying the registry part of images with the value of MutationRegistry
-mutationRegistryEnabled: false
-# -- The registry to inject when MutationRegistryEnabled is true
-mutationRegistry: ""
-# -- Configuration of the process that handles existing pods on init
-existingPods:
-# -- Enable the init function that will process existing pods at startup
-    enabled: true
-# -- Timeout used to wait before starting this job in seconds
-    startTimeout: 5
-# -- Timeout used to wait before retrying to process pods that failed in seconds
-    retryTimeout: 5
-# -- How many times we should retry processing pods that failed
-    retries: 5
-# -- Replace already existing pods with output from webhook, if disabled webhook will be used with dry run to not modify pods
-    updateEnabled: true
-# -- Allow deleting existing pods that are forbidden by webhook
-    deleteEnabled: true
+config:
+  # -- Path to the digests mapping file
+  digestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml"
+  # -- List of images to skip, can contain regex ex: ".*redis:.*"
+  exemptions: []
+  # -- If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping
+  imageDefaultDigest: true
+  # -- Can be warn or fail (default)
+  validationMode: "fail"
+  # -- Enable to not modify pods but instead logs (pods will fail validation unless you disable it or set it in warn)
+  mutationDryRun: false
+  # -- Enable modifying the registry part of images with the value of MutationRegistry
+  mutationRegistryEnabled: false
+  # -- The registry to inject when MutationRegistryEnabled is true
+  mutationRegistry: ""
+  # -- Configuration of the process that handles existing pods on init
+  existingPods:
+  # -- Enable the init function that will process existing pods at startup
+      enabled: true
+  # -- Timeout used to wait before starting this job in seconds
+      startTimeout: 5
+  # -- Timeout used to wait before retrying to process pods that failed in seconds
+      retryTimeout: 5
+  # -- How many times we should retry processing pods that failed
+      retries: 5
+  # -- Replace already existing pods with output from webhook, if disabled webhook will be used with dry run to not modify pods
+      updateEnabled: true
+  # -- Allow deleting existing pods that are forbidden by webhook
+      deleteEnabled: true
 ```
 
-The configuration file path can be overwritten by the environment variable `GOMENHASHAI_CONFIG_PATH`.
+The configuration file path can be overwritten by the environment variable `GOMENHASHAI_CONFIG_PATH` but you do not need this as the file will be created and the correct mountPoint will be created by the Chart.
 
 Using this configuration it is possible to disable the job that process existing pods: `existingPods.enabled`
 

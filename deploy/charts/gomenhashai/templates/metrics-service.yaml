@@ -14,7 +14,6 @@ metadata:
 spec:
   type: {{ .Values.metrics.service.type }}
   selector:
-    app.kubernetes.io/name: gomenhashai
     {{- include "gomenhashai.selectorLabels" . | nindent 4 }}
   ports:
     - name: https

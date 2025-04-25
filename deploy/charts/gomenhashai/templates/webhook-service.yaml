@@ -14,7 +14,6 @@ metadata:
 spec:
   type: {{ .Values.webhook.service.type }}
   selector:
-    app.kubernetes.io/name: gomenhashai
     {{- include "gomenhashai.selectorLabels" . | nindent 4 }}
   ports:
     - port: {{ .Values.webhook.service.port }}
