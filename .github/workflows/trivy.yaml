@@ -5,6 +5,11 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+      - 'logo/**'
+      - 'docs/**'
   schedule:
     - cron: '24 4 * * 6'
 
