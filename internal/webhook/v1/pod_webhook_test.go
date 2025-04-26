@@ -17,71 +17,273 @@ limitations under the License.
 package v1
 
 import (
+	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	// TODO (user): Add any additional imports if needed
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("Pod Webhook", func() {
 	var (
-		obj       *corev1.Pod
-		oldObj    *corev1.Pod
-		validator PodCustomValidator
-		defaulter PodCustomDefaulter
+		containersTrusted    []corev1.Container
+		containersNotTrusted []corev1.Container
+		containersExempted   []corev1.Container
+		validator            PodCustomValidator
+		defaulter            PodCustomDefaulter
+		mutatedContainers    []corev1.Container
+		containers           []corev1.Container
 	)
 
 	BeforeEach(func() {
-		obj = &corev1.Pod{}
-		oldObj = &corev1.Pod{}
+		containersTrusted = []corev1.Container{
+			{
+				Name:  "app",
+				Image: "docker.io/library/busybox:stable",
+			},
+			{
+				Name:  "sidecar",
+				Image: "busybox",
+			},
+		}
+		containersNotTrusted = []corev1.Container{
+			{
+				Name:  "app",
+				Image: "busybox",
+			},
+			{
+				Name:  "sidecar",
+				Image: "curlimages/curl:7",
+			},
+		}
+		containersExempted = []corev1.Container{
+			{
+				Name:  "app",
+				Image: "test/redis:test",
+			},
+		}
 		validator = PodCustomValidator{}
 		Expect(validator).NotTo(BeNil(), "Expected validator to be initialized")
 		defaulter = PodCustomDefaulter{}
 		Expect(defaulter).NotTo(BeNil(), "Expected defaulter to be initialized")
-		Expect(oldObj).NotTo(BeNil(), "Expected oldObj to be initialized")
-		Expect(obj).NotTo(BeNil(), "Expected obj to be initialized")
-		// TODO (user): Add any setup logic common to all tests
 	})
 
-	AfterEach(func() {
-		// TODO (user): Add any teardown logic common to all tests
+	Describe("Function mutation", func() {
+		BeforeEach(func() {
+			containers = make([]corev1.Container, len(containersTrusted))
+			copy(containers, containersTrusted)
+			mutatedContainers = AddContainerImageDigest(containers, "test")
+		})
+		It("should not modify orignal", func() {
+			Expect(mutatedContainers).ToNot(Equal(containersTrusted))
+			Expect(containers).To(Equal(containersTrusted))
+		})
+
+		It("should return a new array", func() {
+			Expect(mutatedContainers).ToNot(Equal(containers))
+		})
 	})
 
-	Context("When creating Pod under Defaulting Webhook", func() {
-		// TODO (user): Add logic for defaulting webhooks
-		// Example:
-		// It("Should apply defaults when a required field is empty", func() {
-		//     By("simulating a scenario where defaults should be applied")
-		//     obj.SomeFieldWithDefault = ""
-		//     By("calling the Default method to apply defaults")
-		//     defaulter.Default(ctx, obj)
-		//     By("checking that the default values are set")
-		//     Expect(obj.SomeFieldWithDefault).To(Equal("default_value"))
-		// })
+	Describe("Common use case pod without digests", func() {
+		Context("Container using trusted images", func() {
+			BeforeEach(func() {
+				mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+			})
+
+			It("Should have trusted digests", func() {
+				Expect(mutatedContainers).To(HaveLen(len(containersTrusted)))
+				for i, container := range containersTrusted {
+					Expect(helpers.GetDigest(mutatedContainers[i].Image)).ToNot(BeEmpty())
+					Expect(helpers.GetDigest(mutatedContainers[i].Image)).To(Equal(helpers.GetTrustedDigest(container.Image)))
+				}
+			})
+			It("Should be Allowed", func() {
+				pod := corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: mutatedContainers,
+					},
+				}
+				warn, err := ValidatePod(&pod)
+				Expect(warn).To(BeEmpty())
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+		Context("Container using NOT trusted images", func() {
+			BeforeEach(func() {
+				mutatedContainers = AddContainerImageDigest(containersNotTrusted, "test")
+			})
+			It("Should have trusted digest on trusted image and nothing on not trusted", func() {
+				Expect(mutatedContainers).To(HaveLen(len(containersNotTrusted)))
+				Expect(helpers.GetDigest(mutatedContainers[0].Image)).To(Equal(helpers.GetTrustedDigest(containersNotTrusted[0].Image)))
+				Expect(helpers.GetDigest(mutatedContainers[1].Image)).To(BeEmpty())
+			})
+			It("Should be denied", func() {
+				pod := corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: mutatedContainers,
+					},
+				}
+				warn, err := ValidatePod(&pod)
+				Expect(warn).To(BeEmpty())
+				Expect(err).To(HaveOccurred())
+				Expect(apierrors.IsForbidden(err)).To(BeTrue())
+			})
+		})
+		Context("Container using exempted images", func() {
+			BeforeEach(func() {
+				mutatedContainers = AddContainerImageDigest(containersExempted, "test")
+			})
+			It("Should not be modified", func() {
+				Expect(mutatedContainers).To(Equal(containersExempted))
+			})
+			It("Should be Allowed", func() {
+				pod := corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: mutatedContainers,
+					},
+				}
+				warn, err := ValidatePod(&pod)
+				Expect(warn).To(BeEmpty())
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+		Context("Containers empty list", func() {
+			BeforeEach(func() {
+				mutatedContainers = AddContainerImageDigest([]corev1.Container{}, "test")
+			})
+			It("Should not be modified", func() {
+				Expect(mutatedContainers).To(Equal([]corev1.Container{}))
+			})
+			It("Should be Allowed", func() {
+				pod := corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: mutatedContainers,
+					},
+				}
+				warn, err := ValidatePod(&pod)
+				Expect(warn).To(BeEmpty())
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
 	})
 
-	Context("When creating or updating Pod under Validating Webhook", func() {
-		// TODO (user): Add logic for validating webhooks
-		// Example:
-		// It("Should deny creation if a required field is missing", func() {
-		//     By("simulating an invalid creation scenario")
-		//     obj.SomeRequiredField = ""
-		//     Expect(validator.ValidateCreate(ctx, obj)).Error().To(HaveOccurred())
-		// })
-		//
-		// It("Should admit creation if all required fields are present", func() {
-		//     By("simulating an invalid creation scenario")
-		//     obj.SomeRequiredField = "valid_value"
-		//     Expect(validator.ValidateCreate(ctx, obj)).To(BeNil())
-		// })
-		//
-		// It("Should validate updates correctly", func() {
-		//     By("simulating a valid update scenario")
-		//     oldObj.SomeRequiredField = "updated_value"
-		//     obj.SomeRequiredField = "updated_value"
-		//     Expect(validator.ValidateUpdate(ctx, oldObj, obj)).To(BeNil())
-		// })
+	Describe("Registry mutation feature", func() {
+		BeforeEach(func() {
+			helpers.CONFIG.MutationRegistryEnabled = true
+		})
+		Context("Registry is myregistry", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.MutationRegistry = "myregistry.test"
+			})
+
+			It("Should add registry prefix to all images", func() {
+				mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+				Expect(mutatedContainers).To(HaveEach(HaveField("Image", HavePrefix("myregistry.test"))))
+			})
+
+			It("Should add registry prefix to all images", func() {
+				mutatedContainers = AddContainerImageDigest(containersNotTrusted, "test")
+				Expect(mutatedContainers).To(HaveEach(HaveField("Image", HavePrefix("myregistry.test"))))
+			})
+
+			It("Should do nothing cause all images already have registry", func() {
+				containersRegistry := []corev1.Container{
+					corev1.Container{
+						Name:  "app",
+						Image: "myregistry.test/image",
+					},
+					corev1.Container{
+						Name:  "sidecar",
+						Image: "myregistry.test/anotherimage",
+					},
+				}
+				mutatedContainers = AddContainerImageDigest(containersRegistry, "test")
+				Expect(mutatedContainers).To(Equal(containersRegistry))
+			})
+		})
+		Context("Registry is empty", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.MutationRegistry = ""
+			})
+
+			It("Should remove registry prefix in image", func() {
+				mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+				Expect(mutatedContainers).To(HaveEach(HaveField("Image", Not(HavePrefix("docker.io")))))
+			})
+
+			It("Should do nothing as images have no registry", func() {
+				containersRegistry := []corev1.Container{
+					corev1.Container{
+						Name:  "app",
+						Image: "repo/image",
+					},
+					corev1.Container{
+						Name:  "sidecar",
+						Image: "repo/anotherimage",
+					},
+				}
+				mutatedContainers = AddContainerImageDigest(containersRegistry, "test")
+				Expect(mutatedContainers).To(Equal(containersRegistry))
+			})
+		})
+		AfterEach(func() {
+			helpers.CONFIG.MutationRegistryEnabled = false
+		})
 	})
 
+	Describe("Dry run and warn", func() {
+		BeforeEach(func() {
+			mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+			helpers.CONFIG.MutationDryRun = true
+			helpers.CONFIG.ValidationMode = helpers.ValidationModeWarn
+		})
+		It("Should not modify containers", func() {
+			mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+			Expect(mutatedContainers).To(Equal(containersTrusted))
+		})
+		It("Should not deny and not send warnings for trusted containers", func() {
+			pod := corev1.Pod{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "test",
+				},
+				Spec: corev1.PodSpec{
+					Containers: mutatedContainers,
+				},
+			}
+			warn, err := ValidatePod(&pod)
+			Expect(warn).To(BeEmpty())
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Should return warnings for not trusted but not deny", func() {
+			pod := corev1.Pod{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "test",
+				},
+				Spec: corev1.PodSpec{
+					Containers: containersNotTrusted,
+				},
+			}
+			warn, err := ValidatePod(&pod)
+			Expect(warn).To(HaveEach(HavePrefix("forbidden:")))
+			Expect(err).ToNot(HaveOccurred())
+		})
+		AfterEach(func() {
+			helpers.CONFIG.MutationDryRun = false
+			helpers.CONFIG.ValidationMode = helpers.ValidationModeFail
+		})
+	})
 })
