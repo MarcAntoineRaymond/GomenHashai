@@ -1,3 +1,7 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/MarcAntoineRaymond/gomenhashai)](https://goreportcard.com/report/github.com/MarcAntoineRaymond/gomenhashai)
+![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=gomenhashai-*&style=flat&label=helm%20chart%20release)
+![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=v*)
+
 # 🍣 GomenHashai 🐾
 
 Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
