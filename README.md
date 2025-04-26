@@ -158,7 +158,7 @@ You can customize the trusted digest secret content, certificate handling, names
 
 You should also read the [certificate management section](docs/certificates_management.md) to understand how to configure certificate management to better fit your needs.
 
-A YAML configuration file can be used to customize the processing behaviour in addition to the other Helm Chart configurations:
+A YAML configuration file can be used to customize the processing behaviour in addition to the other Helm Chart configurations. The file is created by the Helm Chart, you only need to specify the configurations under the `config` field in your values:
 
 ```yaml
 config:
