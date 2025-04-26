@@ -4,7 +4,7 @@ Keep your Kubernetes cluster safe by ensuring all container's images use digests
 
 Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default protections.
 
-![GomenHashai Logo](logo/GomenHashai_NoBg.png)
+![GomenHashai Logo](logo/Logo_banner.png)
 
 *✨ “GomenHashai” is a playful mix of “Gomen nasai” (ごめんなさい – Japanese for “I’m sorry”) and “Hash,” referencing image digests. Because it says sorry when it denies your pods 😄. 🍣*
 
