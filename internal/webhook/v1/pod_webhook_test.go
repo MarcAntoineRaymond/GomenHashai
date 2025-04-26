@@ -77,12 +77,12 @@ var _ = Describe("Pod Webhook", func() {
 			mutatedContainers = AddContainerImageDigest(containers, "test")
 		})
 		It("should not modify orignal", func() {
-			Expect(mutatedContainers).To(Not(Equal(containersTrusted)))
+			Expect(mutatedContainers).ToNot(Equal(containersTrusted))
 			Expect(containers).To(Equal(containersTrusted))
 		})
 
 		It("should return a new array", func() {
-			Expect(mutatedContainers).To(Not(Equal(containers)))
+			Expect(mutatedContainers).ToNot(Equal(containers))
 		})
 	})
 
@@ -95,7 +95,7 @@ var _ = Describe("Pod Webhook", func() {
 			It("Should have trusted digests", func() {
 				Expect(mutatedContainers).To(HaveLen(len(containersTrusted)))
 				for i, container := range containersTrusted {
-					Expect(helpers.GetDigest(mutatedContainers[i].Image)).To(Not(BeEmpty()))
+					Expect(helpers.GetDigest(mutatedContainers[i].Image)).ToNot(BeEmpty())
 					Expect(helpers.GetDigest(mutatedContainers[i].Image)).To(Equal(helpers.GetTrustedDigest(container.Image)))
 				}
 			})
@@ -110,7 +110,7 @@ var _ = Describe("Pod Webhook", func() {
 				}
 				warn, err := ValidatePod(&pod)
 				Expect(warn).To(BeEmpty())
-				Expect(err).To(BeNil())
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 		Context("Container using NOT trusted images", func() {
@@ -155,7 +155,7 @@ var _ = Describe("Pod Webhook", func() {
 				}
 				warn, err := ValidatePod(&pod)
 				Expect(warn).To(BeEmpty())
-				Expect(err).To(BeNil())
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 		Context("Containers empty list", func() {
@@ -176,7 +176,7 @@ var _ = Describe("Pod Webhook", func() {
 				}
 				warn, err := ValidatePod(&pod)
 				Expect(warn).To(BeEmpty())
-				Expect(err).To(BeNil())
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 	})
@@ -266,7 +266,7 @@ var _ = Describe("Pod Webhook", func() {
 			}
 			warn, err := ValidatePod(&pod)
 			Expect(warn).To(BeEmpty())
-			Expect(err).To(BeNil())
+			Expect(err).ToNot(HaveOccurred())
 		})
 		It("Should return warnings for not trusted but not deny", func() {
 			pod := corev1.Pod{
@@ -279,7 +279,7 @@ var _ = Describe("Pod Webhook", func() {
 			}
 			warn, err := ValidatePod(&pod)
 			Expect(warn).To(HaveEach(HavePrefix("forbidden:")))
-			Expect(err).To(BeNil())
+			Expect(err).ToNot(HaveOccurred())
 		})
 		AfterEach(func() {
 			helpers.CONFIG.MutationDryRun = false
