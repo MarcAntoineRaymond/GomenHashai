@@ -34,8 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// nolint:unused
-// log is for logging in this package.
 var podlog = logf.Log.WithName("pod-resource")
 
 // SetupPodWebhookWithManager registers the webhook for Pod in the manager.
@@ -46,13 +44,7 @@ func SetupPodWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate--v1-pod,mutating=true,failurePolicy=fail,sideEffects=None,groups="",resources=pods,verbs=create;update,versions=v1,name=mpod-v1.kb.io,admissionReviewVersions=v1
-
 // PodCustomDefaulter struct is responsible for setting default values on the custom resource of the
-// Kind Pod when those are created or updated.
-//
-// NOTE: The +kubebuilder:object:generate=false marker prevents controller-gen from generating DeepCopy methods,
-// as it is used only for temporary operations and does not need to be deeply copied.
 type PodCustomDefaulter struct {
 	// TODO(user): Add more fields as needed for defaulting
 }
@@ -76,7 +68,9 @@ func (d *PodCustomDefaulter) Default(ctx context.Context, obj runtime.Object) er
 }
 
 // Loop container list and append digest to images, podName is used for logging
-func AddContainerImageDigest(containers []corev1.Container, podName string) []corev1.Container {
+func AddContainerImageDigest(inContainers []corev1.Container, podName string) []corev1.Container {
+	containers := make([]corev1.Container, len(inContainers))
+	copy(containers, inContainers)
 	for i, container := range containers {
 		image := container.Image
 		if helpers.IsImageExempt(image) {
@@ -122,13 +116,7 @@ func AddContainerImageDigest(containers []corev1.Container, podName string) []co
 	return containers
 }
 
-// +kubebuilder:webhook:path=/validate--v1-pod,mutating=false,failurePolicy=fail,sideEffects=None,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod-v1.kb.io,admissionReviewVersions=v1
-
 // PodCustomValidator struct is responsible for validating the Pod resource
-// when it is created, updated, or deleted.
-//
-// NOTE: The +kubebuilder:object:generate=false marker prevents controller-gen from generating DeepCopy methods,
-// as this struct is used only for temporary operations and does not need to be deeply copied.
 type PodCustomValidator struct {
 	// TODO(user): Add more fields as needed for validation
 }

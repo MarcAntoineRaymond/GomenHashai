@@ -28,8 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=create;get;list;watch;update;patch;delete
-
 type PodInitializer struct {
 	Client client.Client
 	Logger logr.Logger
