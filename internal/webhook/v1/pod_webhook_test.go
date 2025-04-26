@@ -180,4 +180,110 @@ var _ = Describe("Pod Webhook", func() {
 			})
 		})
 	})
+
+	Describe("Registry mutation feature", func() {
+		BeforeEach(func() {
+			helpers.CONFIG.MutationRegistryEnabled = true
+		})
+		Context("Registry is myregistry", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.MutationRegistry = "myregistry.test"
+			})
+
+			It("Should add registry prefix to all images", func() {
+				mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+				Expect(mutatedContainers).To(HaveEach(HaveField("Image", HavePrefix("myregistry.test"))))
+			})
+
+			It("Should add registry prefix to all images", func() {
+				mutatedContainers = AddContainerImageDigest(containersNotTrusted, "test")
+				Expect(mutatedContainers).To(HaveEach(HaveField("Image", HavePrefix("myregistry.test"))))
+			})
+
+			It("Should do nothing cause all images already have registry", func() {
+				containersRegistry := []corev1.Container{
+					corev1.Container{
+						Name:  "app",
+						Image: "myregistry.test/image",
+					},
+					corev1.Container{
+						Name:  "sidecar",
+						Image: "myregistry.test/anotherimage",
+					},
+				}
+				mutatedContainers = AddContainerImageDigest(containersRegistry, "test")
+				Expect(mutatedContainers).To(Equal(containersRegistry))
+			})
+		})
+		Context("Registry is empty", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.MutationRegistry = ""
+			})
+
+			It("Should remove registry prefix in image", func() {
+				mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+				Expect(mutatedContainers).To(HaveEach(HaveField("Image", Not(HavePrefix("docker.io")))))
+			})
+
+			It("Should do nothing as images have no registry", func() {
+				containersRegistry := []corev1.Container{
+					corev1.Container{
+						Name:  "app",
+						Image: "repo/image",
+					},
+					corev1.Container{
+						Name:  "sidecar",
+						Image: "repo/anotherimage",
+					},
+				}
+				mutatedContainers = AddContainerImageDigest(containersRegistry, "test")
+				Expect(mutatedContainers).To(Equal(containersRegistry))
+			})
+		})
+		AfterEach(func() {
+			helpers.CONFIG.MutationRegistryEnabled = false
+		})
+	})
+
+	Describe("Dry run and warn", func() {
+		BeforeEach(func() {
+			mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+			helpers.CONFIG.MutationDryRun = true
+			helpers.CONFIG.ValidationMode = helpers.ValidationModeWarn
+		})
+		It("Should not modify containers", func() {
+			mutatedContainers = AddContainerImageDigest(containersTrusted, "test")
+			Expect(mutatedContainers).To(Equal(containersTrusted))
+		})
+		It("Should not deny and not send warnings for trusted containers", func() {
+			pod := corev1.Pod{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "test",
+				},
+				Spec: corev1.PodSpec{
+					Containers: mutatedContainers,
+				},
+			}
+			warn, err := ValidatePod(&pod)
+			Expect(warn).To(BeEmpty())
+			Expect(err).To(BeNil())
+		})
+		It("Should return warnings for not trusted but not deny", func() {
+			pod := corev1.Pod{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "test",
+				},
+				Spec: corev1.PodSpec{
+					Containers: containersNotTrusted,
+				},
+			}
+			warn, err := ValidatePod(&pod)
+			Expect(warn).To(HaveEach(HavePrefix("forbidden:")))
+			Expect(err).To(BeNil())
+		})
+		AfterEach(func() {
+			helpers.CONFIG.MutationDryRun = false
+			helpers.CONFIG.ValidationMode = helpers.ValidationModeFail
+		})
+	})
 })
