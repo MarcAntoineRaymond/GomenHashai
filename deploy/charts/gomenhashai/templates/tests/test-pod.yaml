@@ -32,8 +32,14 @@ spec:
       volumeMounts:
         - name: tmp
           mountPath: /tmp
+      resources:
+        {{- toYaml .Values.resources | nindent 8 }}
+      securityContext:
+        {{- toYaml .Values.containerSecurityContext | nindent 8 }}
   volumes:
     - name: tmp
       emptyDir: {}
+  securityContext:
+    {{- toYaml .Values.podSecurityContext | nindent 4 }}
   serviceAccountName: {{ include "gomenhashai.serviceAccountName" . }}
   restartPolicy: Never
