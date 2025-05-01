@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "gomenhashai.fullname" . }}-test"
+  labels:
+    {{- include "gomenhashai.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: tester
+      image: bitnami/kubectl:1.33.0-debian-12-r0@sha256:0f6b5088710f1c6d2d41f5e19a15663b7fef07d89699247aaaad92975be7eed6
+      command:
+      - sh
+      args:
+      - -c
+      - |
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name={{ include "gomenhashai.name" . }} -n {{ .Release.Namespace }} --timeout=60s || exit 1
+
+        sleep 60
+
+        if ! kubectl run test-{{ include "gomenhashai.name" . }} -n default --image=test 2> /tmp/out.txt ; then
+          if ! grep 'Error from server (Forbidden): admission webhook "vpod-v1.kb.io" denied the request: Pod "test-{{ include "gomenhashai.name" . }}" is forbidden' /tmp/out.txt ; then
+            cat /tmp/out.txt
+            exit 1
+          fi
+        fi
+        if ! kubectl run test-{{ include "gomenhashai.name" . }} -n default --image="docker.io/library/busybox:stable" ; then
+          exit 1
+        fi
+        kubectl delete pod test-{{ include "gomenhashai.name" . }} -n default
+      volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      resources:
+        {{- toYaml .Values.resources | nindent 8 }}
+      securityContext:
+        {{- toYaml .Values.containerSecurityContext | nindent 8 }}
+  volumes:
+    - name: tmp
+      emptyDir: {}
+  securityContext:
+    {{- toYaml .Values.podSecurityContext | nindent 4 }}
+  serviceAccountName: {{ include "gomenhashai.serviceAccountName" . }}
+  restartPolicy: Never

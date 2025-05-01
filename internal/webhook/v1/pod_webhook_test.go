@@ -17,6 +17,8 @@ limitations under the License.
 package v1
 
 import (
+	"context"
+
 	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -35,6 +37,7 @@ var _ = Describe("Pod Webhook", func() {
 		defaulter            PodCustomDefaulter
 		mutatedContainers    []corev1.Container
 		containers           []corev1.Container
+		pod                  corev1.Pod
 	)
 
 	BeforeEach(func() {
@@ -256,7 +259,7 @@ var _ = Describe("Pod Webhook", func() {
 			Expect(mutatedContainers).To(Equal(containersTrusted))
 		})
 		It("Should not deny and not send warnings for trusted containers", func() {
-			pod := corev1.Pod{
+			pod = corev1.Pod{
 				ObjectMeta: v1.ObjectMeta{
 					Name: "test",
 				},
@@ -269,7 +272,7 @@ var _ = Describe("Pod Webhook", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 		It("Should return warnings for not trusted but not deny", func() {
-			pod := corev1.Pod{
+			pod = corev1.Pod{
 				ObjectMeta: v1.ObjectMeta{
 					Name: "test",
 				},
@@ -284,6 +287,89 @@ var _ = Describe("Pod Webhook", func() {
 		AfterEach(func() {
 			helpers.CONFIG.MutationDryRun = false
 			helpers.CONFIG.ValidationMode = helpers.ValidationModeFail
+		})
+	})
+
+	Describe("On trusted pod update", func() {
+		BeforeEach(func() {
+			pod = corev1.Pod{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "test",
+				},
+				Spec: corev1.PodSpec{
+					Containers:     containersTrusted,
+					InitContainers: containersTrusted,
+				},
+			}
+			err := (&defaulter).Default(context.TODO(), &pod)
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Should update images in containers", func() {
+			Expect(pod).To(HaveField("Spec", And(
+				HaveField("Containers", HaveEach(HaveField("Image", MatchRegexp("@sha256:[a-fA-F0-9]{64}$")))),
+				HaveField("InitContainers", HaveEach(HaveField("Image", MatchRegexp("@sha256:[a-fA-F0-9]{64}$")))),
+			)))
+		})
+		It("Should allow the pod and not modify it", func() {
+			tmpPod := pod.DeepCopy()
+			warn, err := (&validator).ValidateCreate(context.TODO(), tmpPod)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(warn).To(BeEmpty())
+			Expect(*tmpPod).To(Equal(pod))
+		})
+		It("On Update Should deny the pod", func() {
+			tmpPod := pod.DeepCopy()
+			warn, err := (&validator).ValidateUpdate(context.TODO(), nil, tmpPod)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(warn).To(BeEmpty())
+			Expect(*tmpPod).To(Equal(pod))
+		})
+		It("On Delete Should do nothing", func() {
+			tmpPod := pod.DeepCopy()
+			warn, err := (&validator).ValidateDelete(context.TODO(), tmpPod)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(warn).To(BeEmpty())
+			Expect(*tmpPod).To(Equal(pod))
+		})
+	})
+	Describe("On untrusted pod update", func() {
+		BeforeEach(func() {
+			pod = corev1.Pod{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "test",
+				},
+				Spec: corev1.PodSpec{
+					Containers:     containersNotTrusted,
+					InitContainers: containersTrusted,
+				},
+			}
+			err := (&defaulter).Default(context.TODO(), &pod)
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Should update some images in containers", func() {
+			Expect(pod).To(HaveField("Spec", HaveField("InitContainers", HaveEach(HaveField("Image", MatchRegexp("@sha256:[a-fA-F0-9]{64}$"))))))
+			Expect(pod.Spec.Containers[0]).To(HaveField("Image", MatchRegexp("@sha256:[a-fA-F0-9]{64}$")))
+		})
+		It("On Create Should deny the pod", func() {
+			tmpPod := pod.DeepCopy()
+			warn, err := (&validator).ValidateCreate(context.TODO(), tmpPod)
+			Expect(apierrors.IsForbidden(err)).To(BeTrue())
+			Expect(warn).To(BeEmpty())
+			Expect(*tmpPod).To(Equal(pod))
+		})
+		It("On Update Should deny the pod", func() {
+			tmpPod := pod.DeepCopy()
+			warn, err := (&validator).ValidateUpdate(context.TODO(), nil, tmpPod)
+			Expect(apierrors.IsForbidden(err)).To(BeTrue())
+			Expect(warn).To(BeEmpty())
+			Expect(*tmpPod).To(Equal(pod))
+		})
+		It("On Delete Should do nothing", func() {
+			tmpPod := pod.DeepCopy()
+			warn, err := (&validator).ValidateDelete(context.TODO(), tmpPod)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(warn).To(BeEmpty())
+			Expect(*tmpPod).To(Equal(pod))
 		})
 	})
 })
