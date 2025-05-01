@@ -298,7 +298,7 @@ var _ = Describe("Pod Webhook", func() {
 				},
 				Spec: corev1.PodSpec{
 					Containers:     containersTrusted,
-					InitContainers: containersExempted,
+					InitContainers: containersTrusted,
 				},
 			}
 			err := (&defaulter).Default(context.TODO(), &pod)
@@ -315,21 +315,21 @@ var _ = Describe("Pod Webhook", func() {
 			warn, err := (&validator).ValidateCreate(context.TODO(), tmpPod)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(warn).To(BeEmpty())
-			Expect(tmpPod).To(Equal(pod))
+			Expect(*tmpPod).To(Equal(pod))
 		})
 		It("On Update Should deny the pod", func() {
 			tmpPod := pod.DeepCopy()
 			warn, err := (&validator).ValidateUpdate(context.TODO(), nil, tmpPod)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(warn).To(BeEmpty())
-			Expect(tmpPod).To(Equal(pod))
+			Expect(*tmpPod).To(Equal(pod))
 		})
 		It("On Delete Should do nothing", func() {
 			tmpPod := pod.DeepCopy()
 			warn, err := (&validator).ValidateDelete(context.TODO(), tmpPod)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(warn).To(BeEmpty())
-			Expect(tmpPod).To(Equal(pod))
+			Expect(*tmpPod).To(Equal(pod))
 		})
 	})
 	Describe("On untrusted pod update", func() {
@@ -355,21 +355,21 @@ var _ = Describe("Pod Webhook", func() {
 			warn, err := (&validator).ValidateCreate(context.TODO(), tmpPod)
 			Expect(apierrors.IsForbidden(err)).To(BeTrue())
 			Expect(warn).To(BeEmpty())
-			Expect(tmpPod).To(Equal(pod))
+			Expect(*tmpPod).To(Equal(pod))
 		})
 		It("On Update Should deny the pod", func() {
 			tmpPod := pod.DeepCopy()
 			warn, err := (&validator).ValidateUpdate(context.TODO(), nil, tmpPod)
 			Expect(apierrors.IsForbidden(err)).To(BeTrue())
 			Expect(warn).To(BeEmpty())
-			Expect(tmpPod).To(Equal(pod))
+			Expect(*tmpPod).To(Equal(pod))
 		})
 		It("On Delete Should do nothing", func() {
 			tmpPod := pod.DeepCopy()
 			warn, err := (&validator).ValidateDelete(context.TODO(), tmpPod)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(warn).To(BeEmpty())
-			Expect(tmpPod).To(Equal(pod))
+			Expect(*tmpPod).To(Equal(pod))
 		})
 	})
 })
