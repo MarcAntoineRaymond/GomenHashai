@@ -101,7 +101,7 @@ jobs:
 
       - name: Install and test Chart
         run: |
-          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml
+          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }}${{ env.CHART_NAME }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml
           helm test ${{ env.CHART_NAME }} -n ${{ env.CHART_NAME }}
       
       - name: Uninstall chart
@@ -115,5 +115,5 @@ jobs:
 
       - name: Install and test Chart (with cert-manager)
         run: |
-          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml --set certificates.cert-manager.enabled=true
+          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }}${{ env.CHART_NAME }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml --set certificates.cert-manager.enabled=true
           helm test ${{ env.CHART_NAME }} -n ${{ env.CHART_NAME }}
