@@ -82,9 +82,10 @@ jobs:
         uses: helm/kind-action@v1.12.0
 
       - name: Setup kubectl context
-        uses: actions-hub/kubectl@master
-        with:
-          args: config use-context kind-chart-testing
+        run: kubectl cluster-info
+      #  uses: actions-hub/kubectl@master
+      #  with:
+      #    args: config use-context kind-chart-testing
 
       - name: Install cert-manager
         uses: actions-hub/kubectl@master
