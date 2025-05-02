@@ -16,7 +16,7 @@ permissions:
   security-events: write
 
 env:
-  CHART_DIR: deploy/charts/gomenhashai
+  CHART_DIR: deploy/charts/
 
 jobs:
   kube-linter:
