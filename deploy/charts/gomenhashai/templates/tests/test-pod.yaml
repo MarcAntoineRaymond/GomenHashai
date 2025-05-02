@@ -39,7 +39,7 @@ spec:
         # A pod test-delete is expected to exist prior deployment, using an untrusted image
         kubectl get pod -n default test-delete && echo "Pod test-delete should have been deleted" && exit 1
         # A pod test-not-delete is expected to exist prior deployment, using a trusted image
-        ! kubectl get pod -n default test-not-delete && echo "Pod test-not-delete should not have been deleted" && exit 1
+        ! kubectl get pod -n default test-not-delete && echo "Pod test-not-delete should not have been deleted" && exit 1 || exit 0
         {{- end }}
         {{- end }}
         {{- end }}
