@@ -81,16 +81,8 @@ jobs:
       - name: Create kind cluster
         uses: helm/kind-action@v1.12.0
 
-      - name: Setup kubectl context
-        run: kubectl cluster-info
-      #  uses: actions-hub/kubectl@master
-      #  with:
-      #    args: config use-context kind-chart-testing
-
       - name: Install cert-manager
-        uses: actions-hub/kubectl@master
-        with:
-          args: apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
+        run: kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
 
       - name: Install cmctl
         run: |
@@ -101,14 +93,10 @@ jobs:
         run: cmctl check api --wait=2m
 
       - name: Run test-not-delete pod
-        uses: actions-hub/kubectl@master
-        with:
-          args: run test-not-delete -n default --image=docker.io/library/busybox:stable
+        run: kubectl run test-not-delete -n default --image=docker.io/library/busybox:stable
 
       - name: Run test-delete pod
-        uses: actions-hub/kubectl@master
-        with:
-          args: run test-delete -n default --image=test
+        run: kubectl run test-delete -n default --image=test
 
       - name: Run chart-testing (install)
         run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '--values tests/values.yaml'
@@ -117,14 +105,10 @@ jobs:
         run: helm uninstall gomenhashai
 
       - name: Run test-not-delete pod
-        uses: actions-hub/kubectl@master
-        with:
-          args: run test-not-delete -n default --image=docker.io/library/busybox:stable
+        run: kubectl run test-not-delete -n default --image=docker.io/library/busybox:stable
 
       - name: Run test-delete pod
-        uses: actions-hub/kubectl@master
-        with:
-          args: run test-delete -n default --image=test
+        run: kubectl run test-delete -n default --image=test
 
       - name: Run chart-testing (install with cert-manager)
         run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '--values tests/values.yaml --set certificates.cert-manager.enabled=true'
