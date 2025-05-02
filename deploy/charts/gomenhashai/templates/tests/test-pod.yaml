@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "gomenhashai.fullname" . }}-test"
+  name: {{ include "gomenhashai.fullname" . }}-test
   labels:
     {{- include "gomenhashai.labels" . | nindent 4 }}
   annotations:
@@ -32,6 +32,7 @@ spec:
 
         kubectl delete pod test-{{ include "gomenhashai.name" . }} -n default
         
+        {{- if .Values.config }}
         {{- if .Values.config.existingPods }}
         {{- if ne .Values.config.existingPods.enabled false }}
         # Test handle existing pods at startup
@@ -39,6 +40,7 @@ spec:
         kubectl get pod -n default test-delete && echo "Pod test-delete should have been deleted" && exit 1
         # A pod test-not-delete is expected to exist prior deployment, using a trusted image
         ! kubectl get pod -n default test-not-delete && echo "Pod test-not-delete should not have been deleted" && exit 1
+        {{- end }}
         {{- end }}
         {{- end }}
       volumeMounts:
