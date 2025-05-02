@@ -99,7 +99,7 @@ jobs:
         run: kubectl run test-delete -n default --image=test
 
       - name: Run chart-testing (install)
-        run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '--values tests/values.yaml'
+        run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '-f tests/values.yaml'
       
       - name: Uninstall chart
         run: helm uninstall gomenhashai
@@ -111,4 +111,4 @@ jobs:
         run: kubectl run test-delete -n default --image=test
 
       - name: Run chart-testing (install with cert-manager)
-        run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '--values tests/values.yaml --set certificates.cert-manager.enabled=true'
+        run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '-f tests/values.yaml --set certificates.cert-manager.enabled=true'
