@@ -11,7 +11,7 @@ keywords:
 home: https://github.com/MarcAntoineRaymond/GomenHashai
 sources:
   - https://github.com/MarcAntoineRaymond/GomenHashai
-maintainers: # (optional)
+maintainers:
   - name: Marc-Antoine Raymond
     url: https://github.com/MarcAntoineRaymond
 icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
