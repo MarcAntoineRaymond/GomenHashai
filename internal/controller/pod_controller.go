@@ -46,7 +46,6 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 	}
 	pods := podList.Items
 	retries := 0
-	r.Logger.Info("[🐾IntegrityPatrol] has rounded up all existing pods and is ready to bite 🐶")
 
 	// Loop until list is empty as error can occur we may need to retry deleting/updating pods on unexpected failure
 	for len(pods) > 0 && retries < maxRetries {
@@ -63,11 +62,15 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 			}
 
 			if err := r.Client.Update(ctx, &pod, updateOpts); err != nil {
-				// If err is API forbidden
-				if apierrors.IsInvalid(err) || apierrors.IsForbidden(err) {
+				// If forbidden, it is denied by the webhook
+				if apierrors.IsForbidden(err) {
 					r.Logger.Info("[🍣GomenHashai!] this pod is forbidden and will be gently offboarded ☁️✂️ Sayonara, pod-san.", "name", pod.Name)
 					if helpers.CONFIG.ExistingPods.DeleteEnabled {
 						if err := r.Client.Delete(ctx, &pod); err != nil {
+							if apierrors.IsNotFound(err) {
+								r.Logger.Info("[🐾IntegrityPatrol] cannot find the pod to delete, it is already gone", "name", pod.Name)
+								continue
+							}
 							r.Logger.Error(err, "[🐾IntegrityPatrol] is embarrassed, an error occurred when deleting pod 😶", "name", pod.Name)
 							remaining = append(remaining, pod)
 							continue

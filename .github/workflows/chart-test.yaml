@@ -75,38 +75,50 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.7.0
 
-      - name: Run chart-testing (list-changed)
-        id: list-changed
-        run: |
-          changed=$(ct list-changed --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }})
-          if [[ -n "$changed" ]]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Run chart-testing (lint)
-        if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }}
 
       - name: Create kind cluster
-        if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@v1.12.0
 
-      # - name: Install cert-manager
-      #   if: steps.list-changed.outputs.changed == 'true'
-      #   uses: actions-hub/kubectl@master
-      #   with:
-      #     args: apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
+      - name: Install cert-manager
+        uses: actions-hub/kubectl@master
+        with:
+          args: apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
 
-      # - name: Install cmctl
-      #   if: steps.list-changed.outputs.changed == 'true'
-      #   run: |
-      #     curl -L https://github.com/cert-manager/cmctl/releases/download/v2.1.1/cmctl_linux_amd64.tar.gz | tar xz
-      #     sudo mv cmctl /usr/local/bin/
+      - name: Install cmctl
+        run: |
+          curl -L https://github.com/cert-manager/cmctl/releases/download/v2.1.1/cmctl_linux_amd64.tar.gz | tar xz
+          sudo mv cmctl /usr/local/bin/
 
-      # - name: Wait for cert-manager webhook to be ready
-      #   if: steps.list-changed.outputs.changed == 'true'
-      #  run: cmctl check api --wait=2m
+      - name: Wait for cert-manager webhook to be ready
+        run: cmctl check api --wait=2m
+
+      - name: Run test-not-delete pod
+        uses: actions-hub/kubectl@master
+        with:
+          args: run test-not-delete -n default --image=docker.io/library/busybox:stable
+
+      - name: Run test-delete pod
+        uses: actions-hub/kubectl@master
+        with:
+          args: run test-delete -n default --image=test
 
       - name: Run chart-testing (install)
-        if: steps.list-changed.outputs.changed == 'true'
         run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '--values tests/values.yaml'
+      
+      - name: Uninstall chart
+        run: helm uninstall gomenhashai
+
+      - name: Run test-not-delete pod
+        uses: actions-hub/kubectl@master
+        with:
+          args: run test-not-delete -n default --image=docker.io/library/busybox:stable
+
+      - name: Run test-delete pod
+        uses: actions-hub/kubectl@master
+        with:
+          args: run test-delete -n default --image=test
+
+      - name: Run chart-testing (install with cert-manager)
+        run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '--values tests/values.yaml --set certificates.cert-manager.enabled=true'
