@@ -2,6 +2,10 @@
 ![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=gomenhashai-*&style=flat&label=helm%20chart%20release)
 ![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=v*)
 
+[![Trivy](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/trivy.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/trivy.yaml)
+[![Go lint, test and gosec](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/go.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/go.yaml)
+[![Lint and Test Charts](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/chart-test.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/chart-test.yaml)
+
 # 🍣 GomenHashai 🐾
 
 Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
