@@ -17,12 +17,7 @@ config:
   mutationRegistryEnabled: true
   mutationRegistry: ""
   existingPods:
-    enabled: false
-    retryTimeout: 0
-
-extraEnv:
-  - name: GOMENHASHAI_EXISTING_PODS_RETRY_TIMEOUT
-    value: "1"
+    enabled: true
 
 webhook:
   mutating:

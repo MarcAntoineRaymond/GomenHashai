@@ -4,3 +4,14 @@ description: GomenHashai guarantee images integrity in your k8s cluster by addin
 type: application
 version: 0.2.0
 appVersion: "v0.2.0"
+keywords:
+  - security
+  - integrity
+  - digest
+home: https://github.com/MarcAntoineRaymond/GomenHashai
+sources:
+  - https://github.com/MarcAntoineRaymond/GomenHashai
+maintainers:
+  - name: MarcAntoineRaymond
+    url: https://github.com/MarcAntoineRaymond
+icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png

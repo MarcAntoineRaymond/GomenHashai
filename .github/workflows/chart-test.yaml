@@ -16,7 +16,8 @@ permissions:
   security-events: write
 
 env:
-  CHART_DIR: deploy/charts/gomenhashai
+  CHART_NAME: gomenhashai
+  CHART_DIR: deploy/charts/
 
 jobs:
   kube-linter:
@@ -75,38 +76,47 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.7.0
 
-      - name: Run chart-testing (list-changed)
-        id: list-changed
-        run: |
-          changed=$(ct list-changed --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }})
-          if [[ -n "$changed" ]]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Run chart-testing (lint)
-        if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }}
+        run: ct lint --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --check-version-increment=false
 
       - name: Create kind cluster
-        if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@v1.12.0
 
-      # - name: Install cert-manager
-      #   if: steps.list-changed.outputs.changed == 'true'
-      #   uses: actions-hub/kubectl@master
-      #   with:
-      #     args: apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
+      - name: Install cert-manager
+        run: kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
 
-      # - name: Install cmctl
-      #   if: steps.list-changed.outputs.changed == 'true'
-      #   run: |
-      #     curl -L https://github.com/cert-manager/cmctl/releases/download/v2.1.1/cmctl_linux_amd64.tar.gz | tar xz
-      #     sudo mv cmctl /usr/local/bin/
+      - name: Install cmctl
+        run: |
+          curl -L https://github.com/cert-manager/cmctl/releases/download/v2.1.1/cmctl_linux_amd64.tar.gz | tar xz
+          sudo mv cmctl /usr/local/bin/
 
-      # - name: Wait for cert-manager webhook to be ready
-      #   if: steps.list-changed.outputs.changed == 'true'
-      #  run: cmctl check api --wait=2m
+      - name: Wait for cert-manager webhook to be ready
+        run: cmctl check api --wait=2m
 
-      - name: Run chart-testing (install)
-        if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --chart-dirs ${{ env.CHART_DIR }} --target-branch ${{ github.event.repository.default_branch }} --helm-extra-args '--values tests/values.yaml'
+      - name: Run test-not-delete pod
+        run: kubectl run test-not-delete -n default --image=docker.io/library/busybox:stable
+
+      - name: Run test-delete pod
+        run: kubectl run test-delete -n default --image=test
+
+      - name: Install and test Chart
+        run: |
+          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }}${{ env.CHART_NAME }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml
+          if ! helm test ${{ env.CHART_NAME }} -n ${{ env.CHART_NAME }} ; then
+            kubectl logs ${{ env.CHART_NAME }}-test -n ${{ env.CHART_NAME }}
+            exit 1
+          fi
+      
+      - name: Uninstall chart
+        run: helm uninstall ${{ env.CHART_NAME }} -n ${{ env.CHART_NAME }}
+
+      - name: Run test-delete pod
+        run: kubectl run test-delete -n default --image=test
+
+      - name: Install and test Chart (with cert-manager)
+        run: |
+          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }}${{ env.CHART_NAME }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml --set certificates.cert-manager.enabled=true
+          if ! helm test ${{ env.CHART_NAME }} -n ${{ env.CHART_NAME }} ; then
+            kubectl logs ${{ env.CHART_NAME }}-test -n ${{ env.CHART_NAME }}
+            exit 1
+          fi
