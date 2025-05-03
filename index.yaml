@@ -2,6 +2,29 @@ apiVersion: v1
 entries:
   gomenhashai:
   - apiVersion: v2
+    appVersion: v0.3.0
+    created: "2025-05-03T23:26:50.920165371Z"
+    description: "GomenHashai guarantee images integrity in your k8s cluster by adding
+      digests from a trusted set to your pods. It will also apologize for denying
+      and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
+    digest: 6ab1453ccaf47da5b3bd24642cc95f8bc2ffa2db5027e15e4e52e5855c7b6d68
+    home: https://github.com/MarcAntoineRaymond/GomenHashai
+    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    keywords:
+    - security
+    - integrity
+    - digest
+    maintainers:
+    - name: MarcAntoineRaymond
+      url: https://github.com/MarcAntoineRaymond
+    name: gomenhashai
+    sources:
+    - https://github.com/MarcAntoineRaymond/GomenHashai
+    type: application
+    urls:
+    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-0.3.0/gomenhashai-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     appVersion: v0.2.0
     created: "2025-04-24T17:14:34.809829162Z"
     description: "GomenHashai guarantee images integrity in your k8s cluster by adding
@@ -37,4 +60,4 @@ entries:
     urls:
     - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-0.1.0/gomenhashai-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-24T17:14:34.809840012Z"
+generated: "2025-05-03T23:26:50.920185609Z"
