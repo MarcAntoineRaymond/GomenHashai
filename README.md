@@ -65,6 +65,11 @@ stringData:
     ...
 ```
 
+### 📈 Monitoring
+
+GomenHashai exposes useful custom Prometheus-compatible metrics.
+You could get metrics helping understand how many pods are compliant with digests.
+Configuration options including port, security, and authorization are available via the Helm chart. Refer to the [monitoring section](docs/monitoring.md)
 
 ### 📦 Helm Chart
 
@@ -84,13 +89,14 @@ It is possible to exempt a list of images, or even use regex to exempt images.
 
 The Helm Chart will exempt the namespace in which you install 🍣GomenHashai, you can exempt other namespaces as well.
 
-### ⚠️ Warning
-
-Running without configuring much may break stuff in your cluster, 🍣GomenHashai 🙇. Be careful providing a complete mapping for images/digests or set exemptions for your important cluster services (CNI, control-plane, api server...).
-
 ---
 
 ## 🚀 Getting Started
+
+> ⚠️ Warning:
+> Running without configuring much may break stuff in your cluster, 🍣GomenHashai 🙇. Be careful providing a complete mapping for images/digests or set exemptions for your important cluster services (CNI, control-plane, api server...).
+
+---
 
 1. Prerequisites
   

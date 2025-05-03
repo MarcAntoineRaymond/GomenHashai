@@ -141,3 +141,7 @@ webhook:
         - "kube-system"
         - "cert-manager"
 ```
+
+## 📈 Monitoring
+
+GomenHashai exposes useful metrics. You could know how many pods were denied or allowed for instance. Refer to the [monitoring section](docs/monitoring.md)
