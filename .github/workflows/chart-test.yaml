@@ -91,7 +91,7 @@ jobs:
             --set kubeApiServer.enabled=false \
             --set kubelet.enabled=false \
             --set kubeControllerManager.enabled=false \
-            --set coreDns.enabled=false
+            --set coreDns.enabled=false \
             --set kubeEtcd.enabled=false \
             --set kubeScheduler.enabled=false \
             --set kubeProxy.enabled=false \
