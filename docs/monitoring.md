@@ -59,6 +59,8 @@ metrics:
     tlsConfig: {}
 ```
 
+Refer to the [Prometheus documentation](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.TLSConfig) for valid tlsConfig fields.
+
 ## Exposed Metrics
 
 GomenHashai exposes common metrics, `controller-runtime` metrics (e.g., reconciliation, queue length, etc.) and some custom metrics:
