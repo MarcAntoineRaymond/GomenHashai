@@ -23,16 +23,15 @@ spec:
         {{- with .Values.extraPodLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- if .Values.podAnnotations }}
       annotations:
-        {{- toYaml .Values.podAnnotations | nindent 8 }}
-      {{- else }}
-      {{- if and .Values.metrics.enabled (not .Values.metrics.serviceMonitor.enabled) }}
-      annotations:
+        {{- if and .Values.metrics.enabled (not .Values.metrics.serviceMonitor.enabled) }}
         prometheus.io/path: "/metrics"
         prometheus.io/scrape: 'true'
         prometheus.io/port: '{{ .Values.metrics.service.targetPort }}'
-      {{- end }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.initContainers }}
       initContainers:
