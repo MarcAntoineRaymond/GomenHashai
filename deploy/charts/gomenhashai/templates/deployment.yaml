@@ -23,9 +23,15 @@ spec:
         {{- with .Values.extraPodLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.podAnnotations }}
+      {{- if .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+      {{- else }}
+      {{- if and .Values.metrics.enabled (not .Values.metrics.serviceMonitor.enabled) }}
+      annotations:
+        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '{{ .Values.metrics.service.targetPort }}'
       {{- end }}
     spec:
       {{- with .Values.initContainers }}
@@ -33,13 +39,24 @@ spec:
       {{- toYaml . | nindent 6 }}
       {{- end }}
       containers:
-      - args:
+      - name: gomenhashai
+        args:
+        {{- if .Values.args }}
           {{- toYaml .Values.args | nindent 10 }}
+        {{- else }}
+          - --leader-elect
+          - --health-probe-bind-address=:8081
+          - --webhook-cert-path=/etc/gomenhashai/certificates/webhook-certs
+          - --metrics-bind-address=:{{ .Values.metrics.service.targetPort }}
+          - --metrics-cert-path=/etc/gomenhashai/certificates/metrics-certs
+          {{- if not .Values.metrics.secure }}
+          - --metrics-secure=false
+          {{- end }}
+        {{- end }}
         command:
         - /manager
         image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ with .Values.image.digest }}@{{ . }}{{ end }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        name: gomenhashai
         env:
           - name: NAMESPACE
             valueFrom:

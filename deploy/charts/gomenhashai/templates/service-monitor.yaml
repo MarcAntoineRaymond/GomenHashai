@@ -1,0 +1,34 @@
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "gomenhashai.fullname" . }}
+  labels:
+    {{- include "gomenhashai.labels" . | nindent 4 }}
+    {{- with .Values.metrics.serviceMonitor.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "gomenhashai.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+  - targetPort: {{ .Values.metrics.serviceMonitor.targetPort }}
+    path: {{ .Values.metrics.serviceMonitor.path }}
+    {{- with .Values.metrics.serviceMonitor.interval }}
+    interval: {{ . }}
+    {{- end }}
+    {{- with .Values.metrics.serviceMonitor.scrapeTimeout }}
+    scrapeTimeout: {{ . }}
+    {{- end }}
+    {{- with .Values.metrics.serviceMonitor.endpointAdditionalProperties }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
