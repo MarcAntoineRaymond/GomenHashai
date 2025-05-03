@@ -110,9 +110,6 @@ jobs:
       - name: Uninstall chart
         run: helm uninstall ${{ env.CHART_NAME }} -n ${{ env.CHART_NAME }}
 
-      - name: Run test-not-delete pod
-        run: kubectl run test-not-delete -n default --image=docker.io/library/busybox:stable
-
       - name: Run test-delete pod
         run: kubectl run test-delete -n default --image=test
 
