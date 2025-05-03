@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
+	"github.com/MarcAntoineRaymond/gomenhashai/internal/metrics"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -61,6 +62,8 @@ func (d *PodCustomDefaulter) Default(ctx context.Context, obj runtime.Object) er
 
 	podlog.Info("[🐾IntegrityPatrol] start mutation 🥷", "pod", pod.GetName())
 
+	metrics.GomenhashaiMutationTotal.Inc()
+
 	pod.Spec.InitContainers = AddContainerImageDigest(pod.Spec.InitContainers, pod.GetName())
 	pod.Spec.Containers = AddContainerImageDigest(pod.Spec.Containers, pod.GetName())
 
@@ -75,6 +78,7 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 		image := container.Image
 		if helpers.IsImageExempt(image) {
 			podlog.Info("[🐾IntegrityPatrol] skip exempted image ⛩️", "pod", podName, "container", container.Name, "image", container.Image)
+			metrics.GomenhashaiMutationExempted.Inc()
 			continue
 		}
 		// Remove digest if already present in image field
@@ -140,6 +144,8 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 	}
 	podlog.Info("[🐾IntegrityPatrol] start in~spec~tion 🔍", "pod", pod.GetName())
 
+	metrics.GomenhashaiValidationTotal.Inc()
+
 	warnings := admission.Warnings{}
 
 	containersList := append(pod.Spec.InitContainers, pod.Spec.Containers...)
@@ -147,6 +153,7 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 		image := container.Image
 		if helpers.IsImageExempt(image) {
 			podlog.Info("[🐾IntegrityPatrol] skip exempted image ⛩️", "pod", pod.GetName(), "container", container.Name, "image", container.Image)
+			metrics.GomenhashaiValidationExempted.Inc()
 			continue
 		}
 
@@ -163,6 +170,7 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 			)
 			switch helpers.CONFIG.ValidationMode {
 			case helpers.ValidationModeFail:
+				metrics.GomenhashaiDenied.Inc()
 				return nil, err
 			case helpers.ValidationModeWarn:
 				warnings = append(warnings, err.Error())
@@ -187,6 +195,7 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 			)
 			switch helpers.CONFIG.ValidationMode {
 			case helpers.ValidationModeFail:
+				metrics.GomenhashaiDenied.Inc()
 				return nil, err
 			case helpers.ValidationModeWarn:
 				warnings = append(warnings, err.Error())
@@ -207,6 +216,7 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 			)
 			switch helpers.CONFIG.ValidationMode {
 			case helpers.ValidationModeFail:
+				metrics.GomenhashaiDenied.Inc()
 				return nil, err
 			case helpers.ValidationModeWarn:
 				warnings = append(warnings, err.Error())
@@ -219,6 +229,11 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 	}
 	podlog.Info("[🍣GomenHashai] integrity verified. You may pass, pod-chan 💮 Okaeri~", "pod", pod.GetName())
 	podlog.Info("[🐾IntegrityPatrol] in~spec~tion complete ✅", "pod", pod.GetName())
+	if len(warnings) > 0 {
+		metrics.GomenhashaiWarnings.Inc()
+	} else {
+		metrics.GomenhashaiAllowed.Inc()
+	}
 	return warnings, nil
 }
 
