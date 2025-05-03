@@ -34,6 +34,7 @@ spec:
     scheme: https
     {{- if not .Values.metrics.tlsConfig }}
     tlsConfig:
+      serverName: '{{ include "gomenhashai.fullname" . }}-metrics-service.{{ .Release.Namespace }}.svc'
       ca:
         secret:
           name: {{ include "gomenhashai.metricsSecretName" . }}
