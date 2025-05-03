@@ -167,6 +167,8 @@ metrics:
     interval: 60s
     # How long until a scrape request times out.
     scrapeTimeout: 10s
+    # Overwrite Service Monitor TLS config, a default TLS config referencing certificates.metrcis.secretName is added when metrics.secure is true
+    tlsConfig: {}
     # Extra properties to add to endpoint in ServiceMonitor resource
     endpointAdditionalProperties: {}
     # Custom annotations to add to ServiceMonitor
