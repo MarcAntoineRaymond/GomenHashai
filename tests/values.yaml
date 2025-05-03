@@ -25,9 +25,19 @@ webhook:
       kubernetes.io/metadata.name:
         - "kube-system"
         - "cert-manager"
+        - "prometheus"
   validating:
     exemptNamespacesLabels:
       kubernetes.io/metadata.name:
         - "kube-system"
         - "cert-manager"
+        - "prometheus"
 
+metrics:
+  # Enable exporting metrics with prometheus annotations
+  enabled: true
+  # Serve metrics with HTTPS and authn/authz
+  secure: false
+  serviceMonitor:
+    # Enable exporting metrics with Prometheus Service Monitor INSTEAD OF annotations, require using Prometheus Operator
+    enabled: false

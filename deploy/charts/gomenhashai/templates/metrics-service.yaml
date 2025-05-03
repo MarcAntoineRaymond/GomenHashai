@@ -4,6 +4,7 @@ metadata:
   name: {{ include "gomenhashai.fullname" . }}-metrics-service
   labels:
     {{- include "gomenhashai.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
     {{- with .Values.metrics.service.extraLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

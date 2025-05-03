@@ -41,13 +41,8 @@ config:
 #  exemptions: []
 #  ...
 
-# Args passed to the manager app
-args:
-  - --metrics-bind-address=:8443
-  - --leader-elect
-  - --health-probe-bind-address=:8081
-  - --webhook-cert-path=/etc/gomenhashai/certificates/webhook-certs
-  - --metrics-cert-path=/etc/gomenhashai/certificates/metrics-certs
+# Args passed to the manager app, override default args
+args: []
 
 annotations: {}
 
@@ -157,6 +152,29 @@ certificates:
     secretName:
 
 metrics:
+  # Enable exporting metrics with prometheus annotations
+  enabled: true
+  # Serve metrics with HTTPS and authn/authz and add TLS Config to Service Monitor if enabled
+  secure: true
+  serviceMonitor:
+    # Enable exporting metrics with Prometheus Service Monitor INSTEAD OF annotations, require using Prometheus Operator
+    enabled: false
+    # Port to scrape on metrics service
+    targetPort: 8443
+    # Path exposing metrics
+    path: /metrics
+    # How frequently to scrape targets by default.
+    interval: 60s
+    # How long until a scrape request times out.
+    scrapeTimeout: 10s
+    # Overwrite Service Monitor TLS config, a default TLS config referencing certificates.metrcis.secretName is added when metrics.secure is true
+    tlsConfig: {}
+    # Extra properties to add to endpoint in ServiceMonitor resource
+    endpointAdditionalProperties: {}
+    # Custom annotations to add to ServiceMonitor
+    annotations: {}
+    # Extra labels to add to ServiceMonitor
+    extraLabels: {}
   # Metrics service configuration
   service:
     annotations: {}
