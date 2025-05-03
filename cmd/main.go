@@ -38,9 +38,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/MarcAntoineRaymond/gomenhashai/internal/controller"
-	webhookcorev1 "github.com/MarcAntoineRaymond/gomenhashai/internal/webhook/v1"
-
 	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
+	"github.com/MarcAntoineRaymond/gomenhashai/internal/metrics"
+	webhookcorev1 "github.com/MarcAntoineRaymond/gomenhashai/internal/webhook/v1"
 )
 
 var (
@@ -170,6 +170,7 @@ func main() {
 	}
 
 	// gomenhashai init
+	metrics.Init()
 	err := helpers.InitConfig()
 	if err != nil {
 		setupLog.Error(err, "🍙GomenHashai cannot init config")

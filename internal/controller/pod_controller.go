@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
+	"github.com/MarcAntoineRaymond/gomenhashai/internal/metrics"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -75,6 +76,7 @@ func (r *PodInitializer) Start(ctx context.Context) error {
 							remaining = append(remaining, pod)
 							continue
 						}
+						metrics.GomenhashaiDeleted.Inc()
 					}
 				} else {
 					r.Logger.Error(err, "[🐾IntegrityPatrol] unexpected error occurred when updating pod, even samurai stumble sometimes ⛩️", "name", pod.Name)
