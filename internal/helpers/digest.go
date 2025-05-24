@@ -43,41 +43,35 @@ func GetTrustedDigest(image string) (string, error) {
 	if CONFIG.FetchDigests.Enabled {
 		return GetTrustedDigestFromRegistry(image)
 	} else {
-		return GetTrustedDigestFromMapping(image)
+		return GetTrustedDigestFromMapping(image), nil
 	}
 }
 
 // Return digest from mapping for this image or empty string
-func GetTrustedDigestFromMapping(image string) (string, error) {
+func GetTrustedDigestFromMapping(image string) string {
 	if digest, ok := DIGEST_MAPPING[image]; ok {
-		return digest, nil
+		return digest
 	} else {
 		// Check for base image without tag in mapping this will be default
 		if CONFIG.ImageDefaultDigest && strings.Contains(image, ":") {
 			imageWithoutTag := strings.Split(image, ":")[0]
 			if digest, ok := DIGEST_MAPPING[imageWithoutTag]; ok {
-				return digest, nil
+				return digest
 			}
 		}
 		// Try to find digest without registry part if it exist
-		imageWithoutRegistry, err := GetImageWithoutRegistry(image)
-		if err != nil {
-			return "", err
-		}
+		imageWithoutRegistry := GetImageWithoutRegistry(image)
 		if imageWithoutRegistry != image {
 			return GetTrustedDigestFromMapping(imageWithoutRegistry)
 		}
 	}
-	return "", nil
+	return ""
 }
 
 // Return digest from registry for this image or empty string
 func GetTrustedDigestFromRegistry(image string) (string, error) {
 	if CONFIG.FetchDigests.Registry != "" {
-		imageWithoutRegistry, err := GetImageWithoutRegistry(image)
-		if err != nil {
-			return "", err
-		}
+		imageWithoutRegistry := GetImageWithoutRegistry(image)
 		image = CONFIG.FetchDigests.Registry + "/" + imageWithoutRegistry
 	}
 	ref, err := name.ParseReference(image)
@@ -106,13 +100,12 @@ func HasExplicitRegistry(image string) bool {
 }
 
 // Return image without registry part if present at the beginning of image
-func GetImageWithoutRegistry(image string) (string, error) {
-	ref, err := name.ParseReference(image)
-	if err != nil {
-		// You might want to handle or log this error differently depending on your use case.
-		return image, fmt.Errorf("error parsing image: %v", err)
+func GetImageWithoutRegistry(image string) string {
+	if strings.Contains(strings.Split(image, "/")[0], ".") {
+		imageWithoutRegistry := strings.Join(strings.Split(image, "/")[1:], "/")
+		return imageWithoutRegistry
 	}
-	return ref.Context().RepositoryStr(), nil
+	return image
 }
 
 // Return if the image match an entry in the exempt list which can contain regex

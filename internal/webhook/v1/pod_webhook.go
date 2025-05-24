@@ -107,11 +107,7 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 		// Do registry mutation
 		if helpers.CONFIG.MutationRegistryEnabled {
 			podlog.Info("[🐾IntegrityPatrol] set common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
-			imageProcessRegistry, err := helpers.GetImageWithoutRegistry(image)
-			if err != nil {
-				podlog.Error(err, "unexpected error during registry modification 💥", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
-				continue
-			}
+			imageProcessRegistry := helpers.GetImageWithoutRegistry(image)
 			// If MutationRegistry is empty we already removed the registry
 			if helpers.CONFIG.MutationRegistry != "" {
 				imageProcessRegistry = helpers.CONFIG.MutationRegistry + "/" + imageProcessRegistry
