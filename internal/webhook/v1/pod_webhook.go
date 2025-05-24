@@ -87,7 +87,11 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 			image = strings.TrimSuffix(image, "@"+digest)
 		}
 		// Append digest from mapping or send error if no mapping
-		trustedDigest := helpers.GetTrustedDigest(image)
+		trustedDigest, err := helpers.GetTrustedDigest(image)
+		if err != nil {
+			podlog.Error(err, "something went wrong when getting trusted digest 😥, GomenHashai...", "pod", podName, "container", container.Name, "image", container.Image)
+			continue
+		}
 		if trustedDigest != "" {
 			image = image + "@" + trustedDigest
 			// Only modify image in incoming pod if there is a trusted digest
@@ -103,7 +107,11 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 		// Do registry mutation
 		if helpers.CONFIG.MutationRegistryEnabled {
 			podlog.Info("[🐾IntegrityPatrol] set common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
-			imageProcessRegistry := helpers.GetImageWithoutRegistry(image)
+			imageProcessRegistry, err := helpers.GetImageWithoutRegistry(image)
+			if err != nil {
+				podlog.Error(err, "unexpected error during registry modification 💥", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
+				continue
+			}
 			// If MutationRegistry is empty we already removed the registry
 			if helpers.CONFIG.MutationRegistry != "" {
 				imageProcessRegistry = helpers.CONFIG.MutationRegistry + "/" + imageProcessRegistry
@@ -180,8 +188,11 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 		}
 		podlog.Info("[🐾IntegrityPatrol] has found a digest ✨", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
 		image = strings.TrimSuffix(image, "@"+digest)
-		// Get trusted dige
-		trustedDigest := helpers.GetTrustedDigest(image)
+		// Get trusted digest
+		trustedDigest, err := helpers.GetTrustedDigest(image)
+		if err != nil {
+			podlog.Error(err, "something went wrong when getting trusted digest 😥, GomenHashai...", "pod", pod.GetName(), "container", container.Name, "image", container.Image)
+		}
 		// Check if image has a mapping with a trusted digest
 		if trustedDigest == "" {
 			podlog.Info("[🍣GomenHashai!] doesn't know any trusted digest for this image ❌", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)

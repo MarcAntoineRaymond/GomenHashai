@@ -92,7 +92,9 @@ var _ = Describe("Digest", func() {
 		})
 		Context("with untrusted tag but default base image", func() {
 			It("should be digest same as default image", func() {
-				Expect(helpers.GetTrustedDigest(imageWithTag)).To(Equal(helpers.GetTrustedDigest(imageNoDigest)))
+				localDigest, err := helpers.GetTrustedDigest(imageNoDigest)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(helpers.GetTrustedDigest(imageWithTag)).To(Equal(localDigest))
 			})
 		})
 		Context("with trusted tag", func() {
