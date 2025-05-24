@@ -43,7 +43,7 @@ var _ = Describe("Digest", func() {
 		"docker.io/library/busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
 		"busybox:stable":                   "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
 		"nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af",
-		"curlimages/curl:8.13.0":           "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd",
+		"curlimages/curl:8.13.0":           "sha256:d56bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd",
 	}
 
 	BeforeEach(func() {
@@ -84,28 +84,113 @@ var _ = Describe("Digest", func() {
 	})
 
 	// Test GetTrustedDigest()
+	Describe("Get trusted digest", func() {
+		Context("with default config and trusted tag", func() {
+			It("should be digest from mapping", func() {
+				localDigest, err := helpers.GetTrustedDigest(imageWithTrustedTag)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(localDigest).To(Equal(helpers.DIGEST_MAPPING[imageWithTrustedTag]))
+			})
+		})
+		Context("with fetch registry and tag", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.FetchDigests.Enabled = true
+			})
+			It("should be digest from docker", func() {
+				localDigest, err := helpers.GetTrustedDigest(imageWithTrustedTag)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(localDigest).To(Equal("sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"))
+			})
+			AfterEach(func() {
+				helpers.CONFIG.FetchDigests.Enabled = false
+			})
+		})
+		Context("with fetch registry and invalid digest", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.FetchDigests.Enabled = true
+			})
+			It("should fail", func() {
+				localDigest, err := helpers.GetTrustedDigest(imageInvalidDigest)
+				Expect(err).To(HaveOccurred())
+				Expect(localDigest).To(Equal(""))
+			})
+			AfterEach(func() {
+				helpers.CONFIG.FetchDigests.Enabled = false
+			})
+		})
+	})
+
+	// Test GetTrustedDigestFromMapping()
 	Describe("Get trusted digest from mapping", func() {
 		Context("with digest", func() {
 			It("should be empty", func() {
-				Expect(helpers.GetTrustedDigest(imageDigest)).To(Equal(""))
+				Expect(helpers.GetTrustedDigestFromMapping(imageDigest)).To(Equal(""))
 			})
 		})
 		Context("with untrusted tag but default base image", func() {
 			It("should be digest same as default image", func() {
-				localDigest, err := helpers.GetTrustedDigest(imageNoDigest)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(helpers.GetTrustedDigest(imageWithTag)).To(Equal(localDigest))
+				Expect(helpers.GetTrustedDigestFromMapping(imageWithTag)).To(Equal(helpers.GetTrustedDigestFromMapping(imageNoDigest)))
 			})
 		})
 		Context("with trusted tag", func() {
 			It("should be digest from mapping", func() {
-				Expect(helpers.GetTrustedDigest(imageWithTrustedTag)).To(Equal(helpers.DIGEST_MAPPING[imageWithTrustedTag]))
+				Expect(helpers.GetTrustedDigestFromMapping(imageWithTrustedTag)).To(Equal(helpers.DIGEST_MAPPING[imageWithTrustedTag]))
 			})
 		})
 		Context("without tag", func() {
 			It("should be digest from mapping", func() {
-				Expect(helpers.GetTrustedDigest(baseImage)).To(Equal(helpers.DIGEST_MAPPING[baseImage]))
+				Expect(helpers.GetTrustedDigestFromMapping(baseImage)).To(Equal(helpers.DIGEST_MAPPING[baseImage]))
 			})
+		})
+	})
+
+	// Test GetDigestFromRegistry()
+	Describe("Get digest from registry", func() {
+		BeforeEach(func() {
+			helpers.CONFIG.FetchDigests.Enabled = true
+		})
+		Context("with invalid digest", func() {
+			It("should fail", func() {
+				localDigest, err := helpers.GetDigestFromRegistry(imageInvalidDigest)
+				Expect(err).To(HaveOccurred())
+				Expect(localDigest).To(Equal(""))
+			})
+		})
+		Context("with good digest and wrong tag", func() {
+			It("should return good digest", func() {
+				goodDigest := "sha256:98ad9d1a2be345201bb0709b0d38655eb1b370145c7d94ca1fe9c421f76e245a"
+				localDigest, err := helpers.GetDigestFromRegistry("busybox:1.36.0@" + goodDigest)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(localDigest).To(Equal(goodDigest))
+			})
+		})
+		Context("with good digest", func() {
+			It("should return good digest", func() {
+				goodDigest := "sha256:98ad9d1a2be345201bb0709b0d38655eb1b370145c7d94ca1fe9c421f76e245a"
+				localDigest, err := helpers.GetDigestFromRegistry("busybox@" + goodDigest)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(localDigest).To(Equal(goodDigest))
+			})
+		})
+		Context("without tag", func() {
+			It("should return same as latest", func() {
+				localDigest, err := helpers.GetDigestFromRegistry("busybox")
+				Expect(err).ToNot(HaveOccurred())
+				digestLatest, err := helpers.GetDigestFromRegistry("busybox:latest")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(localDigest).To(Equal(digestLatest))
+			})
+		})
+		Context("with tag", func() {
+			It("should return good tag digest", func() {
+				goodDigest := "sha256:98ad9d1a2be345201bb0709b0d38655eb1b370145c7d94ca1fe9c421f76e245a"
+				localDigest, err := helpers.GetDigestFromRegistry("busybox:1.35.0")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(localDigest).To(Equal(goodDigest))
+			})
+		})
+		AfterEach(func() {
+			helpers.CONFIG.FetchDigests.Enabled = false
 		})
 	})
 

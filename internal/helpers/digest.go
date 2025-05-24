@@ -41,7 +41,7 @@ func GetDigest(image string) string {
 // Return trusted digests from file or registry depending on conf
 func GetTrustedDigest(image string) (string, error) {
 	if CONFIG.FetchDigests.Enabled {
-		return GetTrustedDigestFromRegistry(image)
+		return GetDigestFromRegistry(image)
 	} else {
 		return GetTrustedDigestFromMapping(image), nil
 	}
@@ -69,7 +69,7 @@ func GetTrustedDigestFromMapping(image string) string {
 }
 
 // Return digest from registry for this image or empty string
-func GetTrustedDigestFromRegistry(image string) (string, error) {
+func GetDigestFromRegistry(image string) (string, error) {
 	if CONFIG.FetchDigests.Registry != "" {
 		imageWithoutRegistry := GetImageWithoutRegistry(image)
 		image = CONFIG.FetchDigests.Registry + "/" + imageWithoutRegistry
@@ -86,17 +86,6 @@ func GetTrustedDigestFromRegistry(image string) (string, error) {
 	}
 
 	return desc.Descriptor.Digest.String(), nil
-}
-
-// HasExplicitRegistry returns true if the image string explicitly includes a registry.
-// It returns false if the image uses the default Docker Hub registry implicitly.
-func HasExplicitRegistry(image string) bool {
-	ref, err := name.ParseReference(image)
-	if err != nil {
-		// You might want to handle or log this error differently depending on your use case.
-		return false
-	}
-	return ref.Context().Registry.Name() != name.DefaultRegistry
 }
 
 // Return image without registry part if present at the beginning of image
