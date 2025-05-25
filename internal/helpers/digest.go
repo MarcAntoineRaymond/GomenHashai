@@ -17,8 +17,13 @@ limitations under the License.
 package helpers
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/google/go-containerregistry/pkg/authn"
+	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1/remote"
 )
 
 const DEFAULT_DIGEST_MAPPING_PATH = "/etc/gomenhashai/digests_mapping.yaml"
@@ -33,8 +38,17 @@ func GetDigest(image string) string {
 	return ""
 }
 
+// Return trusted digests from file or registry depending on conf
+func GetTrustedDigest(image string) (string, error) {
+	if CONFIG.FetchDigests {
+		return GetDigestFromRegistry(image)
+	} else {
+		return GetTrustedDigestFromMapping(image), nil
+	}
+}
+
 // Return digest from mapping for this image or empty string
-func GetTrustedDigest(image string) string {
+func GetTrustedDigestFromMapping(image string) string {
 	if digest, ok := DIGEST_MAPPING[image]; ok {
 		return digest
 	} else {
@@ -46,11 +60,28 @@ func GetTrustedDigest(image string) string {
 			}
 		}
 		// Try to find digest without registry part if it exist
-		if imageWithoutRegistry := GetImageWithoutRegistry(image); imageWithoutRegistry != image {
-			return GetTrustedDigest(imageWithoutRegistry)
+		imageWithoutRegistry := GetImageWithoutRegistry(image)
+		if imageWithoutRegistry != image {
+			return GetTrustedDigestFromMapping(imageWithoutRegistry)
 		}
 	}
 	return ""
+}
+
+// Return digest from registry for this image or empty string
+func GetDigestFromRegistry(image string) (string, error) {
+	ref, err := name.ParseReference(image)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse image reference: %v", err)
+	}
+
+	// Use DefaultKeychain (works with K8s service account/imagePullSecrets)
+	desc, err := remote.Get(ref, remote.WithAuthFromKeychain(authn.DefaultKeychain))
+	if err != nil {
+		return "", fmt.Errorf("failed to get image from registry: %v", err)
+	}
+
+	return desc.Digest.String(), nil
 }
 
 // Return image without registry part if present at the beginning of image

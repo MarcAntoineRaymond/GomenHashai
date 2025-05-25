@@ -81,24 +81,6 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 			metrics.GomenhashaiMutationExempted.Inc()
 			continue
 		}
-		// Remove digest if already present in image field
-		digest := helpers.GetDigest(image)
-		if digest != "" {
-			image = strings.TrimSuffix(image, "@"+digest)
-		}
-		// Append digest from mapping or send error if no mapping
-		trustedDigest := helpers.GetTrustedDigest(image)
-		if trustedDigest != "" {
-			image = image + "@" + trustedDigest
-			// Only modify image in incoming pod if there is a trusted digest
-			if !helpers.CONFIG.MutationDryRun {
-				container.Image = image
-				containers[i] = container
-			}
-			podlog.Info("[🐾IntegrityPatrol] digest was added to image 🐶", "pod", podName, "container", container.Name, "image", container.Image, "digest", trustedDigest)
-		} else {
-			podlog.Info("[🐾IntegrityPatrol] did not found any trusted digest for this image 🛡️", "pod", podName, "container", container.Name, "image", container.Image)
-		}
 
 		// Do registry mutation
 		if helpers.CONFIG.MutationRegistryEnabled {
@@ -113,8 +95,32 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 			if imageProcessRegistry != image {
 				container.Image = imageProcessRegistry
 				containers[i] = container
+				image = imageProcessRegistry
 			}
 			podlog.Info("[🐾IntegrityPatrol] completed setting common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
+		}
+
+		// Remove digest if already present in image field
+		digest := helpers.GetDigest(image)
+		if digest != "" {
+			image = strings.TrimSuffix(image, "@"+digest)
+		}
+		// Append digest from mapping or send error if no mapping
+		trustedDigest, err := helpers.GetTrustedDigest(image)
+		if err != nil {
+			podlog.Error(err, "something went wrong when getting trusted digest 😥, GomenHashai...", "pod", podName, "container", container.Name, "image", container.Image)
+			continue
+		}
+		if trustedDigest != "" {
+			image = image + "@" + trustedDigest
+			// Only modify image in incoming pod if there is a trusted digest
+			if !helpers.CONFIG.MutationDryRun {
+				container.Image = image
+				containers[i] = container
+			}
+			podlog.Info("[🐾IntegrityPatrol] digest was added to image 🐶", "pod", podName, "container", container.Name, "image", container.Image, "digest", trustedDigest)
+		} else {
+			podlog.Info("[🐾IntegrityPatrol] did not found any trusted digest for this image 🛡️", "pod", podName, "container", container.Name, "image", container.Image)
 		}
 	}
 	return containers
@@ -180,8 +186,11 @@ func ValidatePod(obj runtime.Object) (admission.Warnings, error) {
 		}
 		podlog.Info("[🐾IntegrityPatrol] has found a digest ✨", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)
 		image = strings.TrimSuffix(image, "@"+digest)
-		// Get trusted dige
-		trustedDigest := helpers.GetTrustedDigest(image)
+		// Get trusted digest
+		trustedDigest, err := helpers.GetTrustedDigest(image)
+		if err != nil {
+			podlog.Error(err, "something went wrong when getting trusted digest 😥, GomenHashai...", "pod", pod.GetName(), "container", container.Name, "image", container.Image)
+		}
 		// Check if image has a mapping with a trusted digest
 		if trustedDigest == "" {
 			podlog.Info("[🍣GomenHashai!] doesn't know any trusted digest for this image ❌", "pod", pod.GetName(), "container", container.Name, "image", image, "digest", digest)

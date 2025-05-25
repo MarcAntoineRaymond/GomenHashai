@@ -65,6 +65,15 @@ stringData:
     ...
 ```
 
+### 🔃 Fetch digests from registry
+
+Instead of using a secret listing trusted digests, you can automatically fetch digests from your image registry:
+
+```yaml
+config:
+  fetchDigests: true
+```
+
 ### 📈 Monitoring
 
 GomenHashai exposes useful custom Prometheus-compatible metrics.
@@ -178,6 +187,8 @@ A YAML configuration file can be used to customize the processing behaviour in a
 config:
   # -- Path to the digests mapping file
   digestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml"
+  # -- Mode to fetch digests from image registry instead of secret
+  fetchDigests: false
   # -- List of images to skip, can contain regex ex: ".*redis:.*"
   exemptions: []
   # -- If the image in the mapping does not have a tag it will be used as default for this image if the container is using a tag that is not in the mapping

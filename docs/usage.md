@@ -90,6 +90,50 @@ Now for image `docker.io/library/nginx` we specified the registry in the mapping
 Be careful with the tags and registry, very often the same image will have different digests in different registry and tags cannot be easily swapped.
 In most cases you may want to specify both tags and registry in mapping.
 
+## Fetch digests from registry
+
+Instead of using a secret listing trusted digests, you can automatically fetch digests from your image registry:
+
+```yaml
+config:
+  fetchDigests: true
+```
+
+*Note: This mode is less secure because image digests are not pre-verified.
+Additionally, the webhook must contact the registry to retrieve the digest, which may slow down pod validation depending on network latency and registry response times.*
+
+This mode is best suited for environments where all images originate from a secure, trusted, and verified registry.
+
+GomeHashai will fetch digests based on the registry specified in the image reference. You can enforce a specific registry using the Registry Mutation feature.
+
+### Exporting Digests for Trusted Use
+
+With the digests automatically fetched from the registry you could use a bash command to extract the digests and images to make a mapping usable with the trusted digest secret:
+
+```sh
+kubectl get pods --all-namespaces -o json | jq -r '
+  .items[]
+  | (
+      .spec.containers[]?,
+      .spec.initContainers[]?
+    )
+  | select(.image | test("@sha256:"))
+  | "\"\(.image | split("@")[0])\": \"\(.image | split("@")[1])\""
+' | sort | uniq
+```
+
+*This command require kubectl and jq.*
+
+Sample output:
+
+```sh
+"docker.io/grafana/grafana:11.6.1": "sha256:52c3e20686b860c6dc1f623811565773cf51eefa378817a4896dfc863c3c82c8"
+"registry.k8s.io/etcd:3.5.16-0": "sha256:c6a9d11cc5c04b114ccdef39a9265eeef818e3d02f5359be035ae784097fdec5"
+"registry.k8s.io/kube-apiserver:v1.32.0": "sha256:ebc0ce2d7e647dd97980ec338ad81496c111741ab4ad05e7c5d37539aaf7dc3b"
+```
+
+You can use this output to populate the trusted digest secret. Once you've validated each digest, you may disable automatic fetching to enforce stronger security.
+
 ## Audit or Dry Run
 
 Enforcing behaviour of the mutating and validating webhook can be disabled.

@@ -99,7 +99,9 @@ var _ = Describe("Pod Webhook", func() {
 				Expect(mutatedContainers).To(HaveLen(len(containersTrusted)))
 				for i, container := range containersTrusted {
 					Expect(helpers.GetDigest(mutatedContainers[i].Image)).ToNot(BeEmpty())
-					Expect(helpers.GetDigest(mutatedContainers[i].Image)).To(Equal(helpers.GetTrustedDigest(container.Image)))
+					digest, err := helpers.GetTrustedDigest(container.Image)
+					Expect(err).ToNot(HaveOccurred())
+					Expect(helpers.GetDigest(mutatedContainers[i].Image)).To(Equal(digest))
 				}
 			})
 			It("Should be Allowed", func() {
@@ -122,7 +124,9 @@ var _ = Describe("Pod Webhook", func() {
 			})
 			It("Should have trusted digest on trusted image and nothing on not trusted", func() {
 				Expect(mutatedContainers).To(HaveLen(len(containersNotTrusted)))
-				Expect(helpers.GetDigest(mutatedContainers[0].Image)).To(Equal(helpers.GetTrustedDigest(containersNotTrusted[0].Image)))
+				digest, err := helpers.GetTrustedDigest(containersNotTrusted[0].Image)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(helpers.GetDigest(mutatedContainers[0].Image)).To(Equal(digest))
 				Expect(helpers.GetDigest(mutatedContainers[1].Image)).To(BeEmpty())
 			})
 			It("Should be denied", func() {
