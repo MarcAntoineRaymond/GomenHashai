@@ -95,6 +95,7 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 			if imageProcessRegistry != image {
 				container.Image = imageProcessRegistry
 				containers[i] = container
+				image = imageProcessRegistry
 			}
 			podlog.Info("[🐾IntegrityPatrol] completed setting common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
 		}
