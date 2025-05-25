@@ -90,6 +90,20 @@ Now for image `docker.io/library/nginx` we specified the registry in the mapping
 Be careful with the tags and registry, very often the same image will have different digests in different registry and tags cannot be easily swapped.
 In most cases you may want to specify both tags and registry in mapping.
 
+## Fetch digests from registry
+
+Instead of using a secret listing trusted digests, you can automatically fetch digests from your image registry:
+
+```yaml
+config:
+  fetchDigests: true
+```
+
+This mode is less secure as digests are not verified.
+The webhook will also need to communicate with the registry to fetch digests, this may slow pod validation depending on netwok speed and registry response time.
+This mode is useful in case you have a specific image registry where all images are secured, trusted and verified.
+GomeHashai will fetch digests from the registry defined in the image. Use the Registry Mutation feature to enforce a registry name.
+
 ## Audit or Dry Run
 
 Enforcing behaviour of the mutating and validating webhook can be disabled.

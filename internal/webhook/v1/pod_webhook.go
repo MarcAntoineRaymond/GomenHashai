@@ -81,6 +81,24 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 			metrics.GomenhashaiMutationExempted.Inc()
 			continue
 		}
+
+		// Do registry mutation
+		if helpers.CONFIG.MutationRegistryEnabled {
+			podlog.Info("[🐾IntegrityPatrol] set common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
+			imageProcessRegistry := helpers.GetImageWithoutRegistry(image)
+			// If MutationRegistry is empty we already removed the registry
+			if helpers.CONFIG.MutationRegistry != "" {
+				imageProcessRegistry = helpers.CONFIG.MutationRegistry + "/" + imageProcessRegistry
+			}
+
+			// We do nothing if the image was not modified
+			if imageProcessRegistry != image {
+				container.Image = imageProcessRegistry
+				containers[i] = container
+			}
+			podlog.Info("[🐾IntegrityPatrol] completed setting common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
+		}
+
 		// Remove digest if already present in image field
 		digest := helpers.GetDigest(image)
 		if digest != "" {
@@ -102,23 +120,6 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 			podlog.Info("[🐾IntegrityPatrol] digest was added to image 🐶", "pod", podName, "container", container.Name, "image", container.Image, "digest", trustedDigest)
 		} else {
 			podlog.Info("[🐾IntegrityPatrol] did not found any trusted digest for this image 🛡️", "pod", podName, "container", container.Name, "image", container.Image)
-		}
-
-		// Do registry mutation
-		if helpers.CONFIG.MutationRegistryEnabled {
-			podlog.Info("[🐾IntegrityPatrol] set common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
-			imageProcessRegistry := helpers.GetImageWithoutRegistry(image)
-			// If MutationRegistry is empty we already removed the registry
-			if helpers.CONFIG.MutationRegistry != "" {
-				imageProcessRegistry = helpers.CONFIG.MutationRegistry + "/" + imageProcessRegistry
-			}
-
-			// We do nothing if the image was not modified
-			if imageProcessRegistry != image {
-				container.Image = imageProcessRegistry
-				containers[i] = container
-			}
-			podlog.Info("[🐾IntegrityPatrol] completed setting common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
 		}
 	}
 	return containers

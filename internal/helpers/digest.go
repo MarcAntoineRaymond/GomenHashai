@@ -40,7 +40,7 @@ func GetDigest(image string) string {
 
 // Return trusted digests from file or registry depending on conf
 func GetTrustedDigest(image string) (string, error) {
-	if CONFIG.FetchDigests.Enabled {
+	if CONFIG.FetchDigests {
 		return GetDigestFromRegistry(image)
 	} else {
 		return GetTrustedDigestFromMapping(image), nil
@@ -70,10 +70,6 @@ func GetTrustedDigestFromMapping(image string) string {
 
 // Return digest from registry for this image or empty string
 func GetDigestFromRegistry(image string) (string, error) {
-	if CONFIG.FetchDigests.Registry != "" {
-		imageWithoutRegistry := GetImageWithoutRegistry(image)
-		image = CONFIG.FetchDigests.Registry + "/" + imageWithoutRegistry
-	}
 	ref, err := name.ParseReference(image)
 	if err != nil {
 		return "", fmt.Errorf("Failed to parse image reference: %v", err)

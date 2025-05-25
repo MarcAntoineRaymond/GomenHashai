@@ -32,7 +32,7 @@ type Config struct {
 	// Path to the digests mapping file
 	DigestsMappingFile string `yaml:"digestsMappingFile"`
 	// Config for fetching digests from registry
-	FetchDigests FetchDigestsConfig `yaml:"fetchDigests"`
+	FetchDigests bool `yaml:"fetchDigests"`
 	// List of images to skip, can contain regex ex: ".*redis:.*"
 	Exemptions []string `yaml:"exemptions"`
 	// An image without tag in the mapping will be considered default. Images with tag that do not match specific trusted digest will use this digest instead (image it is the same base image)
@@ -64,15 +64,6 @@ type ExistingPodsConfig struct {
 	DeleteEnabled bool `yaml:"deleteEnabled" envconfig:"EXISTING_PODS_DELETE_ENABLED"`
 }
 
-type FetchDigestsConfig struct {
-	// Fetch Digests from registry instead of secret
-	Enabled bool `yaml:"enabled" envconfig:"FETCH_DIGESTS_ENABLED"`
-	// Fetch digests from specific registry or use registry from image name
-	Registry string `yaml:"registry" envconfig:"FETCH_DIGESTS_REGISTRY"`
-	// Secret to create and/or update with the digests_mapping.yaml
-	SecretName string `yaml:"secretName" envconfig:"FETCH_DIGESTS_SECRET_NAME"`
-}
-
 const ValidationModeWarn = "warn"
 const ValidationModeFail = "fail"
 
@@ -83,6 +74,7 @@ var CONFIG = defaultConfig()
 func defaultConfig() Config {
 	return Config{
 		DigestsMappingFile:      "/etc/gomenhashai/digests/digests_mapping.yaml",
+		FetchDigests:            false,
 		Exemptions:              []string{},
 		ImageDefaultDigest:      true,
 		ValidationMode:          "fail",
@@ -95,11 +87,6 @@ func defaultConfig() Config {
 			Retries:       5,
 			UpdateEnabled: true,
 			DeleteEnabled: true,
-		},
-		FetchDigests: FetchDigestsConfig{
-			Enabled:    false,
-			Registry:   "",
-			SecretName: "gomenhashai-digests-mapping-auto",
 		},
 	}
 }
