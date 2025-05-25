@@ -72,16 +72,16 @@ func GetTrustedDigestFromMapping(image string) string {
 func GetDigestFromRegistry(image string) (string, error) {
 	ref, err := name.ParseReference(image)
 	if err != nil {
-		return "", fmt.Errorf("Failed to parse image reference: %v", err)
+		return "", fmt.Errorf("failed to parse image reference: %v", err)
 	}
 
 	// Use DefaultKeychain (works with K8s service account/imagePullSecrets)
 	desc, err := remote.Get(ref, remote.WithAuthFromKeychain(authn.DefaultKeychain))
 	if err != nil {
-		return "", fmt.Errorf("Failed to get image from registry: %v", err)
+		return "", fmt.Errorf("failed to get image from registry: %v", err)
 	}
 
-	return desc.Descriptor.Digest.String(), nil
+	return desc.Digest.String(), nil
 }
 
 // Return image without registry part if present at the beginning of image

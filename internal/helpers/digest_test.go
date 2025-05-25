@@ -34,6 +34,7 @@ var _ = Describe("Digest", func() {
 	var invalidDigest string
 	var imageInvalidDigest string
 	var imageNoDigest string
+	var goodDigestBusybox string
 
 	helpers.DIGEST_MAPPING = map[string]string{
 		"busybox:latest":                   "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f",
@@ -57,6 +58,7 @@ var _ = Describe("Digest", func() {
 		imageDigest = "docker.io/library/busybox" + "@" + digest
 		invalidDigest = "sh56:aae246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e"
 		imageInvalidDigest = "docker.io/library/busybox" + "@" + invalidDigest
+		goodDigestBusybox = "sha256:98ad9d1a2be345201bb0709b0d38655eb1b370145c7d94ca1fe9c421f76e245a"
 	})
 
 	// Test GetDigest()
@@ -158,18 +160,17 @@ var _ = Describe("Digest", func() {
 		})
 		Context("with good digest and wrong tag", func() {
 			It("should return good digest", func() {
-				goodDigest := "sha256:98ad9d1a2be345201bb0709b0d38655eb1b370145c7d94ca1fe9c421f76e245a"
-				localDigest, err := helpers.GetDigestFromRegistry("busybox:1.36.0@" + goodDigest)
+				localDigest, err := helpers.GetDigestFromRegistry("busybox:1.36.0@" + goodDigestBusybox)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(localDigest).To(Equal(goodDigest))
+				Expect(localDigest).To(Equal(goodDigestBusybox))
 			})
 		})
 		Context("with good digest", func() {
 			It("should return good digest", func() {
-				goodDigest := "sha256:98ad9d1a2be345201bb0709b0d38655eb1b370145c7d94ca1fe9c421f76e245a"
-				localDigest, err := helpers.GetDigestFromRegistry("busybox@" + goodDigest)
+
+				localDigest, err := helpers.GetDigestFromRegistry("busybox@" + goodDigestBusybox)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(localDigest).To(Equal(goodDigest))
+				Expect(localDigest).To(Equal(goodDigestBusybox))
 			})
 		})
 		Context("without tag", func() {
@@ -183,10 +184,9 @@ var _ = Describe("Digest", func() {
 		})
 		Context("with tag", func() {
 			It("should return good tag digest", func() {
-				goodDigest := "sha256:98ad9d1a2be345201bb0709b0d38655eb1b370145c7d94ca1fe9c421f76e245a"
 				localDigest, err := helpers.GetDigestFromRegistry("busybox:1.35.0")
 				Expect(err).ToNot(HaveOccurred())
-				Expect(localDigest).To(Equal(goodDigest))
+				Expect(localDigest).To(Equal(goodDigestBusybox))
 			})
 		})
 		AfterEach(func() {
