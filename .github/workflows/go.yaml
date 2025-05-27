@@ -7,6 +7,8 @@ on:
     branches: [ "main" ]
     paths:
       - '**.go'
+      - 'go.mod'
+      - 'go.sum'
   schedule:
     - cron: '30 3 * * 3'
 
