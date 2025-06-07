@@ -188,4 +188,4 @@ webhook:
 
 ## 📈 Monitoring
 
-GomenHashai exposes useful metrics. You could know how many pods were denied or allowed for instance. Refer to the [monitoring section](docs/monitoring.md)
+GomenHashai exposes useful metrics. You could know how many pods were denied or allowed for instance. Refer to the [monitoring section](monitoring.md)
