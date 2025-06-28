@@ -104,7 +104,11 @@ spec:
         volumeMounts:
         {{- if .Values.config }}
         - name: config
-          mountPath: /etc/gomenhashai/configs/
+          mountPath: /etc/gomenhashai/configs/config.yaml
+        {{- end }}
+        {{- if .Values.registriesConfig }}
+        - name: registries-config
+          mountPath: /etc/gomenhashai/configs/registries.yaml
         {{- end }}
         - mountPath: /etc/gomenhashai/digests/digests_mapping.yaml
           name: digests-mapping
@@ -131,6 +135,11 @@ spec:
       - name: config
         configMap:
           name: {{ include "gomenhashai.fullname" . }}-config
+      {{- end }}
+      {{- if .Values.registriesConfig }}
+      - name: registries-config
+        secret:
+          secretName: {{ include "gomenhashai.fullname" . }}-registries
       {{- end }}
       - name: digests-mapping
         secret:

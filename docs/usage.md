@@ -99,6 +99,19 @@ config:
   fetchDigests: true
 ```
 
+You can configure credentials to use for different registries using the `registriesConfig` property in your Helm Chart values:
+
+```yaml
+registriesConfig:
+  myregistry.io:
+    username: user
+    password: pass
+  someotherregistry.io:
+    username: user
+    password: pass
+```
+
+
 *Note: This mode is less secure because image digests are not pre-verified.
 Additionally, the webhook must contact the registry to retrieve the digest, which may slow down pod validation depending on network latency and registry response times.*
 

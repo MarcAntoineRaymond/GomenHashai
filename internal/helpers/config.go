@@ -33,6 +33,8 @@ type Config struct {
 	DigestsMappingFile string `yaml:"digestsMappingFile"`
 	// Config for fetching digests from registry
 	FetchDigests bool `yaml:"fetchDigests"`
+	// Auth config to pull digests from remote registry
+	RegistriesConfigFile string `yaml:"registriesConfigFile"`
 	// List of images to skip, can contain regex ex: ".*redis:.*"
 	Exemptions []string `yaml:"exemptions"`
 	// An image without tag in the mapping will be considered default. Images with tag that do not match specific trusted digest will use this digest instead (image it is the same base image)
@@ -70,11 +72,18 @@ const ValidationModeFail = "fail"
 var CONFIG_PATH = "/etc/gomenhashai/configs/config.yaml"
 var DIGEST_MAPPING = map[string]string{}
 var CONFIG = defaultConfig()
+var REGISTRIES_CONFIG = map[string]RegistryCredentials{}
+
+type RegistryCredentials struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
 
 func defaultConfig() Config {
 	return Config{
 		DigestsMappingFile:      "/etc/gomenhashai/digests/digests_mapping.yaml",
 		FetchDigests:            false,
+		RegistriesConfigFile:    "/etc/gomenhashai/configs/registries.yaml",
 		Exemptions:              []string{},
 		ImageDefaultDigest:      true,
 		ValidationMode:          "fail",
@@ -120,6 +129,17 @@ func InitConfig() error {
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
 		return fmt.Errorf("invalid config: %w", err)
+	}
+
+	// Load registry credentials
+	if cfg.FetchDigests {
+		if data, err := os.ReadFile(filepath.Clean(cfg.RegistriesConfigFile)); err == nil {
+			if err := yaml.Unmarshal(data, &REGISTRIES_CONFIG); err != nil {
+				return fmt.Errorf("failed to parse registries config file: %w", err)
+			}
+		} else if !os.IsNotExist(err) {
+			return fmt.Errorf("failed to read registries config file: %w", err)
+		}
 	}
 
 	CONFIG = cfg
