@@ -78,7 +78,7 @@ func GetDigestFromRegistry(image string) (string, error) {
 	registry := ref.Context().RegistryStr()
 	registry = normalizeRegistry(registry)
 
-	options := []remote.Option{}
+	var options []remote.Option
 
 	authCreds, ok := REGISTRIES_CONFIG[registry]
 	if ok {
