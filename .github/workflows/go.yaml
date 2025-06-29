@@ -43,7 +43,7 @@ jobs:
         env:
           REGISTRY_AUTH: htpasswd
           REGISTRY_AUTH_HTPASSWD_REALM: "Test Registry"
-          REGISTRY_AUTH_HTPASSWD_PATH: /auth/.htpasswd
+          REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
           REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
         options: >-
           --health-cmd "wget --quiet --spider http://localhost:5000/v2/_catalog || exit 1"
@@ -53,6 +53,28 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Restart services
+        run: |
+          TIMEOUT=10  # seconds
+          START=$(date +%s)
+
+          docker restart registry
+
+          while true; do
+            if curl -s --connect-timeout 1 http://localhost:5000/v2/ > /dev/null; then
+              echo "Registry is ready."
+              exit 0
+            fi
+
+            NOW=$(date +%s)
+            if [ $((NOW - START)) -ge $TIMEOUT ]; then
+              echo "Timeout: Registry did not become ready within $TIMEOUT seconds."
+              exit 1
+            fi
+
+            sleep 1
+          done
 
       - name: Login to local registry
         run: |
