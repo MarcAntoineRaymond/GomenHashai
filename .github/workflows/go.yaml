@@ -38,6 +38,8 @@ jobs:
         image: registry:2
         ports:
           - 5000:5000
+        volumes:
+          - ${{ github.workspace }}/tests/registry/auth:/auth
         env:
           REGISTRY_AUTH: htpasswd
           REGISTRY_AUTH_HTPASSWD_REALM: "Test Registry"
@@ -51,30 +53,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Copy auth file to registry
-        run: |
-          docker cp ${{ github.workspace }}/tests/registry/auth/.htpasswd registry:/auth/
-      - name: Restart services
-        run: |
-          TIMEOUT=10  # seconds
-          START=$(date +%s)
-
-          docker restart registry
-
-          while true; do
-            if curl -s --connect-timeout 1 http://localhost:5000/v2/ > /dev/null; then
-              echo "Registry is ready."
-              exit 0
-            fi
-
-            NOW=$(date +%s)
-            if [ $((NOW - START)) -ge $TIMEOUT ]; then
-              echo "Timeout: Registry did not become ready within $TIMEOUT seconds."
-              exit 1
-            fi
-
-            sleep 1
-          done
 
       - name: Login to local registry
         run: |
