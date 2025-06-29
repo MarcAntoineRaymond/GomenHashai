@@ -195,7 +195,7 @@ var _ = Describe("Digest", func() {
 	})
 
 	// Test GetDigestFromRegistry() from registry with basic auth
-	Describe("Get digest from registry", func() {
+	Describe("Get digest from registry with auth", func() {
 		BeforeEach(func() {
 			helpers.CONFIG.FetchDigests = true
 			helpers.REGISTRIES_CONFIG = map[string]helpers.RegistryCredentials{
