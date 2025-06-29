@@ -39,7 +39,7 @@ jobs:
         ports:
           - 5000:5000
         volumes:
-          - ${{ github.workspace }}/tests/registry/auth:/auth
+          - ${{ github.workspace }}/tmp/tests/registry/auth:/auth
         env:
           REGISTRY_AUTH: htpasswd
           REGISTRY_AUTH_HTPASSWD_REALM: "Test Registry"
@@ -48,7 +48,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+      - name: Copy auth file to registry
+        run: |
+          docker cp ${{ github.workspace }}/tests/registry/auth/.htpasswd registry:/auth/
       - name: Restart services
         run: |
           TIMEOUT=10  # seconds
