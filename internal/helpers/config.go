@@ -17,6 +17,8 @@ limitations under the License.
 package helpers
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -32,9 +34,7 @@ type Config struct {
 	// Path to the digests mapping file
 	DigestsMappingFile string `yaml:"digestsMappingFile"`
 	// Config for fetching digests from registry
-	FetchDigests bool `yaml:"fetchDigests"`
-	// Auth config to pull digests from remote registry
-	RegistriesConfigFile string `yaml:"registriesConfigFile"`
+	FetchDigests FetchDigestsConfig `yaml:"fetchDigests"`
 	// List of images to skip, can contain regex ex: ".*redis:.*"
 	Exemptions []string `yaml:"exemptions"`
 	// An image without tag in the mapping will be considered default. Images with tag that do not match specific trusted digest will use this digest instead (image it is the same base image)
@@ -49,6 +49,17 @@ type Config struct {
 	MutationRegistry string `yaml:"mutationRegistry"`
 	// Configuration of the process that handles existing pods on init
 	ExistingPods ExistingPodsConfig `yaml:"existingPods"`
+}
+
+type FetchDigestsConfig struct {
+	// Enable fetching digests from registry
+	Enabled bool `yaml:"enabled" envconfig:"FETCH_DIGESTS_ENABLED"`
+	// Auth config to pull digests from remote registry
+	RegistriesConfigFile string `yaml:"registriesConfigFile" envconfig:"FETCH_DIGESTS_REGISTRIES_CONFIG_FILE"`
+	// Only fetch signed digests
+	OnlySigned bool `yaml:"onlySigned" envconfig:"FETCH_DIGESTS_MUTATION_SIGNED"`
+	// Optional list of public certificates used to verify signatures
+	Certs []string `yaml:"certs" envconfig:"FETCH_DIGESTS_CERTS"`
 }
 
 type ExistingPodsConfig struct {
@@ -73,6 +84,7 @@ var CONFIG_PATH = "/etc/gomenhashai/configs/config.yaml"
 var DIGEST_MAPPING = map[string]string{}
 var CONFIG = defaultConfig()
 var REGISTRIES_CONFIG = map[string]RegistryCredentials{}
+var TRUSTED_SIGNER_CERTS = []x509.Certificate{}
 
 type RegistryCredentials struct {
 	Username string `yaml:"username"`
@@ -81,9 +93,13 @@ type RegistryCredentials struct {
 
 func defaultConfig() Config {
 	return Config{
-		DigestsMappingFile:      "/etc/gomenhashai/digests/digests_mapping.yaml",
-		FetchDigests:            false,
-		RegistriesConfigFile:    "/etc/gomenhashai/configs/registries.yaml",
+		DigestsMappingFile: "/etc/gomenhashai/digests/digests_mapping.yaml",
+		FetchDigests: FetchDigestsConfig{
+			Enabled:              false,
+			RegistriesConfigFile: "/etc/gomenhashai/configs/registries.yaml",
+			OnlySigned:           false,
+			Certs:                []string{},
+		},
 		Exemptions:              []string{},
 		ImageDefaultDigest:      true,
 		ValidationMode:          "fail",
@@ -131,14 +147,27 @@ func InitConfig() error {
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
-	// Load registry credentials
-	if cfg.FetchDigests {
-		if data, err := os.ReadFile(filepath.Clean(cfg.RegistriesConfigFile)); err == nil {
+	// Handle special config for fetch mode
+	if cfg.FetchDigests.Enabled {
+		// Load registry credentials
+		if data, err := os.ReadFile(filepath.Clean(cfg.FetchDigests.RegistriesConfigFile)); err == nil {
 			if err := yaml.Unmarshal(data, &REGISTRIES_CONFIG); err != nil {
 				return fmt.Errorf("failed to parse registries config file: %w", err)
 			}
 		} else if !os.IsNotExist(err) {
 			return fmt.Errorf("failed to read registries config file: %w", err)
+		}
+		for _, certText := range cfg.FetchDigests.Certs {
+			block, _ := pem.Decode([]byte(certText))
+			if block == nil || block.Type != "CERTIFICATE" {
+				continue
+			}
+
+			cert, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				return fmt.Errorf("failed to read certificate from config file: %w", err)
+			}
+			TRUSTED_SIGNER_CERTS = append(TRUSTED_SIGNER_CERTS, *cert)
 		}
 	}
 

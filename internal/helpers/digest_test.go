@@ -96,7 +96,7 @@ var _ = Describe("Digest", func() {
 		})
 		Context("with fetch registry and tag", func() {
 			BeforeEach(func() {
-				helpers.CONFIG.FetchDigests = true
+				helpers.CONFIG.FetchDigests.Enabled = true
 			})
 			It("should be digest from docker", func() {
 				localDigest, err := helpers.GetTrustedDigest(imageWithTrustedTag)
@@ -104,12 +104,12 @@ var _ = Describe("Digest", func() {
 				Expect(localDigest).To(Equal("sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"))
 			})
 			AfterEach(func() {
-				helpers.CONFIG.FetchDigests = false
+				helpers.CONFIG.FetchDigests.Enabled = false
 			})
 		})
 		Context("with fetch registry and invalid digest", func() {
 			BeforeEach(func() {
-				helpers.CONFIG.FetchDigests = true
+				helpers.CONFIG.FetchDigests.Enabled = true
 			})
 			It("should fail", func() {
 				localDigest, err := helpers.GetTrustedDigest(imageInvalidDigest)
@@ -117,7 +117,7 @@ var _ = Describe("Digest", func() {
 				Expect(localDigest).To(Equal(""))
 			})
 			AfterEach(func() {
-				helpers.CONFIG.FetchDigests = false
+				helpers.CONFIG.FetchDigests.Enabled = false
 			})
 		})
 	})
@@ -149,7 +149,7 @@ var _ = Describe("Digest", func() {
 	// Test GetDigestFromRegistry()
 	Describe("Get digest from registry", func() {
 		BeforeEach(func() {
-			helpers.CONFIG.FetchDigests = true
+			helpers.CONFIG.FetchDigests.Enabled = true
 		})
 		Context("with invalid digest", func() {
 			It("should fail", func() {
@@ -190,14 +190,14 @@ var _ = Describe("Digest", func() {
 			})
 		})
 		AfterEach(func() {
-			helpers.CONFIG.FetchDigests = false
+			helpers.CONFIG.FetchDigests.Enabled = false
 		})
 	})
 
 	// Test GetDigestFromRegistry() from registry with basic auth
 	Describe("Get digest from registry with auth", func() {
 		BeforeEach(func() {
-			helpers.CONFIG.FetchDigests = true
+			helpers.CONFIG.FetchDigests.Enabled = true
 			helpers.REGISTRIES_CONFIG = map[string]helpers.RegistryCredentials{
 				"localhost:5000": helpers.RegistryCredentials{
 					Username: "testuser",
@@ -220,7 +220,7 @@ var _ = Describe("Digest", func() {
 			})
 		})
 		AfterEach(func() {
-			helpers.CONFIG.FetchDigests = false
+			helpers.CONFIG.FetchDigests.Enabled = false
 			helpers.REGISTRIES_CONFIG = map[string]helpers.RegistryCredentials{}
 		})
 	})

@@ -17,6 +17,9 @@ limitations under the License.
 package helpers
 
 import (
+	"context"
+	"crypto"
+	"crypto/x509"
 	"fmt"
 	"regexp"
 	"strings"
@@ -24,6 +27,9 @@ import (
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
+
+	"github.com/sigstore/cosign/v2/pkg/cosign"
+	sigcosign "github.com/sigstore/sigstore/pkg/signature"
 )
 
 const DEFAULT_DIGEST_MAPPING_PATH = "/etc/gomenhashai/digests_mapping.yaml"
@@ -40,7 +46,7 @@ func GetDigest(image string) string {
 
 // Return trusted digests from file or registry depending on conf
 func GetTrustedDigest(image string) (string, error) {
-	if CONFIG.FetchDigests {
+	if CONFIG.FetchDigests.Enabled {
 		return GetDigestFromRegistry(image)
 	} else {
 		return GetTrustedDigestFromMapping(image), nil
@@ -100,6 +106,16 @@ func GetDigestFromRegistry(image string) (string, error) {
 		return "", fmt.Errorf("failed to get image from registry: %v", err)
 	}
 
+	if CONFIG.FetchDigests.OnlySigned {
+		signed, err := IsImageSigned(ref)
+		if err != nil {
+			return "", fmt.Errorf("failed to check if image is signed: %v", err)
+		}
+		if !signed {
+			return "", nil
+		}
+	}
+
 	return desc.Digest.String(), nil
 }
 
@@ -137,4 +153,49 @@ func IsImageExempt(image string) bool {
 		}
 	}
 	return false
+}
+
+// Check if an image is signed using one of the trusted certs
+func IsImageSigned(ref name.Reference) (bool, error) {
+	for _, cert := range TRUSTED_SIGNER_CERTS {
+		// Only cosign is supported for now
+		isSigned, err := verifyCosign(ref, &cert)
+		if err != nil {
+			return false, fmt.Errorf("failed to verify sig using cosign: %v", err)
+		}
+		if isSigned {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+// Verify image ref is signed with cert
+func verifyCosign(ref name.Reference, cert *x509.Certificate) (bool, error) {
+	ctx := context.Background()
+	verifier, err := sigcosign.LoadVerifier(cert.PublicKey, crypto.SHA256)
+	if err != nil {
+		return false, fmt.Errorf("failed to create verifier: %w", err)
+	}
+
+	co := &cosign.CheckOpts{
+		SigVerifier:        verifier,
+		RekorClient:        nil, // optional transparency log verification
+		RegistryClientOpts: nil,
+		ClaimVerifier:      cosign.SimpleClaimVerifier,
+		IgnoreSCT:          true,
+		RootCerts:          nil,
+	}
+
+	_, bundleVerified, err := cosign.VerifyImageSignatures(ctx, ref, co)
+	if err != nil {
+		return false, err
+	}
+
+	if !bundleVerified {
+		return false, nil
+	}
+
+	return true, nil
 }
