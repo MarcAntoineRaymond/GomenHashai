@@ -1,0 +1,1 @@
+This folder contains credentials for registry in htpasswd format. Creds are `testuser:testpassword`

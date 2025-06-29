@@ -194,6 +194,37 @@ var _ = Describe("Digest", func() {
 		})
 	})
 
+	// Test GetDigestFromRegistry() from registry with basic auth
+	Describe("Get digest from registry", func() {
+		BeforeEach(func() {
+			helpers.CONFIG.FetchDigests = true
+			helpers.REGISTRIES_CONFIG = map[string]helpers.RegistryCredentials{
+				"localhost:5000": helpers.RegistryCredentials{
+					Username: "testuser",
+					Password: "testpassword",
+				},
+			}
+		})
+		Context("with image not existing in registry", func() {
+			It("should fail", func() {
+				localDigest, err := helpers.GetDigestFromRegistry("localhost:5000/" + imageInvalidDigest)
+				Expect(err).To(HaveOccurred())
+				Expect(localDigest).To(Equal(""))
+			})
+		})
+		Context("with image using trusted tag in registry", func() {
+			It("should not fail", func() {
+				localDigest, err := helpers.GetDigestFromRegistry("localhost:5000/" + imageWithTrustedTag)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(localDigest).To(Equal(helpers.DIGEST_MAPPING[imageWithTrustedTag]))
+			})
+		})
+		AfterEach(func() {
+			helpers.CONFIG.FetchDigests = false
+			helpers.REGISTRIES_CONFIG = map[string]helpers.RegistryCredentials{}
+		})
+	})
+
 	// Test GetImageWithoutRegistry()
 	Describe("Get the image without the registry part of image name", func() {
 		Context("with registry", func() {

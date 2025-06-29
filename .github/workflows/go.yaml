@@ -33,8 +33,59 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+        env:
+          REGISTRY_AUTH: htpasswd
+          REGISTRY_AUTH_HTPASSWD_REALM: "Test Registry"
+          REGISTRY_AUTH_HTPASSWD_PATH: /auth/.htpasswd
+          REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+        options: >-
+          --health-cmd "wget --quiet --spider http://localhost:5000/v2/_catalog || exit 1"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v4
+      - name: Copy auth file to registry
+        run: |
+          docker cp ${{ github.workspace }}/tests/registry/auth/.htpasswd registry:/auth/
+      - name: Restart services
+        run: |
+          TIMEOUT=10  # seconds
+          START=$(date +%s)
+
+          docker restart registry
+
+          while true; do
+            if curl -s --connect-timeout 1 http://localhost:5000/v2/ > /dev/null; then
+              echo "Registry is ready."
+              exit 0
+            fi
+
+            NOW=$(date +%s)
+            if [ $((NOW - START)) -ge $TIMEOUT ]; then
+              echo "Timeout: Registry did not become ready within $TIMEOUT seconds."
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+      - name: Login to local registry
+        run: |
+          echo "testpassword" | docker login localhost:5000 -u testuser --password-stdin
+
+      - name: Push test image
+        run: |
+          docker pull curlimages/curl:8.13.0@sha256:d56bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd
+          docker tag curlimages/curl:8.13.0 localhost:5000/curlimages/curl:8.13.0
+          docker push localhost:5000/curlimages/curl:8.13.0
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
