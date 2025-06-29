@@ -102,13 +102,9 @@ spec:
         securityContext:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
         volumeMounts:
-        {{- if .Values.config }}
-        - name: config
-          mountPath: /etc/gomenhashai/configs/config.yaml
-        {{- end }}
-        {{- if .Values.registriesConfig }}
-        - name: registries-config
-          mountPath: /etc/gomenhashai/configs/registries.yaml
+        {{- if or .Values.config .Values.registriesConfig }}
+        - name: configs
+          mountPath: /etc/gomenhashai/configs
         {{- end }}
         - mountPath: /etc/gomenhashai/digests/digests_mapping.yaml
           name: digests-mapping
@@ -131,15 +127,24 @@ spec:
       serviceAccountName: {{ include "gomenhashai.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
       volumes:
+      {{- if or .Values.config .Values.registriesConfig }}
+      - name: configs
+        projected:
+          sources:
       {{- if .Values.config }}
-      - name: config
-        configMap:
-          name: {{ include "gomenhashai.fullname" . }}-config
+          - configMap:
+              name: {{ include "gomenhashai.fullname" . }}-config
+              items:
+              - key: config.yaml
+                path: config.yaml
       {{- end }}
       {{- if .Values.registriesConfig }}
-      - name: registries-config
-        secret:
-          secretName: {{ include "gomenhashai.fullname" . }}-registries
+          - secret:
+              name: {{ include "gomenhashai.fullname" . }}-registries
+              items:
+              - key: registries.yaml
+                path: registries.yaml
+      {{- end }}
       {{- end }}
       - name: digests-mapping
         secret:
