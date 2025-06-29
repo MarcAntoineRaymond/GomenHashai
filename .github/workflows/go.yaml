@@ -90,12 +90,6 @@ jobs:
             docker://localhost:5000/curlimages/curl:8.13.0 \
             --dest-tls-verify=false
 
-      - name: Push test image
-        run: |
-          docker pull curlimages/curl:8.13.0@sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd
-          docker tag curlimages/curl:8.13.0@sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd localhost:5000/curlimages/curl:8.13.0
-          docker push localhost:5000/curlimages/curl:8.13.0
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
