@@ -39,7 +39,7 @@ jobs:
         ports:
           - 5000:5000
         volumes:
-          - ${{ github.workspace }}/tmp/tests/registry/auth:/auth
+          - /src/tests/registry/auth:/auth
         env:
           REGISTRY_AUTH: htpasswd
           REGISTRY_AUTH_HTPASSWD_REALM: "Test Registry"
