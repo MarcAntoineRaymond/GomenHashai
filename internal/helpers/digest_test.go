@@ -214,7 +214,7 @@ var _ = Describe("Digest", func() {
 		})
 		Context("with image using trusted tag in registry", func() {
 			It("should not fail", func() {
-				localDigest, err := helpers.GetDigestFromRegistry("localhost:5000/" + imageWithTrustedTag)
+				localDigest, err := helpers.GetDigestFromRegistry("localhost:5000/curlimages/curl")
 				Expect(err).ToNot(HaveOccurred())
 				Expect(localDigest).To(Equal("sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"))
 			})
