@@ -45,6 +45,7 @@ jobs:
           REGISTRY_AUTH_HTPASSWD_REALM: "Test Registry"
           REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
           REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+        options: --name registry --hostname registry
 
     steps:
       - uses: actions/checkout@v4
