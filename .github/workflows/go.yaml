@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Copy auth file to registry
         run: |
-          docker cp ${{ github.workspace }}/tests/registry/auth/.htpasswd registry:/auth/
+          docker cp ${{ github.workspace }}/tests/registry/auth/htpasswd registry:/auth/
       - name: Restart services
         run: |
           TIMEOUT=10  # seconds
