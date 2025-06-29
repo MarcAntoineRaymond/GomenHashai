@@ -86,7 +86,7 @@ jobs:
       - name: Copy alpine to local registry via skopeo
         run: |
           skopeo copy \
-            docker://curlimages/curl:8.13.0@sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd \
+            docker://curlimages/curl@sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd \
             docker://localhost:5000/curlimages/curl:8.13.0 \
             --dest-tls-verify=false
 
