@@ -75,13 +75,40 @@ func GetDigestFromRegistry(image string) (string, error) {
 		return "", fmt.Errorf("failed to parse image reference: %v", err)
 	}
 
-	// Use DefaultKeychain (works with K8s service account/imagePullSecrets)
-	desc, err := remote.Get(ref, remote.WithAuthFromKeychain(authn.DefaultKeychain))
+	registry := ref.Context().RegistryStr()
+	registry = normalizeRegistry(registry)
+
+	var options []remote.Option
+
+	authCreds, ok := REGISTRIES_CONFIG[registry]
+	if ok {
+		options = []remote.Option{
+			remote.WithAuth(&authn.Basic{
+				Username: authCreds.Username,
+				Password: authCreds.Password,
+			}),
+		}
+	} else {
+		// Use DefaultKeychain
+		options = []remote.Option{
+			remote.WithAuthFromKeychain(authn.DefaultKeychain),
+		}
+	}
+
+	desc, err := remote.Get(ref, options...)
 	if err != nil {
 		return "", fmt.Errorf("failed to get image from registry: %v", err)
 	}
 
 	return desc.Digest.String(), nil
+}
+
+func normalizeRegistry(reg string) string {
+	// Handle common aliases
+	if reg == "index.docker.io" {
+		return "docker.io"
+	}
+	return reg
 }
 
 // Return image without registry part if present at the beginning of image

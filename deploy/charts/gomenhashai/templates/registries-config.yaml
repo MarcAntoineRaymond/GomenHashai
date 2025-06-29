@@ -1,0 +1,12 @@
+{{- if .Values.registriesConfig }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "gomenhashai.fullname" . }}-registries
+  labels:
+    {{- include "gomenhashai.labels" . | nindent 4 }}
+stringData:
+  registries.yaml: |
+    {{- .Values.registriesConfig | toYaml | nindent 4 }}
+type: Opaque
+{{- end }}

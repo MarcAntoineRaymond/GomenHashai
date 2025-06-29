@@ -44,7 +44,7 @@ var _ = Describe("Digest", func() {
 		"docker.io/library/busybox:stable": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
 		"busybox:stable":                   "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549",
 		"nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af",
-		"curlimages/curl:8.13.0":           "sha256:d56bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd",
+		"curlimages/curl:8.13.0":           "sha256:d56bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd", // Not the right digest in docker registry in order to verify that pull mode actually pull right digest
 	}
 
 	BeforeEach(func() {
@@ -191,6 +191,37 @@ var _ = Describe("Digest", func() {
 		})
 		AfterEach(func() {
 			helpers.CONFIG.FetchDigests = false
+		})
+	})
+
+	// Test GetDigestFromRegistry() from registry with basic auth
+	Describe("Get digest from registry with auth", func() {
+		BeforeEach(func() {
+			helpers.CONFIG.FetchDigests = true
+			helpers.REGISTRIES_CONFIG = map[string]helpers.RegistryCredentials{
+				"localhost:5000": helpers.RegistryCredentials{
+					Username: "testuser",
+					Password: "testpassword",
+				},
+			}
+		})
+		Context("with image not existing in registry", func() {
+			It("should fail", func() {
+				localDigest, err := helpers.GetDigestFromRegistry("localhost:5000/" + imageInvalidDigest)
+				Expect(err).To(HaveOccurred())
+				Expect(localDigest).To(Equal(""))
+			})
+		})
+		Context("with image using trusted tag in registry", func() {
+			It("should not fail", func() {
+				localDigest, err := helpers.GetDigestFromRegistry("localhost:5000/curlimages/curl")
+				Expect(err).ToNot(HaveOccurred())
+				Expect(localDigest).To(Equal("sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"))
+			})
+		})
+		AfterEach(func() {
+			helpers.CONFIG.FetchDigests = false
+			helpers.REGISTRIES_CONFIG = map[string]helpers.RegistryCredentials{}
 		})
 	})
 

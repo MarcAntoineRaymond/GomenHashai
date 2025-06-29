@@ -41,6 +41,11 @@ config:
 #  exemptions: []
 #  ...
 
+registriesConfig:
+#  myregistry.io:
+#    username: user
+#    password: pass
+
 # Args passed to the manager app, override default args
 args: []
 
