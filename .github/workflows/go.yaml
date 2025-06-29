@@ -45,11 +45,6 @@ jobs:
           REGISTRY_AUTH_HTPASSWD_REALM: "Test Registry"
           REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
           REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
-        options: >-
-          --health-cmd "wget --quiet --spider http://localhost:5000/v2/_catalog || exit 1"
-          --health-interval 2s
-          --health-timeout 2s
-          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
