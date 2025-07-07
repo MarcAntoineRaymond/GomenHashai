@@ -6,7 +6,7 @@ godebug default=go1.24
 
 require (
 	github.com/go-logr/logr v1.4.3
-	github.com/go-playground/validator/v10 v10.26.0
+	github.com/go-playground/validator/v10 v10.27.0
 	github.com/google/go-containerregistry v0.20.6
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/onsi/ginkgo/v2 v2.23.4
