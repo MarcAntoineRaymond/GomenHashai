@@ -15,7 +15,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 env:
   IMAGE_NAME: ghcr.io/marcantoineraymond/gomenhashai
@@ -24,6 +23,8 @@ jobs:
   scan-current:
     name: Scan Current Branch
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,6 +47,8 @@ jobs:
   scan-latest:
     name: Scan Latest Release
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.32.0
