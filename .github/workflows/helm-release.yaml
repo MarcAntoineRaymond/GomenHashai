@@ -4,12 +4,15 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'g*'
 
 permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -37,3 +40,60 @@ jobs:
           mark_as_latest: false
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  attestation:
+    if: github.ref_type == 'tag'
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+      
+      - name: Extract Docker tag from Git ref
+        id: extract_tag
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Find Helm chart artifact in release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ steps.extract_tag.outputs.tag }}"
+          echo "Getting assets for release: $tag"
+          chart_asset="${{ steps.extract_tag.outputs.tag }}.tgz"
+          gh release download "$tag" --pattern "$chart_asset"
+          echo "CHART_FILE=$chart_asset" >> $GITHUB_ENV
+
+      - name: Generate artifact attestation
+        id: attest
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+        with:
+          subject-path: ${{ env.CHART_FILE }}
+
+      - name: Prepare sigstore and in-toto bundle
+        if: github.ref_type == 'tag'
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          NAME="${{ github.repository }}-${{ steps.extract_tag.outputs.tag }}"
+          mv "$BUNDLE" "${NAME}.sigstore"
+          if ! jq -e '.dsseEnvelope' "${NAME}.sigstore" > /dev/null; then
+            echo "❌ Error: No 'dsseEnvelope' found in ${NAME}.sigstore"
+            exit 1
+          fi
+
+          jq -c '.dsseEnvelope' "${NAME}.sigstore" > "${NAME}.intoto.jsonl"
+          echo "✅ Extracted dsseEnvelope to ${NAME}.intoto.jsonl"
+
+      # Upload attestations
+      - name: Upload attestations to release
+        uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
+        with:
+          file: ${{ github.repository }}-${{ steps.extract_tag.outputs.tag }}.*
+          file_glob: true
