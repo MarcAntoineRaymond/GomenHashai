@@ -1,7 +1,8 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/MarcAntoineRaymond/gomenhashai)](https://goreportcard.com/report/github.com/MarcAntoineRaymond/gomenhashai)
 ![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=gomenhashai-*&style=flat&label=helm%20chart%20release)
 ![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=v*)
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/MarcAntoineRaymond/gomenhashai)](https://goreportcard.com/report/github.com/MarcAntoineRaymond/gomenhashai)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/MarcAntoineRaymond/GomenHashai/badge)](https://scorecard.dev/viewer/?uri=github.com/MarcAntoineRaymond/GomenHashai)
 [![Trivy](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/trivy.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/trivy.yaml)
 [![Go lint, test and gosec](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/go.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/go.yaml)
 [![Lint and Test Charts](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/chart-test.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/chart-test.yaml)
