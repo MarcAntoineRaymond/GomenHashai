@@ -60,6 +60,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
+        id: attest
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
@@ -94,3 +95,26 @@ jobs:
           title: "chore: update appVersion to ${{ steps.extract_tag.outputs.tag }}"
           body: |
             This PR updates the Helm chart appVersion to match the published Docker tag `${{ steps.extract_tag.outputs.tag }}` and also update the digest.
+
+      - name: Prepare sigstore and in-toto bundle
+        if: github.ref_type == 'tag'
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          NAME="${{ env.IMAGE_NAME}}-${{ steps.extract_tag.outputs.tag }}"
+          mv "$BUNDLE" "${NAME}.sigstore"
+          if ! jq -e '.dsseEnvelope' "${NAME}.sigstore" > /dev/null; then
+            echo "❌ Error: No 'dsseEnvelope' found in ${NAME}.sigstore"
+            exit 1
+          fi
+
+          jq -c '.dsseEnvelope' "${NAME}.sigstore" > "${NAME}.intoto.jsonl"
+          echo "✅ Extracted dsseEnvelope to ${NAME}.intoto.jsonl"
+
+      # Upload attestations
+      - name: Upload attestations to release
+        uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
+        if: github.ref_type == 'tag'
+        with:
+          file: ${{ env.IMAGE_NAME}}-${{ steps.extract_tag.outputs.tag }}.*
+          file_glob: true
