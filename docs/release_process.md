@@ -10,7 +10,7 @@ GomenHashai release process involves building and publishing a Docker image, alo
 - Additionally, a main tag is pushed whenever changes are merged into the main branch.
 ⚠️ Note: The main tag is not a stable release and may be broken or unstable. It is primarily intended for development and testing purposes.
 - Docker images are published to: `ghcr.io/marcantoineraymond/gomenhashai`
-- Images are signed
+- Images are signed using [cosign](https://github.com/sigstore/cosign) through the [attest-build-provenance](https://github.com/actions/attest-build-provenance) GitHub action.
 
 ## ☸️ Helm Chart
 
