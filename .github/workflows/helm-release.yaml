@@ -42,22 +42,24 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Find Helm chart artifact in release
+        id: find_release
         if: ${{ steps.cr.outputs.changed_charts != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="${{ steps.cr.outputs.chart_version }}"
+          tag="$(basename ${{ github.repository }} | tr '[:upper:]' '[:lower:]')-${{ steps.cr.outputs.chart_version }}"
           echo "Getting assets for release: $tag"
           chart_asset="${tag}.tgz"
           gh release download "$tag" --pattern "$chart_asset"
-          echo "CHART_FILE=$chart_asset" >> $GITHUB_ENV
+          echo "chart=$chart_asset" >> $GITHUB_OUTPUT
+          echo "tag=$tag" >> $GITHUB_OUTPUT
 
       - name: Generate artifact attestation
         if: ${{ steps.cr.outputs.changed_charts != '' }}
         id: attest
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
-          subject-path: ${{ env.CHART_FILE }}
+          subject-path: ${{ steps.find_release.outputs.chart }}
 
       - name: Prepare sigstore and in-toto bundle
         if: ${{ steps.cr.outputs.changed_charts != '' }}
@@ -65,7 +67,7 @@ jobs:
         env:
           BUNDLE: ${{ steps.attest.outputs.bundle-path }}
         run: |
-          NAME="${{ runner.temp }}/${{ steps.cr.outputs.chart_version }}"
+          NAME="${{ runner.temp }}/${{ steps.find_release.outputs.tag }}"
           echo "name=$NAME" >> $GITHUB_OUTPUT
           mv "$BUNDLE" "${NAME}.sigstore"
           if ! jq -e '.dsseEnvelope' "${NAME}.sigstore" > /dev/null; then
@@ -81,7 +83,7 @@ jobs:
         if: ${{ steps.cr.outputs.changed_charts != '' }}
         uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
         with:
-          tag: ${{ steps.cr.outputs.chart_version }}
+          tag: ${{ steps.find_release.outputs.tag }}
           file: ${{ steps.prep_attestation.outputs.name }}.*
           file_glob: true
           make_latest: false
