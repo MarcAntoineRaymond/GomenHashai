@@ -91,6 +91,8 @@ jobs:
           branch: update-chart-version-${{ steps.extract_tag.outputs.tag }}
           commit-message: Update appVersion to ${{ steps.extract_tag.outputs.tag }}
           delete-branch: true
+          signoff: true
+          sign-commits: true
           base: main
           title: "chore: update appVersion to ${{ steps.extract_tag.outputs.tag }}"
           body: |
