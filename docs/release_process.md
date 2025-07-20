@@ -10,6 +10,7 @@ GomenHashai release process involves building and publishing a Docker image, alo
 - Additionally, a main tag is pushed whenever changes are merged into the main branch.
 ⚠️ Note: The main tag is not a stable release and may be broken or unstable. It is primarily intended for development and testing purposes.
 - Docker images are published to: `ghcr.io/marcantoineraymond/gomenhashai`
+- Images are signed
 
 ## ☸️ Helm Chart
 
@@ -25,3 +26,9 @@ GomenHashai release process involves building and publishing a Docker image, alo
 - While each Helm release generally references a specific image version, Helm chart updates can occur independently of application changes.
 
 This separation allows for flexible iteration on deployment strategies and configuration while maintaining clear tracking of application version changes.
+
+## Supply Chain Verification
+
+With each Docker image and Helm Chart GitHub release an attestation is created.
+The attestation is added as an artifact of the release in the `.sigstore` bundle format and contains signature for the artifacts of the release.
+An `.intoto.jsonl` file is also included with each release containing an [in-toto envelope](https://github.com/in-toto/attestation/blob/main/spec/v1/envelope.md) similar to [this example](https://github.com/in-toto/in-toto-java/blob/master/intoto_example.intoto.jsonl).
