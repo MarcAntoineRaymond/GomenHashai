@@ -4,15 +4,16 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'g*'
 
 permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
   release:
-    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -33,6 +34,7 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Run chart-releaser
+        id: cr
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
           charts_dir: deploy/charts
@@ -41,48 +43,31 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-  attestation:
-    if: github.ref_type == 'tag'
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
-        with:
-          egress-policy: audit
-      
-      - name: Extract Docker tag from Git ref
-        id: extract_tag
-        run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
-
       - name: Find Helm chart artifact in release
+        if: steps.cr.outputs.changed_charts != ""
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="${{ steps.extract_tag.outputs.tag }}"
+          tag="${{ steps.cr.outputs.chart_version }}"
           echo "Getting assets for release: $tag"
-          chart_asset="${{ steps.extract_tag.outputs.tag }}.tgz"
+          chart_asset="${tag}.tgz"
           gh release download "$tag" --pattern "$chart_asset"
           echo "CHART_FILE=$chart_asset" >> $GITHUB_ENV
 
       - name: Generate artifact attestation
+        if: steps.cr.outputs.changed_charts != ""
         id: attest
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: ${{ env.CHART_FILE }}
 
       - name: Prepare sigstore and in-toto bundle
-        if: github.ref_type == 'tag'
+        if: steps.cr.outputs.changed_charts != ""
         id: prep_attestation
         env:
           BUNDLE: ${{ steps.attest.outputs.bundle-path }}
         run: |
-          NAME="${{ runner.temp }}/$(basename ${{ github.repository }}-${{ steps.extract_tag.outputs.tag }})"
+          NAME="${{ runner.temp }}/${{ steps.cr.outputs.chart_version }}"
           echo "name=$NAME" >> $GITHUB_OUTPUT
           mv "$BUNDLE" "${NAME}.sigstore"
           if ! jq -e '.dsseEnvelope' "${NAME}.sigstore" > /dev/null; then
@@ -95,7 +80,10 @@ jobs:
 
       # Upload attestations
       - name: Upload attestations to release
+        if: steps.cr.outputs.changed_charts != ""
         uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
         with:
+          tag: ${{ steps.cr.outputs.chart_version }}
           file: ${{ steps.prep_attestation.outputs.name }}.*
           file_glob: true
+          make_latest: false
