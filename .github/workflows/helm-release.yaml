@@ -42,7 +42,7 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Find Helm chart artifact in release
-        if: steps.cr.outputs.changed_charts != ""
+        if: ${{ steps.cr.outputs.changed_charts != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -53,14 +53,14 @@ jobs:
           echo "CHART_FILE=$chart_asset" >> $GITHUB_ENV
 
       - name: Generate artifact attestation
-        if: steps.cr.outputs.changed_charts != ""
+        if: ${{ steps.cr.outputs.changed_charts != '' }}
         id: attest
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: ${{ env.CHART_FILE }}
 
       - name: Prepare sigstore and in-toto bundle
-        if: steps.cr.outputs.changed_charts != ""
+        if: ${{ steps.cr.outputs.changed_charts != '' }}
         id: prep_attestation
         env:
           BUNDLE: ${{ steps.attest.outputs.bundle-path }}
@@ -78,7 +78,7 @@ jobs:
 
       # Upload attestations
       - name: Upload attestations to release
-        if: steps.cr.outputs.changed_charts != ""
+        if: ${{ steps.cr.outputs.changed_charts != '' }}
         uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
         with:
           tag: ${{ steps.cr.outputs.chart_version }}
