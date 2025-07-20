@@ -78,10 +78,12 @@ jobs:
 
       - name: Prepare sigstore and in-toto bundle
         if: github.ref_type == 'tag'
+        id: prep_attestation
         env:
           BUNDLE: ${{ steps.attest.outputs.bundle-path }}
         run: |
-          NAME="${{ github.repository }}-${{ steps.extract_tag.outputs.tag }}"
+          NAME="${{ runner.temp }}/$(basename ${{ github.repository }}-${{ steps.extract_tag.outputs.tag }})"
+          echo "name=$NAME" >> $GITHUB_OUTPUT
           mv "$BUNDLE" "${NAME}.sigstore"
           if ! jq -e '.dsseEnvelope' "${NAME}.sigstore" > /dev/null; then
             echo "❌ Error: No 'dsseEnvelope' found in ${NAME}.sigstore"
@@ -95,5 +97,5 @@ jobs:
       - name: Upload attestations to release
         uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
         with:
-          file: ${{ github.repository }}-${{ steps.extract_tag.outputs.tag }}.*
+          file: ${{ steps.prep_attestation.outputs.name }}.*
           file_glob: true
