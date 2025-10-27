@@ -9,7 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/google/go-containerregistry v0.20.6
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/onsi/ginkgo/v2 v2.26.0
+	github.com/onsi/ginkgo/v2 v2.27.1
 	github.com/onsi/gomega v1.38.2
 	github.com/prometheus/client_golang v1.23.2
 	gopkg.in/yaml.v3 v3.0.1
