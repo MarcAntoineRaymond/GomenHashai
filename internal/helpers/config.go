@@ -25,6 +25,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v3"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // Config struct
@@ -47,6 +48,10 @@ type Config struct {
 	MutationRegistryEnabled bool `yaml:"mutationRegistryEnabled"`
 	// The registry to inject when MutationRegistryEnabled is true
 	MutationRegistry string `yaml:"mutationRegistry"`
+	// Enforce image pull policy for all containers
+	MutationPullPolicy string `yaml:"mutationPullPolicy" validate:"omitempty,oneof=Always IfNotPresent Never"`
+	// Additional image pull secrets to add to all pods
+	MutationImagePullSecrets []corev1.LocalObjectReference `yaml:"mutationImagePullSecrets"`
 	// Configuration of the process that handles existing pods on init
 	ExistingPods ExistingPodsConfig `yaml:"existingPods"`
 }
