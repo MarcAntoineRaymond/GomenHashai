@@ -58,6 +58,9 @@ extraLabels: {}
 
 extraPodLabels: {}
 
+# gomenhashai pod image pull secrets
+imagePullSecrets: []
+
 # gomenhashai container security context
 containerSecurityContext:
   allowPrivilegeEscalation: false
