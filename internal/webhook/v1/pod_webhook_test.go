@@ -252,6 +252,209 @@ var _ = Describe("Pod Webhook", func() {
 		})
 	})
 
+	Describe("PullPolicy mutation feature", func() {
+		Context("PullPolicy is Never", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.MutationPullPolicy = "Never"
+			})
+
+			It("Should add/patch pullPolicy 'Never' to all containers", func() {
+				containersRegistry := []corev1.Container{
+					corev1.Container{
+						Name:  "app",
+						Image: "repo/image",
+					},
+					corev1.Container{
+						Name:            "sidecar",
+						Image:           "repo/anotherimage",
+						ImagePullPolicy: corev1.PullIfNotPresent,
+					},
+				}
+				mutatedContainers = AddContainerImageDigest(containersRegistry, "test")
+				Expect(mutatedContainers).To((HaveEach(HaveField("ImagePullPolicy", Equal(corev1.PullNever)))))
+			})
+
+			It("Should do nothing cause all containers already have Never PullPolicy", func() {
+				containersRegistry := []corev1.Container{
+					corev1.Container{
+						Name:            "app",
+						Image:           "repo/image",
+						ImagePullPolicy: corev1.PullNever,
+					},
+					corev1.Container{
+						Name:            "sidecar",
+						Image:           "repo/anotherimage",
+						ImagePullPolicy: corev1.PullNever,
+					},
+				}
+				mutatedContainers = AddContainerImageDigest(containersRegistry, "test")
+				Expect(mutatedContainers).To((HaveEach(HaveField("ImagePullPolicy", Equal(corev1.PullNever)))))
+			})
+		})
+		Context("PullPolicy is empty", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.MutationPullPolicy = ""
+			})
+
+			It("Should do nothing", func() {
+				containersRegistry := []corev1.Container{
+					corev1.Container{
+						Name:            "app",
+						Image:           "repo/image",
+						ImagePullPolicy: corev1.PullAlways,
+					},
+					corev1.Container{
+						Name:            "sidecar",
+						Image:           "repo/anotherimage",
+						ImagePullPolicy: corev1.PullAlways,
+					},
+				}
+				mutatedContainers = AddContainerImageDigest(containersRegistry, "test")
+				Expect(mutatedContainers).To((HaveEach(HaveField("ImagePullPolicy", Equal(corev1.PullAlways)))))
+			})
+
+		})
+		AfterEach(func() {
+			helpers.CONFIG.MutationPullPolicy = ""
+		})
+	})
+
+	Describe("ImagePullSecrets mutation feature", func() {
+		Context("ImagePullSecrets contains secrets", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.MutationImagePullSecrets = []corev1.LocalObjectReference{
+					{Name: "my-secret1"},
+					{Name: "my-secret2"},
+				}
+				pod = corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: containersTrusted,
+					},
+				}
+			})
+
+			It("Should add new ImagePullSecrets to pod", func() {
+				err := (&defaulter).Default(context.TODO(), &pod)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(pod).To(
+					HaveField("Spec",
+						HaveField("ImagePullSecrets",
+							Equal([]corev1.LocalObjectReference{
+								{Name: "my-secret1"},
+								{Name: "my-secret2"},
+							}),
+						),
+					),
+				)
+			})
+
+			It("Should add ImagePullSecrets to pod over existing ones", func() {
+				pod = corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: containersTrusted,
+						ImagePullSecrets: []corev1.LocalObjectReference{
+							{Name: "existing-secret"},
+						},
+					},
+				}
+				err := (&defaulter).Default(context.TODO(), &pod)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(pod).To(
+					HaveField("Spec",
+						HaveField("ImagePullSecrets",
+							ContainElements([]corev1.LocalObjectReference{
+								{Name: "existing-secret"},
+								{Name: "my-secret1"},
+								{Name: "my-secret2"},
+							}),
+						),
+					),
+				)
+			})
+
+			It("Should do nothing cause pod ImagePullSecrets secrets already has correct value", func() {
+				pod = corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: containersTrusted,
+						ImagePullSecrets: []corev1.LocalObjectReference{
+							{Name: "my-secret1"},
+							{Name: "existing-secret"},
+							{Name: "my-secret2"},
+						},
+					},
+				}
+				err := (&defaulter).Default(context.TODO(), &pod)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(pod).To(
+					HaveField("Spec",
+						HaveField("ImagePullSecrets",
+							Equal([]corev1.LocalObjectReference{
+								{Name: "my-secret1"},
+								{Name: "existing-secret"},
+								{Name: "my-secret2"},
+							}),
+						),
+					),
+				)
+			})
+		})
+		Context("ImagePullSecrets is empty", func() {
+			BeforeEach(func() {
+				helpers.CONFIG.MutationImagePullSecrets = []corev1.LocalObjectReference{}
+			})
+
+			It("Should do nothing on pod with empty pullSecrets", func() {
+				pod = corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: containersTrusted,
+					},
+				}
+				err := (&defaulter).Default(context.TODO(), &pod)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(pod).To(HaveField("Spec", HaveField("ImagePullSecrets", BeEmpty())))
+			})
+
+			It("Should do nothing on pod with existing pullSecrets", func() {
+				pod = corev1.Pod{
+					ObjectMeta: v1.ObjectMeta{
+						Name: "test",
+					},
+					Spec: corev1.PodSpec{
+						Containers: containersTrusted,
+						ImagePullSecrets: []corev1.LocalObjectReference{
+							{Name: "my-secret1"},
+						},
+					},
+				}
+				err := (&defaulter).Default(context.TODO(), &pod)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(pod).To(HaveField("Spec",
+					HaveField("ImagePullSecrets",
+						Equal([]corev1.LocalObjectReference{
+							{Name: "my-secret1"},
+						}),
+					),
+				))
+			})
+
+		})
+		AfterEach(func() {
+			helpers.CONFIG.MutationImagePullSecrets = []corev1.LocalObjectReference{}
+		})
+	})
+
 	Describe("Dry run and warn", func() {
 		BeforeEach(func() {
 			mutatedContainers = AddContainerImageDigest(containersTrusted, "test")

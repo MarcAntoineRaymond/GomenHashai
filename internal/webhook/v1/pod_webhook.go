@@ -67,6 +67,25 @@ func (d *PodCustomDefaulter) Default(ctx context.Context, obj runtime.Object) er
 	pod.Spec.InitContainers = AddContainerImageDigest(pod.Spec.InitContainers, pod.GetName())
 	pod.Spec.Containers = AddContainerImageDigest(pod.Spec.Containers, pod.GetName())
 
+	// Do Image Pull Secrets mutation
+	if len(helpers.CONFIG.MutationImagePullSecrets) > 0 {
+		podlog.Info("[🐾IntegrityPatrol] add image pull secrets", "pod", pod.GetName(), "imagePullSecrets", helpers.CONFIG.MutationImagePullSecrets)
+		for _, pullSecret := range helpers.CONFIG.MutationImagePullSecrets {
+			secretName := pullSecret.Name
+			secretExists := false
+			for _, existingSecret := range pod.Spec.ImagePullSecrets {
+				if existingSecret.Name == secretName {
+					secretExists = true
+					break
+				}
+			}
+			if !secretExists {
+				pod.Spec.ImagePullSecrets = append(pod.Spec.ImagePullSecrets, corev1.LocalObjectReference{Name: secretName})
+			}
+		}
+		podlog.Info("[🐾IntegrityPatrol] completed adding image pull secrets", "pod", pod.GetName(), "imagePullSecrets", helpers.CONFIG.MutationImagePullSecrets)
+	}
+
 	return nil
 }
 
@@ -98,6 +117,14 @@ func AddContainerImageDigest(inContainers []corev1.Container, podName string) []
 				image = imageProcessRegistry
 			}
 			podlog.Info("[🐾IntegrityPatrol] completed setting common registry", "pod", podName, "container", container.Name, "image", container.Image, "registry", helpers.CONFIG.MutationRegistry)
+		}
+
+		// Do Pull Policy mutation
+		if helpers.CONFIG.MutationPullPolicy != "" {
+			podlog.Info("[🐾IntegrityPatrol] set pull policy", "pod", podName, "container", container.Name, "pullPolicy", helpers.CONFIG.MutationPullPolicy)
+			container.ImagePullPolicy = corev1.PullPolicy(helpers.CONFIG.MutationPullPolicy)
+			containers[i] = container
+			podlog.Info("[🐾IntegrityPatrol] completed setting pull policy", "pod", podName, "container", container.Name, "pullPolicy", helpers.CONFIG.MutationPullPolicy)
 		}
 
 		// Remove digest if already present in image field
