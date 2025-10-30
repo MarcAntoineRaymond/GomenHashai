@@ -47,7 +47,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="$(basename ${{ github.repository }} | tr '[:upper:]' '[:lower:]')-$(echo ${{ steps.cr.outputs.chart_version }} | cut -c 2-)"
+          tag="$(basename ${{ github.repository }} | tr '[:upper:]' '[:lower:]')-$(cat deploy/charts/gomenhashai/Chart.yaml | grep '^version:' | awk '{print $2}')"
           echo "Getting assets for release: $tag"
           chart_asset="${tag}.tgz"
           gh release download "$tag" --pattern "$chart_asset"
