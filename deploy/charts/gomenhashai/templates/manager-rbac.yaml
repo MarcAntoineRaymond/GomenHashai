@@ -18,6 +18,28 @@ rules:
   - watch
   - patch
   - create
+{{- if .Values.globalPullSecrets }}
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  resourceNames:
+  {{- range .Values.globalPullSecrets }}
+  - {{ .name }}
+  {{- end }}
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+  - patch
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

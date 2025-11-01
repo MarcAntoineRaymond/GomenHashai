@@ -41,3 +41,9 @@ metrics:
   serviceMonitor:
     # Enable exporting metrics with Prometheus Service Monitor INSTEAD OF annotations, require using Prometheus Operator
     enabled: false
+
+globalPullSecrets:
+  - name: my-pull-secret-1
+    username: my-pull-secret-1-username
+    token: my-pull-secret-1-token
+    registry: myregistry.io

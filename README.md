@@ -104,7 +104,7 @@ The provided Helm chart follows Kubernetes security best practices out of the bo
 ### 🐳 Registry Modification
 
 Mutating webhook can also be used to enforce a common registry for all images.
-In addition to the registry, the pullPolicy and imagePullSecrets can also be enforced for all pods.
+In addition to the registry, the pullPolicy and gobal imagePullSecrets can also be enforced for all pods (see [Global Image Pull Secrets section](docs/usage.md#global-image-pull-secrets)).
 
 ### ⛩️ Exemptions
 
@@ -217,7 +217,7 @@ config:
   mutationRegistry: ""
   # -- Enforce image pull policy for all containers
   mutationPullPolicy: ""
-  # -- Additional image pull secrets to add to all pods (secret must exist in all managed namespaces)
+  # -- Additional image pull secrets to add to all pods
   mutationImagePullSecrets: []
   # -- Configuration of the process that handles existing pods on init
   existingPods:

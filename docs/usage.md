@@ -147,6 +147,25 @@ Sample output:
 
 You can use this output to populate the trusted digest secret. Once you've validated each digest, you may disable automatic fetching to enforce stronger security.
 
+## Global Image Pull Secrets
+
+Using variable `mutationImagePullSecrets` it is possible to inject custom imagePullSecrets into all pods across all namespaces. Pods will require the secets to be present in all namespaces.
+
+You can manage these secrets yourself or let GomenHashai create them for you.
+
+By configuring in the values of the helm chart `globalPullSecrets`, the chart will be deployed with specific RBAC rights to create the secret in all namespaces and ONLY access and mofify the secrets with the corresponding names.
+The secrets named `.name` will be created with the correct docker config in every new and already existing namespaces.
+
+```yaml
+globalPullSecrets:
+  - name: my-pull-secret-1
+    username: my-pull-secret-1-username
+    token: my-pull-secret-1-token
+    registry: myregistry.io
+```
+
+If you do not use this variable GomenHashai will not be deployed with RBAC rights to access Secrets ressources but you will need to manage these imagePullSecrets yourself.
+
 ## Audit or Dry Run
 
 Enforcing behaviour of the mutating and validating webhook can be disabled.

@@ -243,6 +243,21 @@ func main() {
 		}
 	}
 
+	if len(helpers.PULL_SECRETS_CREDENTIALS) > 0 {
+		nsReconciler := &controller.NamespaceReconciler{
+			Client: mgr.GetClient(),
+			Logger: mgr.GetLogger(),
+		}
+		if err = (nsReconciler).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "🍙GomenHashai failed on setup", "controller", "Namespace")
+			os.Exit(1)
+		}
+		if err := mgr.Add(nsReconciler); err != nil {
+			setupLog.Error(err, "🍙GomenHashai kindly apologize for failing to handle pull secrets")
+			os.Exit(1)
+		}
+	}
+
 	setupLog.Info("🍙GomenHashai is warming up is nose")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "🍙GomenHashai tripped over its own paws... internal error 🐶💥")

@@ -17,6 +17,8 @@ limitations under the License.
 package helpers
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -54,6 +56,16 @@ type Config struct {
 	MutationImagePullSecrets []corev1.LocalObjectReference `yaml:"mutationImagePullSecrets"`
 	// Configuration of the process that handles existing pods on init
 	ExistingPods ExistingPodsConfig `yaml:"existingPods"`
+	// File containing pull secret credentials to create in all namespaces
+	PullSecretsCredentialsFile string `yaml:"pullSecretsCredentialsFile"`
+}
+
+type PullSecretCredential struct {
+	Name      string `yaml:"name"`
+	Username  string `yaml:"username"`
+	Token     string `yaml:"token"`
+	Registry  string `yaml:"registry"`
+	DockerCfg []byte `yaml:"-"`
 }
 
 type ExistingPodsConfig struct {
@@ -79,6 +91,9 @@ var DIGEST_MAPPING = map[string]string{}
 var CONFIG = defaultConfig()
 var REGISTRIES_CONFIG = map[string]RegistryCredentials{}
 
+// Create pull secrets into all namespaces
+var PULL_SECRETS_CREDENTIALS = []PullSecretCredential{}
+
 type RegistryCredentials struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
@@ -102,6 +117,7 @@ func defaultConfig() Config {
 			UpdateEnabled: true,
 			DeleteEnabled: true,
 		},
+		PullSecretsCredentialsFile: "/etc/gomenhashai/configs/pullSecretsCredentials.yaml",
 	}
 }
 
@@ -147,6 +163,24 @@ func InitConfig() error {
 		}
 	}
 
+	// Load pull secrets credentials
+	if cfg.PullSecretsCredentialsFile != "" {
+		if data, err := os.ReadFile(filepath.Clean(cfg.PullSecretsCredentialsFile)); err == nil {
+			if err := yaml.Unmarshal(data, &PULL_SECRETS_CREDENTIALS); err != nil {
+				return fmt.Errorf("failed to parse pull secrets credentials file: %w", err)
+			}
+			for i, cred := range PULL_SECRETS_CREDENTIALS {
+				dockerCfgJSON, err := MakeDockerConfigJson(cred.Username, cred.Token, cred.Registry)
+				if err != nil {
+					return fmt.Errorf("failed to build docker config json for pull secret %s: %w", cred.Name, err)
+				}
+				PULL_SECRETS_CREDENTIALS[i].DockerCfg = dockerCfgJSON
+			}
+		} else if !os.IsNotExist(err) {
+			return fmt.Errorf("failed to read pull secrets credentials file: %w", err)
+		}
+	}
+
 	CONFIG = cfg
 	return nil
 }
@@ -167,4 +201,22 @@ func LoadDigestMapping() error {
 	}
 
 	return nil
+}
+
+func MakeDockerConfigJson(username, token, registry string) ([]byte, error) {
+	// Build .dockerconfigjson content
+	auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, token)))
+
+	dockerCfg := map[string]any{
+		"auths": map[string]any{
+			registry: map[string]string{
+				"username": username,
+				"password": token,
+				"auth":     auth,
+			},
+		},
+	}
+
+	dockerCfgJSON, _ := json.Marshal(dockerCfg)
+	return dockerCfgJSON, nil
 }
