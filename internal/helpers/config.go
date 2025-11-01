@@ -28,6 +28,8 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 )
 
 // Config struct
@@ -58,6 +60,11 @@ type Config struct {
 	ExistingPods ExistingPodsConfig `yaml:"existingPods"`
 	// File containing pull secret credentials to create in all namespaces
 	PullSecretsCredentialsFile string `yaml:"pullSecretsCredentialsFile"`
+	// Namespaces to exempt from creating pull secrets
+	PullSecretsExemptedNamespaces []string `yaml:"pullSecretsExemptedNamespaces"`
+	// Labels selector to apply pull secrets only to namespaces matching the selector
+	PullSecretsNamespaceSelector       *metav1.LabelSelector `yaml:"pullSecretsNamespaceSelector"`
+	PullSecretsNamespaceSelectorLabels labels.Selector       `yaml:"-"`
 }
 
 type PullSecretCredential struct {
@@ -117,7 +124,9 @@ func defaultConfig() Config {
 			UpdateEnabled: true,
 			DeleteEnabled: true,
 		},
-		PullSecretsCredentialsFile: "/etc/gomenhashai/configs/pullSecretsCredentials.yaml",
+		PullSecretsCredentialsFile:         "/etc/gomenhashai/configs/pullSecretsCredentials.yaml",
+		PullSecretsExemptedNamespaces:      []string{},
+		PullSecretsNamespaceSelectorLabels: labels.Everything(),
 	}
 }
 
@@ -169,12 +178,20 @@ func InitConfig() error {
 			if err := yaml.Unmarshal(data, &PULL_SECRETS_CREDENTIALS); err != nil {
 				return fmt.Errorf("failed to parse pull secrets credentials file: %w", err)
 			}
+			// Build docker config json for each credential
 			for i, cred := range PULL_SECRETS_CREDENTIALS {
 				dockerCfgJSON, err := MakeDockerConfigJson(cred.Username, cred.Token, cred.Registry)
 				if err != nil {
 					return fmt.Errorf("failed to build docker config json for pull secret %s: %w", cred.Name, err)
 				}
 				PULL_SECRETS_CREDENTIALS[i].DockerCfg = dockerCfgJSON
+			}
+			// Prepare label selector
+			if cfg.PullSecretsNamespaceSelector != nil {
+				cfg.PullSecretsNamespaceSelectorLabels, err = metav1.LabelSelectorAsSelector(cfg.PullSecretsNamespaceSelector)
+				if err != nil {
+					return fmt.Errorf("invalid namespace selector: %w", err)
+				}
 			}
 		} else if !os.IsNotExist(err) {
 			return fmt.Errorf("failed to read pull secrets credentials file: %w", err)

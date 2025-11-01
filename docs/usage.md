@@ -166,6 +166,39 @@ globalPullSecrets:
 
 If you do not use this variable GomenHashai will not be deployed with RBAC rights to access Secrets ressources but you will need to manage these imagePullSecrets yourself.
 
+### Target namespaces
+
+It is possible to target specific namespaces for the global pull secret creation. This is useful if you have some restricted namespaces you want GomenHashai to avoid.
+
+However, the RBAC will still be applied globally even if you exempt some namespaces as you cannot apply those selectors to ClusterRoles Kubernetes ressources.
+
+You can use selectors for the namespace ressources to only create secret in specific namespaces:
+
+```yaml
+config:
+  # -- Labels selector to apply pull secrets only to namespaces matching the selector
+  pullSecretsNamespaceSelector:
+    matchLabels:
+      my-label: test
+    matchExpressions:
+      - key: environment
+        operator: NotIn
+        values:
+          - frontend
+```
+
+In addition to using selector you can also exempt specific namespaces from secret creation:
+
+```yaml
+config:
+  pullSecretsExemptedNamespaces:
+  - kube-system
+```
+
+Any namespace listed in this variable will be exempted.
+
+
+
 ## Audit or Dry Run
 
 Enforcing behaviour of the mutating and validating webhook can be disabled.

@@ -46,10 +46,21 @@ spec:
 
         {{- if .Values.globalPullSecrets }}
         SECRET_NAME={{ index .Values.globalPullSecrets 0 "name" }}
+        cat <<EOF | kubectl create -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: frontend
+          labels:
+            environment: frontend
+        EOF
         namespaces=$(kubectl get ns -o jsonpath='{.items[*].metadata.name}')
 
         for ns in $namespaces; do
           if ! kubectl get secret "${SECRET_NAME}" -n "$ns"; then
+            if [ "$ns" = "frontend" ] || [ "$ns" = "kube-system" ]; then
+              continue
+            fi
             echo "Secret ${SECRET_NAME} not found in namespace ${ns}"
             exit 1
           fi

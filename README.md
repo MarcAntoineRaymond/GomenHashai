@@ -219,6 +219,10 @@ config:
   mutationPullPolicy: ""
   # -- Additional image pull secrets to add to all pods
   mutationImagePullSecrets: []
+  # -- Namespaces to exempt from creating pull secrets
+  pullSecretsExemptedNamespaces: []
+  # -- Labels selector to apply pull secrets only to namespaces matching the selector
+  pullSecretsNamespaceSelector: {}
   # -- Configuration of the process that handles existing pods on init
   existingPods:
   # -- Enable the init function that will process existing pods at startup

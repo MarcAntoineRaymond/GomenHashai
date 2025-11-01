@@ -18,6 +18,14 @@ config:
   mutationRegistry: ""
   existingPods:
     enabled: true
+  pullSecretsNamespaceSelector:
+    matchExpressions:
+      - key: environment
+        operator: NotIn
+        values:
+          - frontend
+  pullSecretsExemptedNamespaces:
+  - kube-system
 
 webhook:
   mutating:

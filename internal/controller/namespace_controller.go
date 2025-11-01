@@ -24,6 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,11 +56,24 @@ func (r *NamespaceReconciler) Start(ctx context.Context) error {
 func (r *NamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	ns := &corev1.Namespace{}
+	// Skip excluded namespaces
+	for _, excluded := range helpers.CONFIG.PullSecretsExemptedNamespaces {
+		if req.Name == excluded {
+			r.Logger.Info("[🐾IntegrityPatrol] Skipping excluded namespace", "namespace", req.Name)
+			return ctrl.Result{}, nil
+		}
+	}
 	if err := r.Get(ctx, req.NamespacedName, ns); err != nil {
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil // namespace deleted
 		}
 		return ctrl.Result{}, err
+	}
+
+	// Check label selector
+	if !helpers.CONFIG.PullSecretsNamespaceSelectorLabels.Matches(labels.Set(ns.Labels)) {
+		r.Logger.Info("[🐾IntegrityPatrol] Namespace does not match selector; skipping", "namespace", req.Name)
+		return ctrl.Result{}, nil
 	}
 
 	for _, cred := range helpers.PULL_SECRETS_CREDENTIALS {
