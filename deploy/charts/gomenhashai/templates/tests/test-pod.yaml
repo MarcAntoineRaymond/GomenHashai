@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: tester
-      image: bitnami/kubectl:1.33.0-debian-12-r0@sha256:0f6b5088710f1c6d2d41f5e19a15663b7fef07d89699247aaaad92975be7eed6
+      image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}@{{ .Values.tests.image.digest }}"
       command:
       - sh
       args:
@@ -42,6 +42,44 @@ spec:
         ! kubectl get pod -n default test-not-delete && echo "Pod test-not-delete should not have been deleted" && exit 1 || exit 0
         {{- end }}
         {{- end }}
+        {{- end }}
+
+        {{- if .Values.globalPullSecrets }}
+        SECRET_NAME={{ index .Values.globalPullSecrets 0 "name" }}
+        cat <<EOF | kubectl create -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: frontend
+          labels:
+            environment: frontend
+        EOF
+        namespaces=$(kubectl get ns -o jsonpath='{.items[*].metadata.name}')
+
+        for ns in $namespaces; do
+          if ! kubectl get secret "${SECRET_NAME}" -n "$ns"; then
+            if [ "$ns" = "frontend" ] || [ "$ns" = "kube-system" ]; then
+              continue
+            fi
+            echo "Secret ${SECRET_NAME} not found in namespace ${ns}"
+            exit 1
+          fi
+        done
+
+        test_ns="test-ns-$(date +%s)"
+        kubectl create ns "$test_ns"
+
+        for i in {1..30}; do
+          if kubectl get secret "${SECRET_NAME}" -n "$test_ns" &>/dev/null; then
+            echo "Secret created in new namespace"
+          fi
+          sleep 2
+        done
+
+        if ! kubectl get secret "${SECRET_NAME}" -n "$test_ns" &>/dev/null; then
+          echo "Secret was not created in new namespace ${test_ns} within timeout"
+          exit 1
+        fi
         {{- end }}
       volumeMounts:
         - name: tmp

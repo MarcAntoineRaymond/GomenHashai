@@ -1,0 +1,102 @@
+name: Lint Charts
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+      - 'logo/**'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+env:
+  CHART_DIR: deploy/charts/
+
+jobs:
+  kube-linter:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      # This prepares directory where github/codeql-action/upload-sarif@v1 looks up report files by default.
+      - name: Create ../results directory for SARIF report files
+        shell: bash
+        run: mkdir -p ../results
+
+      - name: Scan yaml files with kube-linter
+        uses: stackrox/kube-linter-action@87802a2f4e01abebb3ee3c67a3002fea71f6eae5 # v1.0.7
+        id: kube-linter-action-scan
+        with:
+          # Adjust this directory to the location where your kubernetes resources and helm charts are located.
+          directory: ${{ env.CHART_DIR }}
+          # config: sample/.kube-linter-config.yaml
+          # The following two settings make kube-linter produce scan analysis in SARIF format which would then be
+          # made available in GitHub UI via upload-sarif action below.
+          format: sarif
+          output-file: ../results/kube-linter.sarif
+        # The following line prevents aborting the workflow immediately in case your files fail kube-linter checks.
+        # This allows the following upload-sarif action to still upload the results to your GitHub repo.
+        continue-on-error: true
+
+      - name: Upload SARIF report files to GitHub
+        uses: github/codeql-action/upload-sarif@4e94bd11f71e507f7f87df81788dff88d1dacbfb # v3.29.5
+
+      # Ensure the workflow eventually fails if files did not pass kube-linter checks.
+      - name: Verify kube-linter-action succeeded
+        shell: bash
+        run: |
+          echo "If this step fails, kube-linter found issues. Check the output of the scan step above."
+          [[ "${{ steps.kube-linter-action-scan.outcome }}" == "success" ]]
+
+  helm-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Set up Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+
+      - name: Install helm-docs
+        run: go install github.com/norwoodj/helm-docs/cmd/helm-docs@v1.14.2
+
+      - name: Check if README.md changed
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Helm chart docs are out of date. Please run 'helm-docs' and commit the changes."
+            git diff
+            exit 1
+          fi
+
+  helm-values-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Generate values schema json
+        uses: losisin/helm-values-schema-json-action@660c441a4a507436a294fc55227e1df54aca5407 # v2.3.1
+        with:
+          working-directory: ${{ env.CHART_DIR }}gomenhashai
+          values: values.yaml
+          fail-on-diff: true

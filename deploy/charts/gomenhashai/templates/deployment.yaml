@@ -106,7 +106,7 @@ spec:
         securityContext:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
         volumeMounts:
-        {{- if or .Values.config .Values.registriesConfig }}
+        {{- if or .Values.config .Values.registriesConfig .Values.globalPullSecrets }}
         - name: configs
           mountPath: /etc/gomenhashai/configs
         {{- end }}
@@ -131,7 +131,7 @@ spec:
       serviceAccountName: {{ include "gomenhashai.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
       volumes:
-      {{- if or .Values.config .Values.registriesConfig }}
+      {{- if or .Values.config .Values.registriesConfig .Values.globalPullSecrets }}
       - name: configs
         projected:
           sources:
@@ -148,6 +148,13 @@ spec:
               items:
               - key: registries.yaml
                 path: registries.yaml
+      {{- end }}
+      {{- if .Values.globalPullSecrets }}
+          - secret:
+              name: {{ include "gomenhashai.fullname" . }}-global-pull-secrets
+              items:
+              - key: pullSecretsCredentials.yaml
+                path: pullSecretsCredentials.yaml
       {{- end }}
       {{- end }}
       - name: digests-mapping

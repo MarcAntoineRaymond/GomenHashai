@@ -2,10 +2,10 @@
 replicas: 1
 
 # -- Override Chart name in template
-nameOverride:
+nameOverride: ""
 
 # -- Override ReleaseName-ChartName in template
-fullnameOverride:
+fullnameOverride: ""
 
 # -- Cluster domain (used by cert-manager to generate certificate)
 kubernetesClusterDomain: cluster.local
@@ -14,7 +14,7 @@ image:
   # -- Image repository
   repository: ghcr.io/marcantoineraymond/gomenhashai
   # -- Image tag to use, default to appVersion
-  tag:
+  tag: ""
   # -- Image digest to use
   digest: "sha256:40f4f71ae3b11236994f734fda0f526daadecb2d525c1c94666a65dc40d6cab2"
   # -- Image pull policy
@@ -25,11 +25,11 @@ digestsMapping:
   # -- Create the digestsMapping secret
   create: true
   # -- Name of the digestsMapping secret, if create is false secret must exist
-  secretName:
+  secretName: ""
   # -- Name of the key under which the mapping is stored in the secret
   secretKey: digests_mapping.yaml
   # -- YAML image name to digest mapping
-  mapping:
+  mapping: {}
 #    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
 #    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
 #    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
@@ -40,15 +40,22 @@ digestsMapping:
 #    "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
 
 # -- YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations
-config:
+config: {}
 #  exemptions: []
 #  ...
 
-# -- Registries authentication configuration, map of registry_name: {username: , password: }
-registriesConfig:
+# -- Registries authentication configuration, map of registry_name: {username: , password: } when automatically fetch digests is enabled
+registriesConfig: {}
 #  myregistry.io:
 #    username: user
 #    password: pass
+
+# -- Global image pull secrets to add to all namespaces
+globalPullSecrets: []
+#  - name: my-pull-secret-1
+#    username: my-pull-secret-1-username
+#    token: my-pull-secret-1-token
+#    registry: myregistry.io
 
 # -- Args passed to the manager app, override default args
 args: []
@@ -132,7 +139,7 @@ serviceAccount:
   # -- Create the service account, if false the service account must be provided
   create: true
   # -- Name of the service account, if create is false it must exists
-  name:
+  name: ""
   # -- Annotations to the service account if create is true
   annotations: {}
   # -- Extra Labels to the service account if create is true
@@ -168,10 +175,10 @@ certificates:
     issuer:
   webhook:
     # -- Name of the secret containing webhook certificates (generated if empty)
-    secretName:
+    secretName: ""
   metrics:
     # -- Name of the secret containing metrics certificates (generated if empty)
-    secretName:
+    secretName: ""
 
 metrics:
   # -- Enable exporting metrics with prometheus annotations
@@ -211,12 +218,12 @@ webhook:
     # -- Enable mutation webhook
     enabled: true
     # -- Add labels: value to match namespace to exempt from mutation
-    exemptNamespacesLabels:
+    exemptNamespacesLabels: {}
     #  kubernetes.io/metadata.name:
     #    - "kube-system"
     #    - "cert-manager"
     # -- CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager
-    caBundle:
+    caBundle: ""
     annotations: {}
     extraLabels: {}
     failurePolicy: Fail
@@ -230,12 +237,12 @@ webhook:
     # -- Enable validation webhook
     enabled: true
     # -- Add labels: value to match namespace to exempt from validation
-    exemptNamespacesLabels:
+    exemptNamespacesLabels: {}
     #  kubernetes.io/metadata.name:
     #    - "kube-system"
     #    - "cert-manager"
     # -- CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager
-    caBundle:
+    caBundle: ""
     annotations: {}
     extraLabels: {}
     failurePolicy: Fail
@@ -250,3 +257,9 @@ webhook:
     port: 443
     targetPort: 9443
     type: ClusterIP
+
+tests:
+  image:
+    repository: bitnami/kubectl
+    tag: 1.33.0-debian-12-r0
+    digest: "sha256:0f6b5088710f1c6d2d41f5e19a15663b7fef07d89699247aaaad92975be7eed6"
