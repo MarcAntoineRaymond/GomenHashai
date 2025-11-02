@@ -1,10 +1,14 @@
-# 🍣 GomenHashai 🐾
+# gomenhashai
+
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.2.0](https://img.shields.io/badge/AppVersion-v1.2.0-informational?style=flat-square)
 
 Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
 
 Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default protections.
 
 ## 🚀 Quick Start
+
+Deploy in warn mode:
 
 ```sh
 helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai \
@@ -15,72 +19,98 @@ helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io
 
 ---
 
-## ✨ What It Does
+## 🍣 Usage
 
-### 🌀 Mutating Admission Webhook
+GomenHashai uses **Kubernetes admission webhook** to validate and optionally mutate pod specifications to ensure all container images use **immutable digests** instead of mutable tags. 
+It helps enforce image provenance and strengthen your supply chain security posture.
+It has many more features.
 
-Automatically rewrites container images in Pods to include a trusted digest (e.g., nginx:1.27.5 -> nginx:1.27.5@sha256:...).
+See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 
-### 🛡️ Validating Admission Webhook
+**Homepage:** <https://github.com/MarcAntoineRaymond/GomenHashai>
 
-Denies Pods that uses containers without trusted digests.
+## Maintainers
 
-Ensures every container image matches a digest listed in a trusted Secret.
+| Name | Email | Url |
+| ---- | ------ | --- |
+| MarcAntoineRaymond |  | <https://github.com/MarcAntoineRaymond> |
 
-### ↩️ Handles Already Existing pods
+## Source Code
 
-Can submit automatically already existing pods to the webhook to make sure they use a digest. It can potentially delete pods using untrusted digests/images.
+* <https://github.com/MarcAntoineRaymond/GomenHashai>
 
-### 🔐 Trusted Digest Store
+## Values
 
-Uses a Kubernetes Secret to store a mapping of image name -> digest.
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| annotations | object | `{}` | Deployment annotations |
+| args | list | `[]` | Args passed to the manager app, override default args |
+| certificates.cert-manager | object | `{"create":true,"duration":365,"enabled":false,"issuer":null,"renewBefore":"360h"}` | Cert manager configuration |
+| certificates.cert-manager.create | bool | `true` | Deploy certificates resources for cert-manager (Only if cert-manager is enabled, disable creation if you provide your own certificates from a secret) |
+| certificates.cert-manager.duration | int | `365` | Certificates duration in days |
+| certificates.cert-manager.enabled | bool | `false` | Use cert-manager to inject CA in webhook configuration |
+| certificates.cert-manager.issuer | string | `nil` | Only set issuer if you have your own issuer otherwise one will be created (if create is true) |
+| certificates.cert-manager.renewBefore | string | `"360h"` | When to renew certificates |
+| certificates.duration | int | `365` | Certificates duration in days (for default self signed certificate) |
+| certificates.metrics.secretName | string | `nil` | Name of the secret containing metrics certificates (generated if empty) |
+| certificates.webhook.secretName | string | `nil` | Name of the secret containing webhook certificates (generated if empty) |
+| config | string | `nil` | YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations |
+| containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true}` | Container security context |
+| digestsMapping | object | `{"create":true,"mapping":null,"secretKey":"digests_mapping.yaml","secretName":null}` | Mapping containing "image": "trusted digest" |
+| digestsMapping.create | bool | `true` | Create the digestsMapping secret |
+| digestsMapping.mapping | string | `nil` | YAML image name to digest mapping |
+| digestsMapping.secretKey | string | `"digests_mapping.yaml"` | Name of the key under which the mapping is stored in the secret |
+| digestsMapping.secretName | string | `nil` | Name of the digestsMapping secret, if create is false secret must exist |
+| envFrom | list | `[]` | Environment variables from secrets or configmaps to add to the container |
+| extraEnv | list | `[]` | Extra environment variables to add to the container |
+| extraLabels | object | `{}` | Extra labels |
+| extraPodLabels | object | `{}` | Pod extra labels |
+| extraVolumeMounts | list | `[]` | Extra volume mounts to add to the container |
+| extraVolumes | list | `[]` | Extra volumes to add to the pod |
+| fullnameOverride | string | `nil` | Override ReleaseName-ChartName in template |
+| image.digest | string | `"sha256:40f4f71ae3b11236994f734fda0f526daadecb2d525c1c94666a65dc40d6cab2"` | Image digest to use |
+| image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
+| image.repository | string | `"ghcr.io/marcantoineraymond/gomenhashai"` | Image repository |
+| image.tag | string | `nil` | Image tag to use, default to appVersion |
+| imagePullSecrets | list | `[]` | Image pull secrets |
+| initContainers | list | `[]` | Extra init containers to add to the pod |
+| kubernetesClusterDomain | string | `"cluster.local"` | Cluster domain (used by cert-manager to generate certificate) |
+| livenessProbe | object | `{"initialDelaySeconds":5,"periodSeconds":10,"port":8081}` | Configure Deployment liveness probe |
+| metrics.enabled | bool | `true` | Enable exporting metrics with prometheus annotations |
+| metrics.secure | bool | `true` | Serve metrics with HTTPS and authn/authz and add TLS Config to Service Monitor if enabled |
+| metrics.service | object | `{"annotations":{},"extraLabels":{},"port":8443,"targetPort":8443,"type":"ClusterIP"}` | Metrics service configuration |
+| metrics.serviceMonitor.annotations | object | `{}` | Custom annotations to add to ServiceMonitor |
+| metrics.serviceMonitor.enabled | bool | `false` | Enable exporting metrics with Prometheus Service Monitor INSTEAD OF annotations, require using Prometheus Operator |
+| metrics.serviceMonitor.endpointAdditionalProperties | object | `{}` | Extra properties to add to endpoint in ServiceMonitor resource |
+| metrics.serviceMonitor.extraLabels | object | `{}` | Extra labels to add to ServiceMonitor |
+| metrics.serviceMonitor.interval | string | `"60s"` | How frequently to scrape targets by default. |
+| metrics.serviceMonitor.path | string | `"/metrics"` | Path exposing metrics |
+| metrics.serviceMonitor.scrapeTimeout | string | `"10s"` | How long until a scrape request times out. |
+| metrics.serviceMonitor.targetPort | int | `8443` | Port to scrape on metrics service |
+| metrics.serviceMonitor.tlsConfig | object | `{}` | Overwrite Service Monitor TLS config, a default TLS config referencing certificates.metrcis.secretName is added when metrics.secure is true |
+| nameOverride | string | `nil` | Override Chart name in template |
+| podAnnotations | object | `{"kubectl.kubernetes.io/default-container":"gomenhashai"}` | Deployment pod annotations |
+| podSecurityContext | object | `{"fsGroup":2000,"runAsGroup":2000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod security context |
+| rbac | object | `{"create":true}` | RBAC role and binding to the service account |
+| rbac.create | bool | `true` | Create the RBAC resources |
+| readinessProbe | object | `{"initialDelaySeconds":5,"periodSeconds":10,"port":8081}` | Configure Deployment readiness probe |
+| registriesConfig | string | `nil` | Registries authentication configuration, map of registry_name: {username: , password: } |
+| replicas | int | `1` | Replicas count multiple replicas is supported for HA |
+| resources | object | `{"limits":{"cpu":"1","memory":"256Mi"},"requests":{"cpu":"10m","memory":"64Mi"}}` | Gomenhashai resources configuration, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
+| serviceAccount | object | `{"annotations":{},"automountServiceAccountToken":true,"create":true,"extraLabels":{},"name":null}` | Service account configuration |
+| serviceAccount.annotations | object | `{}` | Annotations to the service account if create is true |
+| serviceAccount.automountServiceAccountToken | bool | `true` | Automount service account token in service account |
+| serviceAccount.create | bool | `true` | Create the service account, if false the service account must be provided |
+| serviceAccount.extraLabels | object | `{}` | Extra Labels to the service account if create is true |
+| serviceAccount.name | string | `nil` | Name of the service account, if create is false it must exists |
+| sidecars | list | `[]` | Extra sidecars to add to the pod |
+| webhook.mutating | object | `{"annotations":{},"caBundle":null,"enabled":true,"exemptNamespacesLabels":null,"extraLabels":{},"failurePolicy":"Fail","matchPolicy":"Exact","objectSelector":{},"reinvocationPolicy":"Never","sideEffects":"None"}` | Mutating Webhook configuration |
+| webhook.mutating.caBundle | string | `nil` | CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager |
+| webhook.mutating.enabled | bool | `true` | Enable mutation webhook |
+| webhook.mutating.exemptNamespacesLabels | string | `nil` | Add labels: value to match namespace to exempt from mutation |
+| webhook.service | object | `{"annotations":{},"extraLabels":{},"port":443,"targetPort":9443,"type":"ClusterIP"}` | Webhook service configuration |
+| webhook.validating | object | `{"annotations":{},"caBundle":null,"enabled":true,"exemptNamespacesLabels":null,"extraLabels":{},"failurePolicy":"Fail","matchPolicy":"Exact","objectSelector":{},"sideEffects":"None"}` | Validating Webhook configuration |
+| webhook.validating.caBundle | string | `nil` | CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager |
+| webhook.validating.enabled | bool | `true` | Enable validation webhook |
+| webhook.validating.exemptNamespacesLabels | string | `nil` | Add labels: value to match namespace to exempt from validation |
 
-Example:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: gomenhashai-digests-mapping
-type: Opaque
-stringData:
-  digests_mapping.yaml: |
-    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
-    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    "library/busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
-    ...
-```
-
-### 🔃 Fetch digests from registry
-
-Instead of using a secret listing trusted digests, you can automatically fetch digests from your image registry:
-
-```yaml
-config:
-  fetchDigests: true
-```
-
-### 📈 Monitoring
-
-GomenHashai exposes useful custom Prometheus-compatible metrics.
-You could get metrics helping understand how many pods are compliant with digests.
-Configuration options including port, security, and authorization are available via the Helm chart.
-
-### 📦 Helm Chart
-
-Deploy the entire setup in one command with Helm.
-
-Includes webhook deployment, certificates (with cert-manager), and RBAC.
-
-The provided Helm chart follows Kubernetes security best practices out of the box.
-
-### 🐳 Registry Modification
-
-Mutating webhook can also be used to enforce a common registry for all images.
-In addition to the registry, the pullPolicy and imagePullSecrets can also be enforced for all pods.
-
-### ⛩️ Exemptions
-
-It is possible to exempt a list of images, or even use regex to exempt images.
-
-The Helm Chart will exempt the namespace in which you install 🍣GomenHashai, you can exempt other namespaces as well.

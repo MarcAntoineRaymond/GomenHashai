@@ -1,17 +1,42 @@
 apiVersion: v2
 name: gomenhashai
-description: GomenHashai guarantee images integrity in your k8s cluster by adding digests from a trusted set to your pods. It will also apologize for denying and gently terminating pods that does not use a trusted digest. 🍣GomenHashai!
+description: |
+  Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
+
+  Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default protections.
+
+  ## 🚀 Quick Start
+
+  Deploy in warn mode:
+
+  ```sh
+  helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai \
+    --namespace gomenhashai-system \
+    --create-namespace \
+    --set config.validationMode="warn"
+  ```
+
+  ---
+
+  ## 🍣 Usage
+
+  GomenHashai uses **Kubernetes admission webhook** to validate and optionally mutate pod specifications to ensure all container images use **immutable digests** instead of mutable tags.  
+  It helps enforce image provenance and strengthen your supply chain security posture.
+  It has many more features.
+
+  See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 type: application
 version: 1.2.0
 appVersion: "v1.2.0"
 keywords:
   - security
   - integrity
-  - digest
+  - admission-webhook
+  - image-digest
 home: https://github.com/MarcAntoineRaymond/GomenHashai
 sources:
   - https://github.com/MarcAntoineRaymond/GomenHashai
 maintainers:
   - name: MarcAntoineRaymond
     url: https://github.com/MarcAntoineRaymond
-icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+icon: https://raw.githubusercontent.com/MarcAntoineRaymond/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png

@@ -1,31 +1,34 @@
-# gomenhashai replicas count multiple replicas is supported for HA
+# -- Replicas count multiple replicas is supported for HA
 replicas: 1
 
-# Override Chart name in template
+# -- Override Chart name in template
 nameOverride:
 
-# Override ReleaseName-ChartName in template
+# -- Override ReleaseName-ChartName in template
 fullnameOverride:
 
-# Cluster domain (used by cert-manager to generate certificate)
+# -- Cluster domain (used by cert-manager to generate certificate)
 kubernetesClusterDomain: cluster.local
 
 image:
+  # -- Image repository
   repository: ghcr.io/marcantoineraymond/gomenhashai
-  # Image tag to use, default to appVersion
+  # -- Image tag to use, default to appVersion
   tag:
+  # -- Image digest to use
   digest: "sha256:40f4f71ae3b11236994f734fda0f526daadecb2d525c1c94666a65dc40d6cab2"
+  # -- Image pull policy
   pullPolicy: IfNotPresent
 
-# Mapping containing "image": "trusted digest"
+# -- Mapping containing "image": "trusted digest"
 digestsMapping:
-  # Create the secret
+  # -- Create the digestsMapping secret
   create: true
-  # Name of the secret, if create is false secret must exist
+  # -- Name of the digestsMapping secret, if create is false secret must exist
   secretName:
-  # Name of the key under which the mapping is stored in the secret
+  # -- Name of the key under which the mapping is stored in the secret
   secretKey: digests_mapping.yaml
-  # YAML image mapping
+  # -- YAML image name to digest mapping
   mapping:
 #    "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"
 #    "busybox": "sha256:e246aa22ad2cbdfbd19e2a6ca2b275e26245a21920e2b2d0666324cee3f15549"
@@ -36,32 +39,37 @@ digestsMapping:
 #    "nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af"
 #    "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
 
-# YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations
+# -- YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations
 config:
 #  exemptions: []
 #  ...
 
+# -- Registries authentication configuration, map of registry_name: {username: , password: }
 registriesConfig:
 #  myregistry.io:
 #    username: user
 #    password: pass
 
-# Args passed to the manager app, override default args
+# -- Args passed to the manager app, override default args
 args: []
 
+# -- Deployment annotations
 annotations: {}
 
+# -- Deployment pod annotations
 podAnnotations:
   kubectl.kubernetes.io/default-container: gomenhashai
 
+# -- Extra labels
 extraLabels: {}
 
+# -- Pod extra labels
 extraPodLabels: {}
 
-# gomenhashai pod image pull secrets
+# -- Image pull secrets
 imagePullSecrets: []
 
-# gomenhashai container security context
+# -- Container security context
 containerSecurityContext:
   allowPrivilegeEscalation: false
   capabilities:
@@ -71,7 +79,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   runAsNonRoot: true
 
-# Pod security context
+# -- Pod security context
 podSecurityContext:
   fsGroup: 2000
   runAsGroup: 2000
@@ -80,7 +88,7 @@ podSecurityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# gomenhashai resources configuration, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+# -- Gomenhashai resources configuration, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
 resources:
   limits:
     cpu: "1"
@@ -89,46 +97,52 @@ resources:
     cpu: 10m
     memory: 64Mi
 
-# Configure Deployment liveness probe
+# -- Configure Deployment liveness probe
 livenessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
   port: 8081
 
-# Configure Deployment readiness probe
+# -- Configure Deployment readiness probe
 readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
   port: 8081
 
+# -- Extra environment variables to add to the container
 extraEnv: []
 
+# -- Environment variables from secrets or configmaps to add to the container
 envFrom: []
 
+# -- Extra sidecars to add to the pod
 sidecars: []
 
+# -- Extra init containers to add to the pod
 initContainers: []
 
+# -- Extra volumes to add to the pod
 extraVolumes: []
 
+# -- Extra volume mounts to add to the container
 extraVolumeMounts: []
 
-# Service account configuration
+# -- Service account configuration
 serviceAccount:
-  # Create the service account, if false the service account must be provided
+  # -- Create the service account, if false the service account must be provided
   create: true
-  # Name of the service account, if create is false it must exists
+  # -- Name of the service account, if create is false it must exists
   name:
-  # Annotations to the service account if create is true
+  # -- Annotations to the service account if create is true
   annotations: {}
-  # Extra Labels to the service account if create is true
+  # -- Extra Labels to the service account if create is true
   extraLabels: {}
-  # Automount service account token in service account
+  # -- Automount service account token in service account
   automountServiceAccountToken: true
 
-# RBAC role and binding to the service account
+# -- RBAC role and binding to the service account
 rbac:
-  # Create the RBAC
+  # -- Create the RBAC resources
   create: true
 
 # Certificates management configuration
@@ -138,52 +152,52 @@ rbac:
 # Or enable cert-manager, disable create and provide your own secret with cert-manager certificates
 # You can also provide your own secrets with cert-manager disabled but you will need to to provide the CA for both webhook configurations and certificate rotation will have to be handled manually
 certificates:
-  # Certificates duration in days (for default self signed certificate)
+  # -- Certificates duration in days (for default self signed certificate)
   duration: 365
-  # Cert manager configuration
+  # -- Cert manager configuration
   cert-manager:
-    # Use cert-manager to inject CA in webhook configuration
+    # -- Use cert-manager to inject CA in webhook configuration
     enabled: false
-    # Deploy certificates resources for cert-manager (Only if cert-manager is enabled, disable creation if you provide your own certificates from a secret)
+    # -- Deploy certificates resources for cert-manager (Only if cert-manager is enabled, disable creation if you provide your own certificates from a secret)
     create: true
-    # Certificates duration in days
+    # -- Certificates duration in days
     duration: 365
-    # When to renew certificates
+    # -- When to renew certificates
     renewBefore: 360h
-    # Only set issuer if you have your own issuer otherwise one will be created (if create is true)
+    # -- Only set issuer if you have your own issuer otherwise one will be created (if create is true)
     issuer:
   webhook:
-    # Name of the secret containing webhook certificates (generated if empty)
+    # -- Name of the secret containing webhook certificates (generated if empty)
     secretName:
   metrics:
-    # Name of the secret containing metrics certificates (generated if empty)
+    # -- Name of the secret containing metrics certificates (generated if empty)
     secretName:
 
 metrics:
-  # Enable exporting metrics with prometheus annotations
+  # -- Enable exporting metrics with prometheus annotations
   enabled: true
-  # Serve metrics with HTTPS and authn/authz and add TLS Config to Service Monitor if enabled
+  # -- Serve metrics with HTTPS and authn/authz and add TLS Config to Service Monitor if enabled
   secure: true
   serviceMonitor:
-    # Enable exporting metrics with Prometheus Service Monitor INSTEAD OF annotations, require using Prometheus Operator
+    # -- Enable exporting metrics with Prometheus Service Monitor INSTEAD OF annotations, require using Prometheus Operator
     enabled: false
-    # Port to scrape on metrics service
+    # -- Port to scrape on metrics service
     targetPort: 8443
-    # Path exposing metrics
+    # -- Path exposing metrics
     path: /metrics
-    # How frequently to scrape targets by default.
+    # -- How frequently to scrape targets by default.
     interval: 60s
-    # How long until a scrape request times out.
+    # -- How long until a scrape request times out.
     scrapeTimeout: 10s
-    # Overwrite Service Monitor TLS config, a default TLS config referencing certificates.metrcis.secretName is added when metrics.secure is true
+    # -- Overwrite Service Monitor TLS config, a default TLS config referencing certificates.metrcis.secretName is added when metrics.secure is true
     tlsConfig: {}
-    # Extra properties to add to endpoint in ServiceMonitor resource
+    # -- Extra properties to add to endpoint in ServiceMonitor resource
     endpointAdditionalProperties: {}
-    # Custom annotations to add to ServiceMonitor
+    # -- Custom annotations to add to ServiceMonitor
     annotations: {}
-    # Extra labels to add to ServiceMonitor
+    # -- Extra labels to add to ServiceMonitor
     extraLabels: {}
-  # Metrics service configuration
+  # -- Metrics service configuration
   service:
     annotations: {}
     extraLabels: {}
@@ -192,16 +206,16 @@ metrics:
     type: ClusterIP
 
 webhook:
-  # Mutating Webhook configuration
+  # -- Mutating Webhook configuration
   mutating:
-    # Enable mutation webhook
+    # -- Enable mutation webhook
     enabled: true
-    # Add labels: value to match namespace to exempt from mutation
+    # -- Add labels: value to match namespace to exempt from mutation
     exemptNamespacesLabels:
     #  kubernetes.io/metadata.name:
     #    - "kube-system"
     #    - "cert-manager"
-    # CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager
+    # -- CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager
     caBundle:
     annotations: {}
     extraLabels: {}
@@ -211,16 +225,16 @@ webhook:
     objectSelector: {}
     sideEffects: None
 
-  # Validating Webhook configuration
+  # -- Validating Webhook configuration
   validating:
-    # Enable validation webhook
+    # -- Enable validation webhook
     enabled: true
-    # Add labels: value to match namespace to exempt from validation
+    # -- Add labels: value to match namespace to exempt from validation
     exemptNamespacesLabels:
     #  kubernetes.io/metadata.name:
     #    - "kube-system"
     #    - "cert-manager"
-    # CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager
+    # -- CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager
     caBundle:
     annotations: {}
     extraLabels: {}
@@ -229,7 +243,7 @@ webhook:
     objectSelector: {}
     sideEffects: None
 
-  # Webhook service configuration
+  # -- Webhook service configuration
   service:
     annotations: {}
     extraLabels: {}

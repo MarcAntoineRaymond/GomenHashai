@@ -1,0 +1,29 @@
+name: Validate Helm chart documentation
+
+on:
+  pull_request:
+    branches: main
+    paths:
+      - "deploy/charts/**"
+
+jobs:
+  helm-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install helm-docs
+        uses: norwoodj/helm-docs-action@v1.2.0
+        with:
+          chart-search-root: deploy/charts
+
+      - name: Run helm-docs
+        run: helm-docs
+
+      - name: Check if README.md changed
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Helm chart docs are out of date. Please run 'helm-docs' and commit the changes."
+            git diff
+            exit 1
+          fi
