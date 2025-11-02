@@ -27,7 +27,7 @@ description: |
   See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 type: application
 version: 1.2.1
-appVersion: "v1.2.0"
+appVersion: "v1.3.0"
 keywords:
   - security
   - integrity
