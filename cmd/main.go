@@ -200,6 +200,7 @@ func main() {
 			Cache: &client.CacheOptions{
 				DisableFor: []client.Object{
 					&corev1.Secret{},
+					&corev1.ConfigMap{},
 				},
 			},
 		},
