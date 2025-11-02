@@ -81,10 +81,22 @@ jobs:
         if: github.ref_type == 'tag'
         run: |
           sed -i "s/^appVersion:.*/appVersion: \"${TAG}\"/" deploy/charts/gomenhashai/Chart.yaml
-          sed -i "s|^\([[:space:]]*digest:\).*|\1 \"${DIGEST}\"|" deploy/charts/gomenhashai/values.yaml
+          sed -i "0,/^[[:space:]]*digest:/s|^\([[:space:]]*digest:\).*|\1 \"${DIGEST}\"|" deploy/charts/gomenhashai/values.yaml
         env:
           TAG: ${{ steps.extract_tag.outputs.tag }}
           DIGEST: ${{ steps.push.outputs.digest }}
+
+      - name: Set up Go
+        if: github.ref_type == 'tag'
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+
+      - name: Install helm-docs
+        if: github.ref_type == 'tag'
+        run: go install github.com/norwoodj/helm-docs/cmd/helm-docs@v1.14.2
+
+      - name: Generate Helm chart documentation
+        if: github.ref_type == 'tag'
+        run: helm-docs
 
       # Create a Pull Request
       - name: Create Pull Request
