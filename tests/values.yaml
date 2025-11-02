@@ -1,5 +1,8 @@
 replicas: 2
 
+image:
+  digest: ""
+
 digestsMapping:
   mapping:
     "busybox:latest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f"

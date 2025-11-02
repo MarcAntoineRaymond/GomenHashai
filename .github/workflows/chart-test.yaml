@@ -1,15 +1,11 @@
 name: Lint and Test Charts
 
 on:
-  push:
-    branches: main
-  pull_request:
-    branches: main
-    paths-ignore:
-      - '**.md'
-      - '.github/**'
-      - 'logo/**'
-      - 'docs/**'
+  workflow_call:
+    inputs:
+      image_tag:
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -130,7 +126,7 @@ jobs:
 
       - name: Install and test Chart
         run: |
-          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }}${{ env.CHART_NAME }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml
+          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }}${{ env.CHART_NAME }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml --set image.tag="${{ inputs.image_tag }}"
           if ! helm test ${{ env.CHART_NAME }} -n ${{ env.CHART_NAME }} ; then
             kubectl logs ${{ env.CHART_NAME }}-test -n ${{ env.CHART_NAME }}
             exit 1
@@ -144,7 +140,7 @@ jobs:
 
       - name: Install and test Chart (with cert-manager and serviceMonitor)
         run: |
-          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }}${{ env.CHART_NAME }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml --set certificates.cert-manager.enabled=true --set metrics.serviceMonitor.enabled=true --set metrics.secure=true
+          helm install ${{ env.CHART_NAME }} ${{ env.CHART_DIR }}${{ env.CHART_NAME }} --create-namespace -n ${{ env.CHART_NAME }} --values tests/values.yaml --set image.tag="${{ inputs.image_tag }}" --set certificates.cert-manager.enabled=true --set metrics.serviceMonitor.enabled=true --set metrics.secure=true
           if ! helm test ${{ env.CHART_NAME }} -n ${{ env.CHART_NAME }} ; then
             kubectl logs ${{ env.CHART_NAME }}-test -n ${{ env.CHART_NAME }}
             exit 1

@@ -122,3 +122,8 @@ jobs:
         with:
           file: ${{ steps.prep_attestation.outputs.name }}.*
           file_glob: true
+
+      - name: Call Chart Test Workflow
+        uses: ./.github/workflows/chart-test.yaml
+        with:
+          image_tag: ${{ steps.extract_tag.outputs.tag }}
