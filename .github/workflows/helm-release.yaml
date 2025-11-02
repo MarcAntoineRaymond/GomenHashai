@@ -31,7 +31,19 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Check if tag exists
+        id: check
+        run: |
+          tag="$(basename ${{ github.repository }} | tr '[:upper:]' '[:lower:]')-$(cat deploy/charts/gomenhashai/Chart.yaml | grep '^version:' | awk '{print $2}')"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run chart-releaser
+        if: steps.check.outputs.exists == 'false'
         id: cr
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
@@ -43,31 +55,30 @@ jobs:
 
       - name: Find Helm chart artifact in release
         id: find_release
-        if: ${{ steps.cr.outputs.changed_charts != '' }}
+        if: ${{ steps.cr.outcome == 'success' && steps.cr.outputs.changed_charts != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="$(basename ${{ github.repository }} | tr '[:upper:]' '[:lower:]')-$(cat deploy/charts/gomenhashai/Chart.yaml | grep '^version:' | awk '{print $2}')"
+          tag="${{ steps.check.outputs.tag }}"
           echo "Getting assets for release: $tag"
           chart_asset="${tag}.tgz"
           gh release download "$tag" --pattern "$chart_asset"
           echo "chart=$chart_asset" >> $GITHUB_OUTPUT
-          echo "tag=$tag" >> $GITHUB_OUTPUT
 
       - name: Generate artifact attestation
-        if: ${{ steps.cr.outputs.changed_charts != '' }}
+        if: ${{ steps.cr.outcome == 'success' && steps.cr.outputs.changed_charts != '' }}
         id: attest
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
         with:
           subject-path: ${{ steps.find_release.outputs.chart }}
 
       - name: Prepare sigstore and in-toto bundle
-        if: ${{ steps.cr.outputs.changed_charts != '' }}
+        if: ${{ steps.cr.outcome == 'success' && steps.cr.outputs.changed_charts != '' }}
         id: prep_attestation
         env:
           BUNDLE: ${{ steps.attest.outputs.bundle-path }}
         run: |
-          NAME="${{ runner.temp }}/${{ steps.find_release.outputs.tag }}"
+          NAME="${{ runner.temp }}/${{ steps.check.outputs.tag }}"
           echo "name=$NAME" >> $GITHUB_OUTPUT
           mv "$BUNDLE" "${NAME}.sigstore"
           if ! jq -e '.dsseEnvelope' "${NAME}.sigstore" > /dev/null; then
@@ -80,10 +91,10 @@ jobs:
 
       # Upload attestations
       - name: Upload attestations to release
-        if: ${{ steps.cr.outputs.changed_charts != '' }}
+        if: ${{ steps.cr.outcome == 'success' && steps.cr.outputs.changed_charts != '' }}
         uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2
         with:
-          tag: ${{ steps.find_release.outputs.tag }}
+          tag: ${{ steps.check.outputs.tag }}
           file: ${{ steps.prep_attestation.outputs.name }}.*
           file_glob: true
           make_latest: false

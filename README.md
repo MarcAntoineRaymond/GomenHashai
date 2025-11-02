@@ -1,5 +1,6 @@
 ![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=gomenhashai-*&style=flat&label=helm%20chart%20release)
 ![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=v*)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/gomenhashai)](https://artifacthub.io/packages/search?repo=gomenhashai)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/MarcAntoineRaymond/gomenhashai)](https://goreportcard.com/report/github.com/MarcAntoineRaymond/gomenhashai)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/MarcAntoineRaymond/GomenHashai/badge)](https://scorecard.dev/viewer/?uri=github.com/MarcAntoineRaymond/GomenHashai)
