@@ -19,6 +19,17 @@ Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default 
 
 ---
 
+Quick install in `warn` mode:
+
+```sh
+helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai \
+  --namespace gomenhashai-system \
+  --create-namespace \
+  --set config.validationMode="warn"
+```
+
+---
+
 ## 📚 Table of Contents
 
 - [✨ What It Does](#-what-it-does)
