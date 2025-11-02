@@ -19,6 +19,9 @@ jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
 
+    outputs:
+      image_tag: ${{ steps.extract_tag.outputs.tag }}
+
     permissions:
       contents: write
       packages: write
@@ -122,11 +125,6 @@ jobs:
         with:
           file: ${{ steps.prep_attestation.outputs.name }}.*
           file_glob: true
-
-    outputs:
-      image_tag:
-        description: "Docker Image Tag"
-        value: ${{ steps.extract_tag.outputs.tag }}
 
   Call Chart Test Workflow:
     needs: build-and-push-image
