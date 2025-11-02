@@ -68,6 +68,7 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 | extraVolumeMounts | list | `[]` | Extra volume mounts to add to the container |
 | extraVolumes | list | `[]` | Extra volumes to add to the pod |
 | fullnameOverride | string | `nil` | Override ReleaseName-ChartName in template |
+| globalPullSecrets | string | `nil` | Global image pull secrets to add to all namespaces |
 | image.digest | string | `"sha256:40f4f71ae3b11236994f734fda0f526daadecb2d525c1c94666a65dc40d6cab2"` | Image digest to use |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"ghcr.io/marcantoineraymond/gomenhashai"` | Image repository |
@@ -94,7 +95,7 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 | rbac | object | `{"create":true}` | RBAC role and binding to the service account |
 | rbac.create | bool | `true` | Create the RBAC resources |
 | readinessProbe | object | `{"initialDelaySeconds":5,"periodSeconds":10,"port":8081}` | Configure Deployment readiness probe |
-| registriesConfig | string | `nil` | Registries authentication configuration, map of registry_name: {username: , password: } |
+| registriesConfig | string | `nil` | Registries authentication configuration, map of registry_name: {username: , password: } when automatically fetch digests is enabled |
 | replicas | int | `1` | Replicas count multiple replicas is supported for HA |
 | resources | object | `{"limits":{"cpu":"1","memory":"256Mi"},"requests":{"cpu":"10m","memory":"64Mi"}}` | Gomenhashai resources configuration, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
 | serviceAccount | object | `{"annotations":{},"automountServiceAccountToken":true,"create":true,"extraLabels":{},"name":null}` | Service account configuration |
@@ -104,6 +105,9 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 | serviceAccount.extraLabels | object | `{}` | Extra Labels to the service account if create is true |
 | serviceAccount.name | string | `nil` | Name of the service account, if create is false it must exists |
 | sidecars | list | `[]` | Extra sidecars to add to the pod |
+| tests.image.digest | string | `"sha256:0f6b5088710f1c6d2d41f5e19a15663b7fef07d89699247aaaad92975be7eed6"` |  |
+| tests.image.repository | string | `"bitnami/kubectl"` |  |
+| tests.image.tag | string | `"1.33.0-debian-12-r0"` |  |
 | webhook.mutating | object | `{"annotations":{},"caBundle":null,"enabled":true,"exemptNamespacesLabels":null,"extraLabels":{},"failurePolicy":"Fail","matchPolicy":"Exact","objectSelector":{},"reinvocationPolicy":"Never","sideEffects":"None"}` | Mutating Webhook configuration |
 | webhook.mutating.caBundle | string | `nil` | CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager |
 | webhook.mutating.enabled | bool | `true` | Enable mutation webhook |
