@@ -1,6 +1,6 @@
 # gomenhashai
 
-![Version: 1.2.1](https://img.shields.io/badge/Version-1.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.2.0](https://img.shields.io/badge/AppVersion-v1.2.0-informational?style=flat-square)
+![Version: 1.2.1](https://img.shields.io/badge/Version-1.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.0](https://img.shields.io/badge/AppVersion-v1.3.0-informational?style=flat-square)
 
 Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
 
@@ -69,7 +69,7 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 | extraVolumes | list | `[]` | Extra volumes to add to the pod |
 | fullnameOverride | string | `""` | Override ReleaseName-ChartName in template |
 | globalPullSecrets | list | `[]` | Global image pull secrets to add to all namespaces |
-| image.digest | string | `"sha256:40f4f71ae3b11236994f734fda0f526daadecb2d525c1c94666a65dc40d6cab2"` | Image digest to use |
+| image.digest | string | `"sha256:55258a5614a35af2dc8e4cc3de012c9d0eb9c6e533f9c11de16ad1cebb36e7b4"` | Image digest to use |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"ghcr.io/marcantoineraymond/gomenhashai"` | Image repository |
 | image.tag | string | `""` | Image tag to use, default to appVersion |
