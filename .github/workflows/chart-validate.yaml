@@ -76,6 +76,9 @@ jobs:
       - name: Install helm-docs
         run: go install github.com/norwoodj/helm-docs/cmd/helm-docs@v1.14.2
 
+      - name: Generate Helm chart documentation
+        run: helm-docs
+
       - name: Check if README.md changed
         run: |
           if ! git diff --quiet; then
