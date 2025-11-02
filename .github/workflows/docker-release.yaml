@@ -131,7 +131,7 @@ jobs:
         run: |
           tag="${{ steps.extract_tag.outputs.tag }}"
           if [ -z "$tag" ]; then
-            tag="$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1 | cut -d':' -f2))"
+            tag="$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1 | cut -d':' -f2)"
           fi
           echo "tag=$tag" >> $GITHUB_OUTPUT
 
