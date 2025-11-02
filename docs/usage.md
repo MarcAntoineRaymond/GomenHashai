@@ -153,7 +153,7 @@ Using variable `mutationImagePullSecrets` it is possible to inject custom imageP
 
 You can manage these secrets yourself or let GomenHashai create them for you.
 
-By configuring in the values of the helm chart `globalPullSecrets`, the chart will be deployed with specific RBAC rights to create the secret in all namespaces and ONLY access and mofify the secrets with the corresponding names.
+By configuring in the values of the helm chart `globalPullSecrets`, the chart will be deployed with specific RBAC rights to list and get all namespaces and create the secret in all namespaces and ONLY access and mofify the secrets with the corresponding names.
 The secrets named `.name` will be created with the correct docker config in every new and already existing namespaces.
 
 ```yaml
