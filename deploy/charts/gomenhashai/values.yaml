@@ -262,4 +262,4 @@ tests:
   image:
     repository: bitnami/kubectl
     tag: 1.33.0-debian-12-r0
-    digest: "sha256:55258a5614a35af2dc8e4cc3de012c9d0eb9c6e533f9c11de16ad1cebb36e7b4"
+    digest: "sha256:0f6b5088710f1c6d2d41f5e19a15663b7fef07d89699247aaaad92975be7eed6"
