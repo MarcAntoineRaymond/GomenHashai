@@ -1,6 +1,6 @@
 # gomenhashai
 
-![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.2.0](https://img.shields.io/badge/AppVersion-v1.2.0-informational?style=flat-square)
+![Version: 1.2.1](https://img.shields.io/badge/Version-1.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.2.0](https://img.shields.io/badge/AppVersion-v1.2.0-informational?style=flat-square)
 
 Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
 
@@ -21,7 +21,7 @@ helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io
 
 ## 🍣 Usage
 
-GomenHashai uses **Kubernetes admission webhook** to validate and optionally mutate pod specifications to ensure all container images use **immutable digests** instead of mutable tags. 
+GomenHashai uses **Kubernetes admission webhook** to validate and optionally mutate pod specifications to ensure all container images use **immutable digests** instead of mutable tags.
 It helps enforce image provenance and strengthen your supply chain security posture.
 It has many more features.
 

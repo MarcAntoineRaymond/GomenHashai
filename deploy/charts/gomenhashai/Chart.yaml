@@ -20,7 +20,7 @@ description: |
 
   ## 🍣 Usage
 
-  GomenHashai uses **Kubernetes admission webhook** to validate and optionally mutate pod specifications to ensure all container images use **immutable digests** instead of mutable tags.  
+  GomenHashai uses **Kubernetes admission webhook** to validate and optionally mutate pod specifications to ensure all container images use **immutable digests** instead of mutable tags.
   It helps enforce image provenance and strengthen your supply chain security posture.
   It has many more features.
 
