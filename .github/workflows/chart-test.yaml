@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       image_tag:
-        required: false
+        required: true
         type: string
 
 permissions:
