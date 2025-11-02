@@ -3,6 +3,39 @@ entries:
   gomenhashai:
   - apiVersion: v2
     appVersion: v1.2.0
+    created: "2025-11-02T12:14:39.809173813Z"
+    description: "Keep your Kubernetes cluster safe by ensuring all container's images
+      use digests from a trusted set. GomenHashai verifies image integrity and gently
+      apologizes as it gracefully denies or terminates pods that don’t meet the standard.
+      Gomen Hashai~ \U0001F647  Built with security \U0001F6E1️ in mind, \U0001F363
+      GomenHashai ships with strong default protections.  ## \U0001F680 Quick Start
+      \ Deploy in warn mode:  ```sh helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai
+      \\   --namespace gomenhashai-system \\   --create-namespace \\   --set config.validationMode=\"warn\"
+      ```  ---  ## \U0001F363 Usage  GomenHashai uses **Kubernetes admission webhook**
+      to validate and optionally mutate pod specifications to ensure all container
+      images use **immutable digests** instead of mutable tags. It helps enforce image
+      provenance and strengthen your supply chain security posture. It has many more
+      features.  See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai). "
+    digest: e4633886638e248bb149bd42fe54257dd231f680b7ee860f3c5c965ec4db7b48
+    home: https://github.com/MarcAntoineRaymond/GomenHashai
+    icon: https://raw.githubusercontent.com/MarcAntoineRaymond/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png
+    keywords:
+    - security
+    - integrity
+    - admission-webhook
+    - image-digest
+    maintainers:
+    - name: MarcAntoineRaymond
+      url: https://github.com/MarcAntoineRaymond
+    name: gomenhashai
+    sources:
+    - https://github.com/MarcAntoineRaymond/GomenHashai
+    type: application
+    urls:
+    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.2.1/gomenhashai-1.2.1.tgz
+    version: 1.2.1
+  - apiVersion: v2
+    appVersion: v1.2.0
     created: "2025-10-30T12:55:36.00223336Z"
     description: "GomenHashai guarantee images integrity in your k8s cluster by adding
       digests from a trusted set to your pods. It will also apologize for denying
@@ -221,4 +254,4 @@ entries:
     urls:
     - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-0.1.0/gomenhashai-0.1.0.tgz
     version: 0.1.0
-generated: "2025-10-30T12:55:36.002274978Z"
+generated: "2025-11-02T12:14:39.809219038Z"
