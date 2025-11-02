@@ -52,27 +52,27 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 | certificates.cert-manager.issuer | string | `nil` | Only set issuer if you have your own issuer otherwise one will be created (if create is true) |
 | certificates.cert-manager.renewBefore | string | `"360h"` | When to renew certificates |
 | certificates.duration | int | `365` | Certificates duration in days (for default self signed certificate) |
-| certificates.metrics.secretName | string | `nil` | Name of the secret containing metrics certificates (generated if empty) |
-| certificates.webhook.secretName | string | `nil` | Name of the secret containing webhook certificates (generated if empty) |
-| config | string | `nil` | YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations |
+| certificates.metrics.secretName | string | `""` | Name of the secret containing metrics certificates (generated if empty) |
+| certificates.webhook.secretName | string | `""` | Name of the secret containing webhook certificates (generated if empty) |
+| config | object | `{}` | YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations |
 | containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true}` | Container security context |
-| digestsMapping | object | `{"create":true,"mapping":null,"secretKey":"digests_mapping.yaml","secretName":null}` | Mapping containing "image": "trusted digest" |
+| digestsMapping | object | `{"create":true,"mapping":{},"secretKey":"digests_mapping.yaml","secretName":""}` | Mapping containing "image": "trusted digest" |
 | digestsMapping.create | bool | `true` | Create the digestsMapping secret |
-| digestsMapping.mapping | string | `nil` | YAML image name to digest mapping |
+| digestsMapping.mapping | object | `{}` | YAML image name to digest mapping |
 | digestsMapping.secretKey | string | `"digests_mapping.yaml"` | Name of the key under which the mapping is stored in the secret |
-| digestsMapping.secretName | string | `nil` | Name of the digestsMapping secret, if create is false secret must exist |
+| digestsMapping.secretName | string | `""` | Name of the digestsMapping secret, if create is false secret must exist |
 | envFrom | list | `[]` | Environment variables from secrets or configmaps to add to the container |
 | extraEnv | list | `[]` | Extra environment variables to add to the container |
 | extraLabels | object | `{}` | Extra labels |
 | extraPodLabels | object | `{}` | Pod extra labels |
 | extraVolumeMounts | list | `[]` | Extra volume mounts to add to the container |
 | extraVolumes | list | `[]` | Extra volumes to add to the pod |
-| fullnameOverride | string | `nil` | Override ReleaseName-ChartName in template |
-| globalPullSecrets | string | `nil` | Global image pull secrets to add to all namespaces |
+| fullnameOverride | string | `""` | Override ReleaseName-ChartName in template |
+| globalPullSecrets | list | `[]` | Global image pull secrets to add to all namespaces |
 | image.digest | string | `"sha256:40f4f71ae3b11236994f734fda0f526daadecb2d525c1c94666a65dc40d6cab2"` | Image digest to use |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"ghcr.io/marcantoineraymond/gomenhashai"` | Image repository |
-| image.tag | string | `nil` | Image tag to use, default to appVersion |
+| image.tag | string | `""` | Image tag to use, default to appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets |
 | initContainers | list | `[]` | Extra init containers to add to the pod |
 | kubernetesClusterDomain | string | `"cluster.local"` | Cluster domain (used by cert-manager to generate certificate) |
@@ -89,32 +89,32 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 | metrics.serviceMonitor.scrapeTimeout | string | `"10s"` | How long until a scrape request times out. |
 | metrics.serviceMonitor.targetPort | int | `8443` | Port to scrape on metrics service |
 | metrics.serviceMonitor.tlsConfig | object | `{}` | Overwrite Service Monitor TLS config, a default TLS config referencing certificates.metrcis.secretName is added when metrics.secure is true |
-| nameOverride | string | `nil` | Override Chart name in template |
+| nameOverride | string | `""` | Override Chart name in template |
 | podAnnotations | object | `{"kubectl.kubernetes.io/default-container":"gomenhashai"}` | Deployment pod annotations |
 | podSecurityContext | object | `{"fsGroup":2000,"runAsGroup":2000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod security context |
 | rbac | object | `{"create":true}` | RBAC role and binding to the service account |
 | rbac.create | bool | `true` | Create the RBAC resources |
 | readinessProbe | object | `{"initialDelaySeconds":5,"periodSeconds":10,"port":8081}` | Configure Deployment readiness probe |
-| registriesConfig | string | `nil` | Registries authentication configuration, map of registry_name: {username: , password: } when automatically fetch digests is enabled |
+| registriesConfig | object | `{}` | Registries authentication configuration, map of registry_name: {username: , password: } when automatically fetch digests is enabled |
 | replicas | int | `1` | Replicas count multiple replicas is supported for HA |
 | resources | object | `{"limits":{"cpu":"1","memory":"256Mi"},"requests":{"cpu":"10m","memory":"64Mi"}}` | Gomenhashai resources configuration, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
-| serviceAccount | object | `{"annotations":{},"automountServiceAccountToken":true,"create":true,"extraLabels":{},"name":null}` | Service account configuration |
+| serviceAccount | object | `{"annotations":{},"automountServiceAccountToken":true,"create":true,"extraLabels":{},"name":""}` | Service account configuration |
 | serviceAccount.annotations | object | `{}` | Annotations to the service account if create is true |
 | serviceAccount.automountServiceAccountToken | bool | `true` | Automount service account token in service account |
 | serviceAccount.create | bool | `true` | Create the service account, if false the service account must be provided |
 | serviceAccount.extraLabels | object | `{}` | Extra Labels to the service account if create is true |
-| serviceAccount.name | string | `nil` | Name of the service account, if create is false it must exists |
+| serviceAccount.name | string | `""` | Name of the service account, if create is false it must exists |
 | sidecars | list | `[]` | Extra sidecars to add to the pod |
 | tests.image.digest | string | `"sha256:0f6b5088710f1c6d2d41f5e19a15663b7fef07d89699247aaaad92975be7eed6"` |  |
 | tests.image.repository | string | `"bitnami/kubectl"` |  |
 | tests.image.tag | string | `"1.33.0-debian-12-r0"` |  |
-| webhook.mutating | object | `{"annotations":{},"caBundle":null,"enabled":true,"exemptNamespacesLabels":null,"extraLabels":{},"failurePolicy":"Fail","matchPolicy":"Exact","objectSelector":{},"reinvocationPolicy":"Never","sideEffects":"None"}` | Mutating Webhook configuration |
-| webhook.mutating.caBundle | string | `nil` | CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager |
+| webhook.mutating | object | `{"annotations":{},"caBundle":"","enabled":true,"exemptNamespacesLabels":{},"extraLabels":{},"failurePolicy":"Fail","matchPolicy":"Exact","objectSelector":{},"reinvocationPolicy":"Never","sideEffects":"None"}` | Mutating Webhook configuration |
+| webhook.mutating.caBundle | string | `""` | CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager |
 | webhook.mutating.enabled | bool | `true` | Enable mutation webhook |
-| webhook.mutating.exemptNamespacesLabels | string | `nil` | Add labels: value to match namespace to exempt from mutation |
+| webhook.mutating.exemptNamespacesLabels | object | `{}` | Add labels: value to match namespace to exempt from mutation |
 | webhook.service | object | `{"annotations":{},"extraLabels":{},"port":443,"targetPort":9443,"type":"ClusterIP"}` | Webhook service configuration |
-| webhook.validating | object | `{"annotations":{},"caBundle":null,"enabled":true,"exemptNamespacesLabels":null,"extraLabels":{},"failurePolicy":"Fail","matchPolicy":"Exact","objectSelector":{},"sideEffects":"None"}` | Validating Webhook configuration |
-| webhook.validating.caBundle | string | `nil` | CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager |
+| webhook.validating | object | `{"annotations":{},"caBundle":"","enabled":true,"exemptNamespacesLabels":{},"extraLabels":{},"failurePolicy":"Fail","matchPolicy":"Exact","objectSelector":{},"sideEffects":"None"}` | Validating Webhook configuration |
+| webhook.validating.caBundle | string | `""` | CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager |
 | webhook.validating.enabled | bool | `true` | Enable validation webhook |
-| webhook.validating.exemptNamespacesLabels | string | `nil` | Add labels: value to match namespace to exempt from validation |
+| webhook.validating.exemptNamespacesLabels | object | `{}` | Add labels: value to match namespace to exempt from validation |
 

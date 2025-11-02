@@ -59,3 +59,44 @@ jobs:
         run: |
           echo "If this step fails, kube-linter found issues. Check the output of the scan step above."
           [[ "${{ steps.kube-linter-action-scan.outcome }}" == "success" ]]
+
+  helm-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Set up Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+
+      - name: Install helm-docs
+        run: go install github.com/norwoodj/helm-docs/cmd/helm-docs@v1.14.2
+
+      - name: Check if README.md changed
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Helm chart docs are out of date. Please run 'helm-docs' and commit the changes."
+            git diff
+            exit 1
+          fi
+
+  helm-values-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Generate values schema json
+        uses: losisin/helm-values-schema-json-action@660c441a4a507436a294fc55227e1df54aca5407 # v2.3.1
+        with:
+          working-directory: ${{ env.CHART_DIR }}gomenhashai
+          values: values.yaml
+          fail-on-diff: true
