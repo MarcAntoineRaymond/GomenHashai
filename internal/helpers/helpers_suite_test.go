@@ -19,7 +19,7 @@ package helpers_test
 import (
 	"testing"
 
-	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
+	"github.com/GomenHashai/gomenhashai/internal/helpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"

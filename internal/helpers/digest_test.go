@@ -20,7 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
+	"github.com/GomenHashai/gomenhashai/internal/helpers"
 )
 
 var _ = Describe("Digest", func() {

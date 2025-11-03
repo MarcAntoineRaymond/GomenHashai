@@ -11,7 +11,7 @@ Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default 
 Deploy in warn mode:
 
 ```sh
-helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai \
+helm install gomenhashai gomenhashai --repo https://gomenhashai.github.io/GomenHashai \
   --namespace gomenhashai-system \
   --create-namespace \
   --set config.validationMode="warn"
@@ -25,9 +25,9 @@ GomenHashai uses **Kubernetes admission webhook** to validate and optionally mut
 It helps enforce image provenance and strengthen your supply chain security posture.
 It has many more features.
 
-See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
+See the [Full Documentation](https://github.com/GomenHashai/GomenHashai).
 
-**Homepage:** <https://github.com/MarcAntoineRaymond/GomenHashai>
+**Homepage:** <https://github.com/GomenHashai/GomenHashai>
 
 ## Maintainers
 
@@ -37,7 +37,7 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 
 ## Source Code
 
-* <https://github.com/MarcAntoineRaymond/GomenHashai>
+* <https://github.com/GomenHashai/GomenHashai>
 
 ## Values
 
@@ -54,7 +54,7 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 | certificates.duration | int | `365` | Certificates duration in days (for default self signed certificate) |
 | certificates.metrics.secretName | string | `""` | Name of the secret containing metrics certificates (generated if empty) |
 | certificates.webhook.secretName | string | `""` | Name of the secret containing webhook certificates (generated if empty) |
-| config | object | `{}` | YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations |
+| config | object | `{}` | YAML configuration, see https://github.com/GomenHashai/GomenHashai?tab=readme-ov-file#-configurations |
 | containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true}` | Container security context |
 | digestsMapping | object | `{"create":true,"mapping":{},"secretKey":"digests_mapping.yaml","secretName":""}` | Mapping containing "image": "trusted digest" |
 | digestsMapping.create | bool | `true` | Create the digestsMapping secret |
@@ -71,7 +71,7 @@ See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
 | globalPullSecrets | list | `[]` | Global image pull secrets to add to all namespaces |
 | image.digest | string | `"sha256:55258a5614a35af2dc8e4cc3de012c9d0eb9c6e533f9c11de16ad1cebb36e7b4"` | Image digest to use |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
-| image.repository | string | `"ghcr.io/marcantoineraymond/gomenhashai"` | Image repository |
+| image.repository | string | `"ghcr.io/gomenhashai/gomenhashai"` | Image repository |
 | image.tag | string | `""` | Image tag to use, default to appVersion |
 | imagePullSecrets | list | `[]` | Image pull secrets |
 | initContainers | list | `[]` | Extra init containers to add to the pod |

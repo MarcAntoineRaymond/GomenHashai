@@ -1,4 +1,4 @@
-module github.com/MarcAntoineRaymond/gomenhashai
+module github.com/GomenHashai/gomenhashai
 
 go 1.24.2
 

@@ -12,7 +12,7 @@ kubernetesClusterDomain: cluster.local
 
 image:
   # -- Image repository
-  repository: ghcr.io/marcantoineraymond/gomenhashai
+  repository: ghcr.io/gomenhashai/gomenhashai
   # -- Image tag to use, default to appVersion
   tag: ""
   # -- Image digest to use
@@ -39,7 +39,7 @@ digestsMapping:
 #    "nginx/nginx-ingress:5.0.0-alpine": "sha256:a6c4d7c7270f03a3abb1ff38973f5db98d8660832364561990c4d0ef8b1477af"
 #    "curlimages/curl:8.13.0": "sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd"
 
-# -- YAML configuration, see https://github.com/MarcAntoineRaymond/GomenHashai?tab=readme-ov-file#-configurations
+# -- YAML configuration, see https://github.com/GomenHashai/GomenHashai?tab=readme-ov-file#-configurations
 config: {}
 #  exemptions: []
 #  ...

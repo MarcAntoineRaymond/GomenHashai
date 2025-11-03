@@ -1,12 +1,12 @@
-![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=gomenhashai-*&style=flat&label=helm%20chart%20release)
-![GitHub Release](https://img.shields.io/github/v/release/MarcAntoineRaymond/GomenHashai?filter=v*)
+![GitHub Release](https://img.shields.io/github/v/release/GomenHashai/GomenHashai?filter=gomenhashai-*&style=flat&label=helm%20chart%20release)
+![GitHub Release](https://img.shields.io/github/v/release/GomenHashai/GomenHashai?filter=v*)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/gomenhashai)](https://artifacthub.io/packages/search?repo=gomenhashai)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/MarcAntoineRaymond/gomenhashai)](https://goreportcard.com/report/github.com/MarcAntoineRaymond/gomenhashai)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/MarcAntoineRaymond/GomenHashai/badge)](https://scorecard.dev/viewer/?uri=github.com/MarcAntoineRaymond/GomenHashai)
-[![Trivy](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/trivy.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/trivy.yaml)
-[![Go lint, test and gosec](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/go.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/go.yaml)
-[![Lint and Test Charts](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/chart-test.yaml/badge.svg)](https://github.com/MarcAntoineRaymond/GomenHashai/actions/workflows/chart-test.yaml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/GomenHashai/gomenhashai)](https://goreportcard.com/report/github.com/GomenHashai/gomenhashai)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/GomenHashai/GomenHashai/badge)](https://scorecard.dev/viewer/?uri=github.com/GomenHashai/GomenHashai)
+[![Trivy](https://github.com/GomenHashai/GomenHashai/actions/workflows/trivy.yaml/badge.svg)](https://github.com/GomenHashai/GomenHashai/actions/workflows/trivy.yaml)
+[![Go lint, test and gosec](https://github.com/GomenHashai/GomenHashai/actions/workflows/go.yaml/badge.svg)](https://github.com/GomenHashai/GomenHashai/actions/workflows/go.yaml)
+[![Lint and Test Charts](https://github.com/GomenHashai/GomenHashai/actions/workflows/chart-test.yaml/badge.svg)](https://github.com/GomenHashai/GomenHashai/actions/workflows/chart-test.yaml)
 
 # 🍣 GomenHashai 🐾
 
@@ -23,7 +23,7 @@ Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default 
 Quick install in `warn` mode:
 
 ```sh
-helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai \
+helm install gomenhashai gomenhashai --repo https://gomenhashai.github.io/GomenHashai \
   --namespace gomenhashai-system \
   --create-namespace \
   --set config.validationMode="warn"
@@ -143,7 +143,7 @@ The Helm Chart will exempt the namespace in which you install 🍣GomenHashai, y
 3. Add the GomenHashai Helm Repository
 
     ```sh
-    helm repo add gomenhashai https://marcantoineRaymond.github.io/GomenHashai
+    helm repo add gomenhashai https://gomenhashai.github.io/GomenHashai
     helm repo update
     ```
 

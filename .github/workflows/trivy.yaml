@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE_NAME: ghcr.io/marcantoineraymond/gomenhashai
+  IMAGE_NAME: ghcr.io/gomenhashai/gomenhashai
 
 jobs:
   scan-current:

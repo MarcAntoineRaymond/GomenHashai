@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
-	"github.com/MarcAntoineRaymond/gomenhashai/internal/metrics"
+	"github.com/GomenHashai/gomenhashai/internal/helpers"
+	"github.com/GomenHashai/gomenhashai/internal/metrics"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
