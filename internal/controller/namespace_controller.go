@@ -19,7 +19,7 @@ package controller
 import (
 	"context"
 
-	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
+	"github.com/GomenHashai/gomenhashai/internal/helpers"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

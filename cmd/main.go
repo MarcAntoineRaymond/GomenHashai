@@ -38,10 +38,10 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/MarcAntoineRaymond/gomenhashai/internal/controller"
-	"github.com/MarcAntoineRaymond/gomenhashai/internal/helpers"
-	"github.com/MarcAntoineRaymond/gomenhashai/internal/metrics"
-	webhookcorev1 "github.com/MarcAntoineRaymond/gomenhashai/internal/webhook/v1"
+	"github.com/GomenHashai/gomenhashai/internal/controller"
+	"github.com/GomenHashai/gomenhashai/internal/helpers"
+	"github.com/GomenHashai/gomenhashai/internal/metrics"
+	webhookcorev1 "github.com/GomenHashai/gomenhashai/internal/webhook/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 

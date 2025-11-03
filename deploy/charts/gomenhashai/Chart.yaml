@@ -10,7 +10,7 @@ description: |
   Deploy in warn mode:
 
   ```sh
-  helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai \
+  helm install gomenhashai gomenhashai --repo https://gomenhashai.github.io/GomenHashai \
     --namespace gomenhashai-system \
     --create-namespace \
     --set config.validationMode="warn"
@@ -24,7 +24,7 @@ description: |
   It helps enforce image provenance and strengthen your supply chain security posture.
   It has many more features.
 
-  See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai).
+  See the [Full Documentation](https://github.com/GomenHashai/GomenHashai).
 type: application
 version: 1.3.0
 appVersion: "v1.3.0"
@@ -33,10 +33,10 @@ keywords:
   - integrity
   - admission-webhook
   - image-digest
-home: https://github.com/MarcAntoineRaymond/GomenHashai
+home: https://github.com/GomenHashai/GomenHashai
 sources:
-  - https://github.com/MarcAntoineRaymond/GomenHashai
+  - https://github.com/GomenHashai/GomenHashai
 maintainers:
   - name: MarcAntoineRaymond
     url: https://github.com/MarcAntoineRaymond
-icon: https://raw.githubusercontent.com/MarcAntoineRaymond/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png
+icon: https://raw.githubusercontent.com/GomenHashai/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png
