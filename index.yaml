@@ -9,16 +9,16 @@ entries:
       apologizes as it gracefully denies or terminates pods that don’t meet the standard.
       Gomen Hashai~ \U0001F647  Built with security \U0001F6E1️ in mind, \U0001F363
       GomenHashai ships with strong default protections.  ## \U0001F680 Quick Start
-      \ Deploy in warn mode:  ```sh helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai
+      \ Deploy in warn mode:  ```sh helm install gomenhashai gomenhashai --repo https://gomenhashai.github.io/GomenHashai
       \\   --namespace gomenhashai-system \\   --create-namespace \\   --set config.validationMode=\"warn\"
       ```  ---  ## \U0001F363 Usage  GomenHashai uses **Kubernetes admission webhook**
       to validate and optionally mutate pod specifications to ensure all container
       images use **immutable digests** instead of mutable tags. It helps enforce image
       provenance and strengthen your supply chain security posture. It has many more
-      features.  See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai). "
+      features.  See the [Full Documentation](https://github.com/GomenHashai/GomenHashai). "
     digest: 85cdcac15a140a474420558d8da7cea8f7293f5c4231144dcd9dc9c246854f70
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://raw.githubusercontent.com/MarcAntoineRaymond/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://raw.githubusercontent.com/GomenHashai/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -29,10 +29,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.3.0/gomenhashai-1.3.0.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.3.0/gomenhashai-1.3.0.tgz
     version: 1.3.0
   - apiVersion: v2
     appVersion: v1.2.0
@@ -42,16 +42,16 @@ entries:
       apologizes as it gracefully denies or terminates pods that don’t meet the standard.
       Gomen Hashai~ \U0001F647  Built with security \U0001F6E1️ in mind, \U0001F363
       GomenHashai ships with strong default protections.  ## \U0001F680 Quick Start
-      \ Deploy in warn mode:  ```sh helm install gomenhashai gomenhashai --repo https://marcantoineRaymond.github.io/GomenHashai
+      \ Deploy in warn mode:  ```sh helm install gomenhashai gomenhashai --repo https://gomenhashai.github.io/GomenHashai
       \\   --namespace gomenhashai-system \\   --create-namespace \\   --set config.validationMode=\"warn\"
       ```  ---  ## \U0001F363 Usage  GomenHashai uses **Kubernetes admission webhook**
       to validate and optionally mutate pod specifications to ensure all container
       images use **immutable digests** instead of mutable tags. It helps enforce image
       provenance and strengthen your supply chain security posture. It has many more
-      features.  See the [Full Documentation](https://github.com/MarcAntoineRaymond/GomenHashai). "
+      features.  See the [Full Documentation](https://github.com/GomenHashai/GomenHashai). "
     digest: e4633886638e248bb149bd42fe54257dd231f680b7ee860f3c5c965ec4db7b48
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://raw.githubusercontent.com/MarcAntoineRaymond/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://raw.githubusercontent.com/GomenHashai/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -62,10 +62,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.2.1/gomenhashai-1.2.1.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.2.1/gomenhashai-1.2.1.tgz
     version: 1.2.1
   - apiVersion: v2
     appVersion: v1.2.0
@@ -74,8 +74,8 @@ entries:
       digests from a trusted set to your pods. It will also apologize for denying
       and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
     digest: 456e14506703cbce48a715363390d75b4521347920be7dd66535a0c313f256b6
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://github.com/GomenHashai/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -85,10 +85,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.2.0/gomenhashai-1.2.0.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.2.0/gomenhashai-1.2.0.tgz
     version: 1.2.0
   - apiVersion: v2
     appVersion: v1.1.2
@@ -97,8 +97,8 @@ entries:
       digests from a trusted set to your pods. It will also apologize for denying
       and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
     digest: 458512395035d3ec3f19333d6b2f463ba7d804a4e7f0250daa493898dfcfcf1b
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://github.com/GomenHashai/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -108,10 +108,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.1.3/gomenhashai-1.1.3.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.1.3/gomenhashai-1.1.3.tgz
     version: 1.1.3
   - apiVersion: v2
     appVersion: v1.1.2
@@ -120,8 +120,8 @@ entries:
       digests from a trusted set to your pods. It will also apologize for denying
       and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
     digest: d043af8d06b1141551849dbd87875bb9764f86e94f2e4f353de6aa2425cc1346
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://github.com/GomenHashai/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -131,10 +131,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.1.2/gomenhashai-1.1.2.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.1.2/gomenhashai-1.1.2.tgz
     version: 1.1.2
   - apiVersion: v2
     appVersion: v1.1.1
@@ -143,8 +143,8 @@ entries:
       digests from a trusted set to your pods. It will also apologize for denying
       and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
     digest: 601ce2679a6769db5df6342b6f36a3edd096ae0b22e06f0af1c8fb70791cc9dd
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://github.com/GomenHashai/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -154,10 +154,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.1.1/gomenhashai-1.1.1.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.1.1/gomenhashai-1.1.1.tgz
     version: 1.1.1
   - apiVersion: v2
     appVersion: v1.1.0
@@ -166,8 +166,8 @@ entries:
       digests from a trusted set to your pods. It will also apologize for denying
       and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
     digest: 5949a42c11087a15d8abafad669d90f4e5886e921e07412338e093f2d278b90b
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://github.com/GomenHashai/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -177,10 +177,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.1.0/gomenhashai-1.1.0.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.1.0/gomenhashai-1.1.0.tgz
     version: 1.1.0
   - apiVersion: v2
     appVersion: v1.0.0
@@ -189,8 +189,8 @@ entries:
       digests from a trusted set to your pods. It will also apologize for denying
       and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
     digest: 6ab21997fa2cf50d884a5ef85a949921822bcb13bdcabbe4ee432c67fae79b93
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://github.com/GomenHashai/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -200,10 +200,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-1.0.0/gomenhashai-1.0.0.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.0.0/gomenhashai-1.0.0.tgz
     version: 1.0.0
   - apiVersion: v2
     appVersion: v0.4.0
@@ -212,8 +212,8 @@ entries:
       digests from a trusted set to your pods. It will also apologize for denying
       and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
     digest: a03aa910cc50efae0400a70ae01921531e5d20da409e42ae644f6339d1fc83e6
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://github.com/GomenHashai/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -223,10 +223,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-0.4.0/gomenhashai-0.4.0.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-0.4.0/gomenhashai-0.4.0.tgz
     version: 0.4.0
   - apiVersion: v2
     appVersion: v0.3.0
@@ -235,8 +235,8 @@ entries:
       digests from a trusted set to your pods. It will also apologize for denying
       and gently terminating pods that does not use a trusted digest. \U0001F363GomenHashai!"
     digest: 6ab1453ccaf47da5b3bd24642cc95f8bc2ffa2db5027e15e4e52e5855c7b6d68
-    home: https://github.com/MarcAntoineRaymond/GomenHashai
-    icon: https://github.com/MarcAntoineRaymond/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://github.com/GomenHashai/GomenHashai/blob/main/logo/GomenHashai_NoBg_NoText.png
     keywords:
     - security
     - integrity
@@ -246,10 +246,10 @@ entries:
       url: https://github.com/MarcAntoineRaymond
     name: gomenhashai
     sources:
-    - https://github.com/MarcAntoineRaymond/GomenHashai
+    - https://github.com/GomenHashai/GomenHashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-0.3.0/gomenhashai-0.3.0.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-0.3.0/gomenhashai-0.3.0.tgz
     version: 0.3.0
   - apiVersion: v2
     appVersion: v0.2.0
@@ -261,7 +261,7 @@ entries:
     name: gomenhashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-0.2.0/gomenhashai-0.2.0.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-0.2.0/gomenhashai-0.2.0.tgz
     version: 0.2.0
   - apiVersion: v2
     appVersion: v0.1.0
@@ -273,7 +273,7 @@ entries:
     name: gomenhashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-0.1.1/gomenhashai-0.1.1.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-0.1.1/gomenhashai-0.1.1.tgz
     version: 0.1.1
   - apiVersion: v2
     appVersion: v0.1.0
@@ -285,6 +285,6 @@ entries:
     name: gomenhashai
     type: application
     urls:
-    - https://github.com/MarcAntoineRaymond/GomenHashai/releases/download/gomenhashai-0.1.0/gomenhashai-0.1.0.tgz
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-0.1.0/gomenhashai-0.1.0.tgz
     version: 0.1.0
 generated: "2025-11-02T20:39:54.151814068Z"

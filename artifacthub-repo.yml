@@ -4,7 +4,7 @@ owners:
     email: marcantoine.raymond127@gmail.com
 displayName: GomenHashai
 description: GomenHashai guarantee images integrity in your k8s cluster by adding digests from a trusted set to your pods. It will also apologize for denying and gently terminating pods that does not use a trusted digest. 🍣GomenHashai!
-homeURL: https://github.com/MarcAntoineRaymond/GomenHashai
+homeURL: https://github.com/GomenHashai/GomenHashai
 license: Apache-2.0
 keywords:
   - kubernetes

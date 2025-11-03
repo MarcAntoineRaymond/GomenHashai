@@ -11,7 +11,7 @@ Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default 
 
 ---
 
-Documentation is located on main branch: [README](https://github.com/MarcAntoineRaymond/GomenHashai)
+Documentation is located on main branch: [README](https://github.com/GomenHashai/GomenHashai)
 
 ---
 ## 📄 License
