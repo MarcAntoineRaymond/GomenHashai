@@ -1,8 +1,8 @@
 # gomenhashai
 
-![Version: 1.3.1](https://img.shields.io/badge/Version-1.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.1](https://img.shields.io/badge/AppVersion-v1.3.1-informational?style=flat-square)
+![Version: 1.3.2](https://img.shields.io/badge/Version-1.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.1](https://img.shields.io/badge/AppVersion-v1.3.1-informational?style=flat-square)
 
-Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don’t meet the standard. Gomen Hashai~ 🙇
+Keep your Kubernetes cluster safe by ensuring all container's images use digests from a trusted set. GomenHashai verifies image integrity and gently apologizes as it gracefully denies or terminates pods that don't meet the standard. Gomen Hashai~ 🙇
 
 Built with security 🛡️ in mind, 🍣 GomenHashai ships with strong default protections.
 
@@ -117,4 +117,3 @@ See the [Full Documentation](https://github.com/GomenHashai/GomenHashai).
 | webhook.validating.caBundle | string | `""` | CA Bundle in PEM format to pass to the webhook, mandatory if not injected by cert-manager |
 | webhook.validating.enabled | bool | `true` | Enable validation webhook |
 | webhook.validating.exemptNamespacesLabels | object | `{}` | Add labels: value to match namespace to exempt from validation |
-

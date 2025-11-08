@@ -1,0 +1,32 @@
+{{ template "chart.header" . }}
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+## 🚀 Quick Start
+
+Deploy in warn mode:
+
+```sh
+helm install gomenhashai gomenhashai --repo https://gomenhashai.github.io/GomenHashai \
+  --namespace gomenhashai-system \
+  --create-namespace \
+  --set config.validationMode="warn"
+```
+
+---
+
+## 🍣 Usage
+
+GomenHashai uses **Kubernetes admission webhook** to validate and optionally mutate pod specifications to ensure all container images use **immutable digests** instead of mutable tags.
+It helps enforce image provenance and strengthen your supply chain security posture.
+It has many more features.
+
+See the [Full Documentation](https://github.com/GomenHashai/GomenHashai).
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.valuesSection" . }}
