@@ -3,6 +3,32 @@ entries:
   gomenhashai:
   - apiVersion: v2
     appVersion: v1.3.1
+    created: "2025-11-08T11:56:41.87314596Z"
+    description: "Keep your Kubernetes cluster safe by ensuring all container's images
+      use digests from a trusted set. GomenHashai verifies image integrity and gently
+      apologizes as it gracefully denies or terminates pods that don't meet the standard.
+      Gomen Hashai~ \U0001F647  Built with security \U0001F6E1️ in mind, \U0001F363
+      GomenHashai ships with strong default protections. "
+    digest: 8101a2c98de9390a7965f8219003ddc52d33bbc0d5099dbec5c2947a652c2d6b
+    home: https://github.com/GomenHashai/GomenHashai
+    icon: https://raw.githubusercontent.com/GomenHashai/GomenHashai/main/logo/GomenHashai_NoBg_NoText.png
+    keywords:
+    - security
+    - integrity
+    - admission-webhook
+    - image-digest
+    maintainers:
+    - name: MarcAntoineRaymond
+      url: https://github.com/MarcAntoineRaymond
+    name: gomenhashai
+    sources:
+    - https://github.com/GomenHashai/GomenHashai
+    type: application
+    urls:
+    - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-1.3.2/gomenhashai-1.3.2.tgz
+    version: 1.3.2
+  - apiVersion: v2
+    appVersion: v1.3.1
     created: "2025-11-03T19:18:08.257439143Z"
     description: "Keep your Kubernetes cluster safe by ensuring all container's images
       use digests from a trusted set. GomenHashai verifies image integrity and gently
@@ -320,4 +346,4 @@ entries:
     urls:
     - https://github.com/GomenHashai/GomenHashai/releases/download/gomenhashai-0.1.0/gomenhashai-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-03T19:18:08.257545943Z"
+generated: "2025-11-08T11:56:41.873266445Z"
